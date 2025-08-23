@@ -1,0 +1,88 @@
+{
+  "pages": [
+    {
+      "name": "Transport",
+      "buttons": [
+        {
+          "name": "Play",
+          "cc": 64,
+          "command": [ "Transport", "Start" ]
+        },
+        {
+          "name": "Stop",
+          "cc": 65,
+          "command": [ "Transport", "Stop" ]
+        },
+        {
+          "name": "Record",
+          "cc": 66,
+          "command": [ "Transport", "Record" ]
+        }
+      ],
+      "faders": [],
+      "knobs": []
+    },
+    {
+      "name": "Mixer",
+      "buttons": [
+        {
+          "name": "Mute 1",
+          "cc": 64,
+          "command": [ "Mixer", "MuteChannel1" ]
+        },
+        {
+          "name": "Mute 2",
+          "cc": 65,
+          "command": [ "Mixer", "MuteChannel2" ]
+        }
+      ],
+      "faders": [
+        {
+          "name": "Fader 1",
+          "cc": 64,
+          "parameter": "mMixerChannelBank.channel[0].mVolume"
+        },
+        {
+          "name": "Fader 2",
+          "cc": 65,
+          "parameter": "mMixerChannelBank.channel[1].mVolume"
+        }
+      ],
+      "knobs": [
+        {
+          "name": "Pan 1",
+          "cc": 20,
+          "parameter": "mMixerChannelBank.channel[0].mPan"
+        },
+        {
+          "name": "Pan 2",
+          "cc": 21,
+          "parameter": "mMixerChannelBank.channel[1].mPan"
+        }
+      ]
+    },
+    {
+      "name": "Plugins",
+      "buttons": [
+        {
+          "name": "Bypass FX1",
+          "cc": 64,
+          "command": [ "Plugin", "Bypass1" ]
+        },
+        {
+          "name": "Bypass FX2",
+          "cc": 65,
+          "command": [ "Plugin", "Bypass2" ]
+        }
+      ],
+      "faders": [
+        {
+          "name": "FX1 Gain",
+          "cc": 64,
+          "parameter": "mPluginBank.plugin[0].mGain"
+        }
+      ],
+      "knobs": []
+    }
+  ]
+}

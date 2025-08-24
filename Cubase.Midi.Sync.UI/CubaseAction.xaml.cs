@@ -1,74 +1,71 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
-using System.Net.Http;
+using Microsoft.Maui.Graphics;
 
 namespace Cubase.Midi.Sync.UI;
 
 public partial class CubaseAction : ContentPage
 {
-	private readonly CubaseCommandCollection collection;
+    private readonly CubaseCommandCollection _commands;
+    private readonly ICubaseHttpClient _client;
 
-	private readonly ICubaseHttpClient httpClient;
-
-
-    public CubaseAction(CubaseCommandCollection collection, ICubaseHttpClient httpClient)
-	{
-		InitializeComponent();
-		this.collection = collection;
-		this.httpClient = httpClient;
-        this.LoadCommands();
-	}
-
-    private void LoadCommands()
+    public CubaseAction(CubaseCommandCollection commands, ICubaseHttpClient client)
     {
-        foreach (var cmd in collection.Commands)
+        InitializeComponent();
+        _commands = commands;
+        _client = client;
+
+        Title = commands.Name;
+        LoadCommand();
+    }
+
+    private void LoadCommand()
+    {
+        CommandsLayout.Children.Clear();
+
+        foreach (var _command in _commands.Commands)
         {
             var button = new Button
             {
-                Text = cmd.Name,
+                Text = _command.Name,
+                BackgroundColor = _command.ButtonColor.ToMauiColor(),
+                TextColor = _command.ForeColor.ToMauiColor(),   
                 HorizontalOptions = LayoutOptions.Fill,
-                BackgroundColor = Colors.MediumPurple,
-                TextColor = Colors.White,
-                CornerRadius = 12
+                FontAttributes = FontAttributes.Bold,
+                CornerRadius = 12,
+                HeightRequest = 60
             };
 
             button.Clicked += async (s, e) =>
             {
-                bool confirm = await DisplayAlert("Send Action?", $"Do you want to send '{cmd.Action}' to server?", "Yes", "No");
-                if (confirm)
+                try
                 {
-                    await SendAction(cmd.Action);
+                    _command.IsToggled = !_command.IsToggled;
+                    button.BackgroundColor = _command.ButtonColor.ToMauiColor();
+                    var response = await _client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(_command), async (ex) => 
+                    { 
+                        await DisplayAlert("Error", ex.Message, "OK");  
+                    }); 
+                    if (!response.Success)
+                    {
+                        await DisplayAlert("Error", response.Message ?? "Unknown error", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", ex.Message, "OK");
                 }
             };
 
             button.SizeChanged += (s, e) =>
             {
-                var btn = s as Button;
-                btn.FontSize = btn.Height * 0.5; // adjust factor as needed
+                var b = (Button)s;
+                b.FontSize = Math.Max(12, Math.Min(b.Height * 0.5, 18));
             };
 
             CommandsLayout.Children.Add(button);
-        }
-    }
-
-    private async Task SendAction(string action)
-    {
-        try
-        {
-            //var response = await _httpClient.PostAsJsonAsync("run", new { action });
-            //if (response.IsSuccessStatusCode)
-            //{
-            //    await DisplayAlert("Success", $"Action '{action}' sent to server.", "OK");
-           // }
-            //else
-            //{
-            //    var error = await response.Content.ReadAsStringAsync();
-            //    await DisplayAlert("Error", error, "OK");
-            //}
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", ex.Message, "OK");
         }
     }
 }

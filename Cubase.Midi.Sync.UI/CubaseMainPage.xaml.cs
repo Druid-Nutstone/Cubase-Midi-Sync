@@ -1,61 +1,108 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
-using System.Net.Http;
+using Microsoft.Maui.Graphics;
 
 namespace Cubase.Midi.Sync.UI;
 
 public partial class CubaseMainPage : ContentPage
 {
-	private readonly ICubaseHttpClient client;
+    private readonly ICubaseHttpClient client;
+    private List<CubaseCommandCollection> collections; // store once
 
-    public CubaseMainPage(ICubaseHttpClient cubaseHttpClient)
-	{
-		InitializeComponent();
-        this.client = cubaseHttpClient;
-        this.LoadCommands();
+    private bool loaded = false;
+
+    public CubaseMainPage(ICubaseHttpClient client)
+    {
+        InitializeComponent();
+        this.client = client;
+        CollectionsLayout.Clear();
+        var label = new Label
+        {
+            Text = "Loading ..",
+            TextColor = Colors.Black,
+            FontSize = 20,
+            FontAttributes = FontAttributes.Bold,   
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+        CollectionsLayout.Children.Add(label);
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (loaded) return;
+        SetSpinner(true);
+        await LoadCommands();
+        loaded = true;
+        SetSpinner(false);
     }
 
 
-    private async void LoadCommands()
+    private async Task LoadCommands()
     {
-
         try
         {
-            var collections = await client.GetCommands();
-            if (collections != null)
+            // CollectionsLayout.Children.Clear();
+            collections = await this.client.GetCommands(async (msg) => 
+            { 
+               // todo show acrtionsin a non-blocking ui section
+            },async (exception) =>
             {
-                foreach (var collection in collections)
+                await DisplayAlert("Error", exception, "OK");
+            });
+
+            if (collections == null) return;
+
+
+
+            foreach (var collection in collections)
+            {
+                var button = new Button
                 {
-                    var button = new Button
-                    {
-                        Text = collection.Name,
-                        HorizontalOptions = LayoutOptions.Fill,
-                        // VerticalOptions = LayoutOptions.Center, // important
-                        VerticalOptions = LayoutOptions.Start,  // align each button to top
-                        BackgroundColor = Colors.SkyBlue,
-                        TextColor = Colors.White,
-                        CornerRadius = 12
-                    };
+                    Text = collection.Name,
+                    HeightRequest = 60,
+                    WidthRequest = 150,
+                    HorizontalOptions = LayoutOptions.Fill,
+                    BackgroundColor = Colors.SkyBlue,
+                    TextColor = Colors.White,
+                    FontAttributes = FontAttributes.Bold,
+                    CornerRadius = 12
+                };
 
-                    button.Clicked += async (s, e) =>
+                button.Clicked += async (s, e) =>
+                {
+                    try
                     {
-                        // Navigate to details page
+                        // await _client.SendAction(cmd.Action);
                         await Navigation.PushAsync(new CubaseAction(collection, this.client));
-                    };
-
-                    button.SizeChanged += (s, e) =>
+                    }
+                    catch (Exception ex)
                     {
-                        var btn = s as Button;
-                        btn.FontSize = btn.Height * 0.5; // adjust factor as needed
-                    };
+                        await DisplayAlert("Error", ex.Message, "OK");
+                    }
+                };
 
-                    CollectionsLayout.Children.Add(button);
-                }
+                button.SizeChanged += (s, e) =>
+                {
+                    var b = (Button)s;
+                    if (b.Height > 0)
+                        b.FontSize = Math.Min(b.Height * 0.5, 18);
+                };
+                CollectionsLayout.Children.Add(button);
             }
+            CollectionsLayout.Children.RemoveAt(0); // remove loading button    
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", ex.Message, "OK");
         }
+    }
+
+    private void SetSpinner(bool state)
+    {
+        LoadingSpinner.IsVisible = state;
+        LoadingSpinner.IsRunning = state;
     }
 }

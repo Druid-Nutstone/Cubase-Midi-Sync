@@ -1,8 +1,12 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
+using Cubase.Midi.Sync.UI.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,9 +14,41 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
 {
     public class CubaseHttpClient : HttpClient, ICubaseHttpClient
     {
-        public async Task<CubaseCommandsCollection> GetCommands()
+        public CubaseHttpClient(AppSettings appSettings)
         {
-            throw new NotImplementedException();
+            this.BaseAddress = new Uri(appSettings.CubaseConnection.BaseUrl);
+        }
+
+        public async Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler)
+        {
+            var response = await this.PostAsJsonAsync("api/cubase/execute", cubaseActionRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<CubaseActionResponse>() ?? new CubaseActionResponse { Success = false, Message = "No response from server." };
+            }
+            else
+            {
+                exceptionHandler?.Invoke(new Exception($"Error executing action: {response.ReasonPhrase}"));
+                return new CubaseActionResponse { Success = false, Message = $"Error executing action: {response.ReasonPhrase}" };
+            }
+        }
+
+        public async Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler)
+        {
+            msgHandler.Invoke($"Fetching commands from Cubase...{this.BaseAddress.ToString()}");
+
+            var response = await GetAsync("api/cubase/commands");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // log status code + error body
+                var errorBody = await response.Content.ReadAsStringAsync();
+                exceptionHandler.Invoke($"Code: {response.StatusCode.ToString()} URL: {response.RequestMessage.RequestUri.ToString()} error:{errorBody}");
+            }
+
+            // success → deserialize
+            var result = await response.Content.ReadFromJsonAsync<CubaseCommandsCollection>();
+            return result ?? new CubaseCommandsCollection();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Common.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,8 @@ namespace Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient
 {
     public interface ICubaseHttpClient
     {
-        Task<CubaseCommandsCollection> GetCommands();
+        Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler);
+
+        Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler);
     }
 }

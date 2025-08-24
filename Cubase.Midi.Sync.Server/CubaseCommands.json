@@ -1,0 +1,182 @@
+[
+  {
+    "Name": "Transport",
+    "Area": 0,
+    "Commands": [
+      {
+        "Name": "Play",
+        "Action": 0,
+        "Area": 0,
+        "ButtonType": 0,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      },
+      {
+        "Name": "Go To Start",
+        "Action": 2,
+        "Area": 0,
+        "ButtonType": 1,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      },
+      {
+        "Name": "Record",
+        "Action": 1,
+        "Area": 0,
+        "ButtonType": 0,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      },
+      {
+        "Name": "Left Locator",
+        "Action": 3,
+        "Area": 0,
+        "ButtonType": 1,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      },
+      {
+        "Name": "Right Locator",
+        "Action": 4,
+        "Area": 0,
+        "ButtonType": 1,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      },
+      {
+        "Name": "Loop",
+        "Action": 5,
+        "Area": 0,
+        "ButtonType": 0,
+        "IsToggled": false,
+        "ButtonColor": {
+          "R": 135,
+          "G": 206,
+          "B": 235,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "SkyBlue"
+        },
+        "ForeColor": {
+          "R": 255,
+          "G": 255,
+          "B": 255,
+          "A": 255,
+          "IsKnownColor": true,
+          "IsEmpty": false,
+          "IsNamedColor": true,
+          "IsSystemColor": false,
+          "Name": "White"
+        }
+      }
+    ]
+  }
+]

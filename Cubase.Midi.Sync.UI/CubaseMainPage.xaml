@@ -3,9 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Cubase.Midi.Sync.UI.CubaseMainPage"
              Title="Main Menu">
-    <ScrollView>
-        <HorizontalStackLayout x:Name="CollectionsLayout"
-                             Padding="20"
-                             Spacing="10"/>
-    </ScrollView>
+    <Grid>
+        <!-- Your content -->
+        <ScrollView Orientation="Horizontal">
+            <HorizontalStackLayout x:Name="CollectionsLayout"
+                               Padding="20"
+                               Spacing="10"
+                               VerticalOptions="Start" />
+        </ScrollView>
+
+        <!-- Overlay spinner -->
+        <ActivityIndicator x:Name="LoadingSpinner"
+                           IsVisible="False"
+                           IsRunning="False"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"
+                           Color="Purple"
+                           WidthRequest="60"
+                           HeightRequest="60"/>
+    </Grid>    
+
 </ContentPage>

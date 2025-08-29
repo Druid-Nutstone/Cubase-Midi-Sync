@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Maui.Graphics;
 using System.Drawing;
+using Cubase.Midi.Sync.Common.Colours;
 
 namespace Cubase.Midi.Sync.UI.Extensions
 {
@@ -13,6 +14,11 @@ namespace Cubase.Midi.Sync.UI.Extensions
         public static Microsoft.Maui.Graphics.Color ToMauiColor(this System.Drawing.Color c)
         {
             return Microsoft.Maui.Graphics.Color.FromRgb(c.R, c.G, c.B);
+        }
+
+        public static Microsoft.Maui.Graphics.Color ToMauiColour(this SerializableColour colour)
+        {
+            return Microsoft.Maui.Graphics.Color.FromRgba(colour.R, colour.G, colour.B, colour.A);  
         }
 
     }

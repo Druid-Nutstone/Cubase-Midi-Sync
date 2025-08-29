@@ -29,8 +29,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             });
         }
 
-        public async Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler,  Action<string> exceptionHandler)
+
+        public async Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler)
         {
+            return null;
+            /*
             try
             {
                 // Simulate slow operation
@@ -63,6 +66,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
                 exceptionHandler?.Invoke(ex.Message);
                 return null;
             }
+        }
+            */
         }
 
     }

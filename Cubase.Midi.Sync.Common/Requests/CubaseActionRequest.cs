@@ -8,18 +8,18 @@ namespace Cubase.Midi.Sync.Common.Requests
 {
     public class CubaseActionRequest
     {
-        public CubaseActionName Action { get; set; }
+        public string Action { get; set; }
 
-        public CubaseAreaName Area { get; set; }
+        public string Category { get; set; }
 
-        public static CubaseActionRequest Create(CubaseActionName action)
+        public static CubaseActionRequest Create(string action)
         {
             return new CubaseActionRequest() { Action = action };
         }
 
         public static CubaseActionRequest CreateFromCommand(CubaseCommand command)
         {
-            return new CubaseActionRequest() { Action = command.Action };
+            return new CubaseActionRequest() { Action = command.Action, Category = command.Category };
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
         }
 
-        public bool SendKey(VirtualKey key)
+        public bool SendKey(string keyText)
         {
             var cubase = CubaseExtensions.GetCubaseService();
             if (cubase?.MainWindowHandle == IntPtr.Zero)
@@ -46,9 +46,40 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
                 }
             }
 
-            keybd_event((byte)key, 0, 0, UIntPtr.Zero);
-            Thread.Sleep(50); // simulate key press duration    
-            keybd_event((byte)key, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            var parts = keyText.ToUpper().Split('+');
+            var modifiers = new List<byte>();
+            byte key = 0;
+
+            foreach (var part in parts)
+            {
+                if (CubaseKeyMap.Map.ContainsKey(part))
+                {
+                    byte vk = CubaseKeyMap.Map[part];
+                    // Last part is the main key
+                    if (part == parts[^1])
+                        key = vk;
+                    else
+                        modifiers.Add(vk); // treat as modifier
+                }
+                else
+                {
+                    Console.WriteLine($"Unknown key: {part}");
+                }
+            }
+
+            // Press modifiers
+            foreach (var mod in modifiers)
+                keybd_event(mod, 0, 0, UIntPtr.Zero);
+
+            // Press main key
+            keybd_event(key, 0, 0, UIntPtr.Zero);
+            Thread.Sleep(50); // simulate key press
+            keybd_event(key, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+
+            // Release modifiers
+            foreach (var mod in modifiers)
+                keybd_event(mod, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+
             return true;
         }
     }

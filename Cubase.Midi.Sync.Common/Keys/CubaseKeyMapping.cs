@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.Common.Keys
 {
+    [Obsolete]
     public class CubaseMappingCollection : List<CubaseKeyMapping>
     {
-        public CubaseMappingCollection AddMapping(VirtualKey key, CubaseActionName action)
+        public CubaseMappingCollection AddMapping(string key, string category)
         {
-            this.Add(new CubaseKeyMapping() { CubaseKey = key, Command = action });
+            this.Add(new CubaseKeyMapping() { CubaseKey = key, Category = category });
             return this;
         }
     
@@ -25,16 +26,17 @@ namespace Cubase.Midi.Sync.Common.Keys
             return System.Text.Json.JsonSerializer.Deserialize<CubaseMappingCollection>(System.IO.File.ReadAllText(fileName)) ?? new CubaseMappingCollection();
         }
 
-        public bool ContainsCubaseKey(CubaseActionName action)
+        public bool ContainsCubaseKey(string action)
         {
-            return this.Any(x => x.Command == action);
+            return false; // this.Any(x => x.Command == action);
         }
 
-        public VirtualKey GetCubaseKey(CubaseActionName action)
+        public string GetCubaseKey(string action)
         {
-            var mapping = this.FirstOrDefault(x => x.Command == action);
-            if (mapping == null) throw new Exception($"No mapping found for action {action}");
-            return mapping.CubaseKey;
+            //var mapping = this.FirstOrDefault(x => x.Command == action);
+            //if (mapping == null) throw new Exception($"No mapping found for action {action}");
+            //return mapping.CubaseKey;
+            return null;
         }
 
         public static CubaseMappingCollection Create()
@@ -45,13 +47,9 @@ namespace Cubase.Midi.Sync.Common.Keys
 
     public class CubaseKeyMapping
     {
-        public VirtualKey CubaseKey { get; set; }   
+        public string CubaseKey { get; set; }   
 
-        public CubaseActionName Command { get; set; }
-    
-        public string CubaseKeyString => CubaseKey.ToString();
-
-        public string CommandString => Command.ToString();
+        public string Category { get; set; }
 
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.Common.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -32,8 +34,8 @@ namespace Cubase.Midi.Sync.Common
             return JsonSerializer.Deserialize<CubaseCommandsCollection>(File.ReadAllText(fileName)); 
         }
 
-        public CubaseCommandCollection WithNewCubaseCommand(string name, CubaseAreaName cubaseAreaName)         {
-            var collection = new CubaseCommandCollection() { Name = name, Area = cubaseAreaName };
+        public CubaseCommandCollection WithNewCubaseCommand(string name, string category)         {
+            var collection = new CubaseCommandCollection() { Name = name, Category = category };
             this.Add(collection);
             return collection;
         }
@@ -46,14 +48,13 @@ namespace Cubase.Midi.Sync.Common
     {
         public string Name { get; set; }    
     
-        public CubaseAreaName Area { get; set; }
+        public string Category { get; set; }
 
-        public List<CubaseCommand> Commands { get; set; } = new List<CubaseCommand>();  
-    
-        public CubaseCommandCollection WithNewCubaseCommand(string name, CubaseActionName action, CubaseButtonType buttonType = CubaseButtonType.Momentory)
+        public List<CubaseCommand> Commands { get; set; } = new List<CubaseCommand>();
+
+        public CubaseCommandCollection WithNewCubaseCommand(CubaseCommand cubaseCommand)
         {
-            var command = new CubaseCommand() { Name = name, Action = action, ButtonType = buttonType, Area = this.Area};
-            Commands.Add(command);
+            Commands.Add(cubaseCommand.WithCategory(this.Category));
             return this;
         }
 
@@ -63,23 +64,96 @@ namespace Cubase.Midi.Sync.Common
     {
         public string Name { get; set; }    
     
-        public CubaseActionName Action { get; set; }
+        public string Action { get; set; }
 
-        public CubaseAreaName Area { get; set; }    
+        public string Category { get; set; }
 
+        public SerializableColour ToggleBackGroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
+
+        public SerializableColour ToggleForeColour { get; set; } = ColourConstants.ButtonText.ToSerializableColour();
 
         public CubaseButtonType ButtonType { get; set; } = CubaseButtonType.Momentory;
 
 
         public bool IsToggled { get; set; }
 
-        public Color ButtonColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
-            ? Color.Green
-            : Color.SkyBlue;
+        //public Color ButtonColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+        //    ? this.ToggleBackGroundColour
+        //    : ColourConstants.ButtonBackground;
 
-        public Color ForeColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
-            ? Color.Black
-            : Color.White;
+        public SerializableColour ForeColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+            ? this.ToggleForeColour
+            : ColourConstants.ButtonText.ToSerializableColour();
+    
+        public SerializableColour GetBackgroundColour()
+        {
+            if (ButtonType == CubaseButtonType.Toggle && IsToggled)
+            {
+                return this.ToggleBackGroundColour;
+            }
+            return ColourConstants.ButtonBackground.ToSerializableColour();
+        }
+        
+        public CubaseCommand WithButtonType(CubaseButtonType buttonType)
+        {
+            this.ButtonType = buttonType;
+            return this;
+        }   
+
+        public CubaseCommand WithToggleBackGroundColour(Color colour)
+        {
+            this.ToggleBackGroundColour = colour.ToSerializableColour();
+            return this;
+        }
+
+        public CubaseCommand WithToggleForeColour(Color colour)
+        {
+            this.ToggleForeColour = colour.ToSerializableColour();
+            return this;
+        }
+
+        public CubaseCommand WithCategory(string category)
+        {
+            this.Category = category;
+            return this;
+        }
+
+        public static CubaseCommand Create(string name, string action)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                Action = action,
+                ButtonType = CubaseButtonType.Momentory,
+                ToggleBackGroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonText.ToSerializableColour()
+            };
+        }
+
+        public static CubaseCommand CreateStandardButton(string name, string action)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                Action = action,
+                ButtonType = CubaseButtonType.Momentory,
+                ToggleBackGroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonText.ToSerializableColour()
+            };
+        }
+
+        public static CubaseCommand CreateToggleButton(string name, string action)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                Action = action,
+                ButtonType = CubaseButtonType.Toggle,
+                ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+            };
+        }
+
     }
 
 

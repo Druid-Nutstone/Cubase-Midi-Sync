@@ -1,9 +1,8 @@
 ﻿using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
-using Cubase.Midi.Sync.Server.Constants;
-using Cubase.Midi.Sync.Server.Services.Area;
 using System.Diagnostics;
 using Cubase.Midi.Sync.Server.Extensions;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -27,20 +26,20 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                 };
             }
             // locate the service processor 
-            var areaService = this.serviceProvider.GetKeyedService<IAreaService>(request.Area);
+            var catgeoryService = this.serviceProvider.GetKeyedService<ICategoryService>(request.Category);
             
 
 
-            if (areaService == null)
+            if (catgeoryService == null)
             {
                 return new CubaseActionResponse
                 {
                     Success = false,
-                    Message = $"No service found for area {request.Area}"
+                    Message = $"No service found for area {request.Category}"
                 };
             }
             // not async because neither midi or key commands are async operations
-            return areaService.ProcessAction(request);    
+            return catgeoryService.ProcessAction(request);    
         }
 
 

@@ -1,6 +1,6 @@
 using Cubase.Midi.Sync.Common;
-using Cubase.Midi.Sync.Server.Services.Area;
-using Cubase.Midi.Sync.Server.Services.Area.Transport;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
@@ -12,7 +12,7 @@ builder.Services
       .AddTransient<ICommandService, CommandService>()
       .AddTransient<ICubaseService, CubaseService>()
       .AddTransient<IKeyboardService, KeyboardService>()
-      .AddKeyedTransient<IAreaService, TransportAreaService>(CubaseAreaName.Transport);
+      .AddKeyedTransient<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
 
 builder.Services.AddControllers();

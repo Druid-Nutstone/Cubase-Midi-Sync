@@ -1,6 +1,8 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Colours;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
+using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 
 namespace Cubase.Midi.Sync.UI;
@@ -17,12 +19,13 @@ public partial class CubaseMainPage : ContentPage
         InitializeComponent();
         this.client = client;
         CollectionsLayout.Clear();
+        BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         var label = new Label
         {
             Text = "Loading ..",
             TextColor = Colors.Black,
             FontSize = 20,
-            FontAttributes = FontAttributes.Bold,   
+            FontAttributes = FontAttributes.Bold,
             HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center
         };
@@ -45,10 +48,10 @@ public partial class CubaseMainPage : ContentPage
         try
         {
             // CollectionsLayout.Children.Clear();
-            collections = await this.client.GetCommands(async (msg) => 
-            { 
-               // todo show acrtionsin a non-blocking ui section
-            },async (exception) =>
+            collections = await this.client.GetCommands(async (msg) =>
+            {
+                // todo show acrtionsin a non-blocking ui section
+            }, async (exception) =>
             {
                 await DisplayAlert("Error", exception, "OK");
             });
@@ -59,38 +62,19 @@ public partial class CubaseMainPage : ContentPage
 
             foreach (var collection in collections)
             {
-                var button = new Button
-                {
-                    Text = collection.Name,
-                    HeightRequest = 60,
-                    WidthRequest = 150,
-                    HorizontalOptions = LayoutOptions.Fill,
-                    BackgroundColor = Colors.SkyBlue,
-                    TextColor = Colors.White,
-                    FontAttributes = FontAttributes.Bold,
-                    CornerRadius = 12
-                };
 
-                button.Clicked += async (s, e) =>
+                var button = RaisedButtonFactory.Create(collection.Name, async (s, e) =>
                 {
                     try
                     {
-                        // await _client.SendAction(cmd.Action);
                         await Navigation.PushAsync(new CubaseAction(collection, this.client));
                     }
                     catch (Exception ex)
                     {
                         await DisplayAlert("Error", ex.Message, "OK");
                     }
-                };
-
-                button.SizeChanged += (s, e) =>
-                {
-                    var b = (Button)s;
-                    if (b.Height > 0)
-                        b.FontSize = Math.Min(b.Height * 0.5, 18);
-                };
-                CollectionsLayout.Children.Add(button);
+                });
+                CollectionsLayout.Children.Add(button.Button);
             }
             CollectionsLayout.Children.RemoveAt(0); // remove loading button    
         }

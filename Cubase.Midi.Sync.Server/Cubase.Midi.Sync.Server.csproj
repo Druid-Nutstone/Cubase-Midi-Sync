@@ -7,14 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\Area\**" />
+    <Content Remove="Services\Area\**" />
+    <EmbeddedResource Remove="Services\Area\**" />
+    <None Remove="Services\Area\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Cubase.Midi.Sync.Common\Cubase.Midi.Sync.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Update="CubaseCommands.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="CubaseKeyMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

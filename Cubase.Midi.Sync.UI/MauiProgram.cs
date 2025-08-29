@@ -1,9 +1,10 @@
 ﻿using Cubase.Midi.Sync.UI.CubaseService.NutstoneClient;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Cubase.Midi.Sync.UI.Settings;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Handlers;
 using System.Reflection;
 
 
@@ -41,6 +42,9 @@ namespace Cubase.Midi.Sync.UI
             // builder.Services.AddSingleton<ICubaseHttpClient, TestCubaseHttpClient>();
             builder.Services.AddSingleton(appSettings)
                             .AddTransient<CubaseMainPage>();
+
+
+
             return builder.Build();
         }
     }

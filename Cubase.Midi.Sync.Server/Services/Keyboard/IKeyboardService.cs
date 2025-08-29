@@ -5,6 +5,6 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 {
     public interface IKeyboardService
     {
-        bool SendKey(VirtualKey key);
+        bool SendKey(string key);
     }
 }

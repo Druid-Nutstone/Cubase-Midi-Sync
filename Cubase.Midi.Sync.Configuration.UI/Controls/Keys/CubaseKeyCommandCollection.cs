@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cubase.Midi.Sync.Command.Builder
+namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 {
     public class CubaseKeyCommandCollection : List<CubaseKeyCommand>    
     {
@@ -23,9 +23,9 @@ namespace Cubase.Midi.Sync.Command.Builder
             return this.Select(c => c.Key).Where(k => !string.IsNullOrWhiteSpace(k)).Distinct().OrderBy(k => k).ToList();
         }
 
-        public List<string> GetByName(string name)
+        public List<CubaseKeyCommand> GetByName(string name)
         {
-            return this.Where(c => c.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0).OrderBy(c => c.Name).Select(c => $"{c.Name} ({c.Key})").ToList();
+            return this.Where(c => c.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0).OrderBy(c => c.Name).ToList();
         }
 
         public List<CubaseKeyCommand> GetByCategory(string category)

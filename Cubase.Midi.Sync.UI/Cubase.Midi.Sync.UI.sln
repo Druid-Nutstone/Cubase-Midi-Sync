@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.Server", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.Command.Builder", "..\Cubase.Midi.Sync.Command.Builder\Cubase.Midi.Sync.Command.Builder.csproj", "{6FAF1E66-32EF-4CE2-9936-B8DC1EB9A674}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.Configuration.UI", "..\Cubase.Midi.Sync.Configuration.UI\Cubase.Midi.Sync.Configuration.UI.csproj", "{5374B0A8-A0BC-4041-914D-F416ABFEF909}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{6FAF1E66-32EF-4CE2-9936-B8DC1EB9A674}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FAF1E66-32EF-4CE2-9936-B8DC1EB9A674}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FAF1E66-32EF-4CE2-9936-B8DC1EB9A674}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5374B0A8-A0BC-4041-914D-F416ABFEF909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5374B0A8-A0BC-4041-914D-F416ABFEF909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5374B0A8-A0BC-4041-914D-F416ABFEF909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5374B0A8-A0BC-4041-914D-F416ABFEF909}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

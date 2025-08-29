@@ -17,10 +17,4 @@
     <ProjectReference Include="..\Cubase.Midi.Sync.Common\Cubase.Midi.Sync.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="CubaseCommands.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

@@ -7,19 +7,8 @@ namespace Cubase.Midi.Sync.Server.Services.Commands
     {
         public Task<CubaseCommandsCollection> GetCommands()
         {
-            var collection = new CubaseCommandsCollection();
-            if (File.Exists(CubaseServerConstants.CommandsFileLocation))
-            {
-                collection = CubaseCommandsCollection.LoadFromFile(CubaseServerConstants.CommandsFileLocation);
-            }
-            else
-            {
-                collection = CubaseCommandsCollection.CreateWithError($"Cannot find file {CubaseServerConstants.CommandsFileLocation}");
-            }
-                // todo 
-            return Task.FromResult(collection);
-            
-   
+            var cubaseServerSettings = new CubaseServerSettings();
+            return Task.FromResult(cubaseServerSettings.GetCubaseCommands());
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Cubase.Midi.Sync.Command.Builder;
+﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -25,16 +25,16 @@ var keys = CubaseMappingCollection.Create().AddMapping("Space", CubaseActionName
 keys.SaveToFile(Path.Combine("C:\\Dev\\Cubase-Midi-Sync\\Cubase.Midi.Sync.Server\\", "CubaseKeyMap.json"));
 */
 
-var commands = CubaseKeyCommandParser.Create().Parse();
+//var commands = CubaseKeyCommandParser.Create().Parse();
 
-var allocated = commands.GetAllocated();  
+//var allocated = commands.GetAllocated();  
 
-var categories = commands.GetCategories();
+//var categories = commands.GetCategories();
 
-var allKeys = commands.GetKeys();
+//var allKeys = commands.GetKeys();
 
-var locator = commands.GetByName("locator");
+//var locator = commands.GetByName("locator");
 
-File.WriteAllLines("C:\\Deleteme\\AllKeys.txt", allKeys);
+//File.WriteAllLines("C:\\Deleteme\\AllKeys.txt", allKeys);
 
-var size = allocated.Count; 
+//var size = allocated.Count; 

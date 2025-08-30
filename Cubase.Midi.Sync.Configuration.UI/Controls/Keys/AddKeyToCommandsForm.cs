@@ -1,4 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Extensions;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Cubase.Midi.Sync.Common.Extensions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 {
@@ -54,7 +56,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
             this.cbAreaName.SelectedIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
             this.cbAreaName.Enabled = false;
-            this.toggleButton.Checked = existingCommand.ButtonType == CubaseButtonType.Toggle;
             textColour.Text = existingCommand.TextColor.FromSerializableColour().ToArgb().ToString();
             toggleBackgroundColour.Text = existingCommand.ToggleBackGroundColour.FromSerializableColour().ToArgb().ToString();      
             backgroundColour.Text = existingCommand.ButtonBackgroundColour.FromSerializableColour().ToArgb().ToString();    
@@ -64,6 +65,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void InitialiseControls(CubaseKeyCommand cubaseKeyCommand, CubaseCommandsCollection cubaseCommandCollections, CubaseServerSettings cubaseServerSettings)
         {
+            this.buttonCubaseCommands.Visible = false;
+            this.buttonCubaseCommands.Click += ButtonCubaseCommands_Click;
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.cubaseKeyCommand = cubaseKeyCommand;
             this.cubaseServerSettings = cubaseServerSettings;
@@ -73,19 +76,67 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.backgroundColourButton.Click += BackgroundColourButton_Click;
             this.textColourButton.Click += TextColourButton_Click;
             this.InitialiseAreaName();
+            
             this.cbAreaName.SelectedIndexChanged += CbAreaName_SelectedIndexChanged;
             this.newAreaName.Enabled = false;
             this.newAreaName.KeyPress += NewAreaName_KeyPress;
             this.newAreaName.LostFocus += NewAreaName_LostFocus;
             this.toggleBackgroundColourButton.Click += ToggleBackgroundColourButton_Click;
             this.toggleTextColourButton.Click += ToggleTextColourButton_Click;
-
+            this.InitialiseButtonType();
             // set default or existing colours 
             this.backgroundColour.BackColor = this.cubaseCommand.ButtonBackgroundColour.FromSerializableColour();
             this.textColour.BackColor = this.cubaseCommand.ButtonTextColour.FromSerializableColour();    
             this.toggleBackgroundColour.BackColor = this.cubaseCommand.ToggleBackGroundColour.FromSerializableColour();   
             this.toggleTextColour.BackColor = this.cubaseCommand.ToggleForeColour.FromSerializableColour(); 
-            
+        }
+
+        private void ButtonCubaseCommands_Click(object? sender, EventArgs e)
+        {
+            var macroCommandSelectorForm = new MacroCommandSelectorForm((key) => 
+            {
+                this.cubaseCommand.ActionGroup.Add(key.Key);
+                action.Lines = cubaseCommand.ActionGroup.ToArray();
+
+            });
+            macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
+
+            // Align left side of child to right side of parent
+            macroCommandSelectorForm.Location = new Point(
+                this.Location.X + this.Width,   // parent's right edge
+                this.Location.Y                 // align top edges
+            );
+            macroCommandSelectorForm.Show(); 
+        }
+
+        private void InitialiseButtonType()
+        {
+            cbButtonType.Items.Clear();
+            cbButtonType.Items.AddRange(Enum.GetNames(typeof(CubaseButtonType)).ToArray());
+            cbButtonType.SelectedIndex = cbButtonType.Items.IndexOf(cubaseCommand.ButtonType.ToString());
+            cbButtonType.SelectedIndexChanged += CbButtonType_SelectedIndexChanged;
+            if (cubaseCommand.ButtonType == CubaseButtonType.Macro)
+            {
+                EnableMultiActions();    
+            }
+        }
+
+        private void CbButtonType_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            var buttonType = Enum.Parse<CubaseButtonType>(cbButtonType.SelectedItem.ToString(), true);
+            if (buttonType == CubaseButtonType.Macro) 
+            {
+                EnableMultiActions();
+            }
+        }
+
+        private void EnableMultiActions()
+        {
+            action.Multiline = true;
+            action.Lines = cubaseCommand.ActionGroup.ToArray();
+            action.Height = action.Height * 2;
+            action.ScrollBars = ScrollBars.Vertical;    
+            this.buttonCubaseCommands.Visible = true;
         }
 
         private void NewAreaName_LostFocus(object? sender, EventArgs e)
@@ -197,11 +248,18 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     }
 
                     CubaseCommand cubaseCommand = CubaseCommand.CreateStandardButton(buttonName.Text, action.Text);
-                    if (toggleButton.Checked)
+                    
+                    switch (this.GetSelectedButtonType())
                     {
-                        cubaseCommand = CubaseCommand.CreateToggleButton(buttonName.Text, action.Text);
+                        case CubaseButtonType.Toggle:
+                            cubaseCommand = CubaseCommand.CreateToggleButton(buttonName.Text, action.Text);
+                            break;
+                        case CubaseButtonType.Macro:
+                            var actionGroup = action.Lines.ToList();
+                            cubaseCommand = CubaseCommand.CreateMacroButton(buttonName.Text, actionGroup);
+                            break;
                     }
-
+ 
                     if (!string.IsNullOrEmpty(backgroundColour.Text))
                     {
                         cubaseCommand.ButtonBackgroundColour = Color.FromArgb(int.Parse(backgroundColour.Text)).ToSerializableColour();
@@ -235,7 +293,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void UpdateCubaseCommand()
         {
-            cubaseCommand.ButtonType = toggleButton.Checked ? CubaseButtonType.Toggle : CubaseButtonType.Momentory;
+            cubaseCommand.ButtonType = this.GetSelectedButtonType();
             cubaseCommand.ButtonTextColour = Color.FromArgb(int.Parse(textColour.Text)).ToSerializableColour();
             cubaseCommand.ToggleBackGroundColour = Color.FromArgb(int.Parse(toggleBackgroundColour.Text)).ToSerializableColour();
             cubaseCommand.ToggleForeColour = Color.FromArgb(int.Parse(toggleTextColour.Text)).ToSerializableColour();
@@ -244,6 +302,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             cubaseCommand.Name = buttonName.Text;
             this.cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);
             this.Close();
+        }
+
+        private CubaseButtonType GetSelectedButtonType()
+        {
+            return Enum.Parse<CubaseButtonType>(cbButtonType.SelectedItem.ToString(), true);
         }
     }
 }

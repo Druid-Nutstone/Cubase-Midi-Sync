@@ -1,0 +1,42 @@
+﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
+{
+    public partial class MacroCommandSelectorForm : Form
+    {
+        private Action<CubaseKeyCommand> keyHandkler;
+
+        private CubaseKeyCommandCollection cubaseKeyCommands;
+
+        public MacroCommandSelectorForm()
+        {
+            InitializeComponent();
+        }
+
+        public MacroCommandSelectorForm(Action<CubaseKeyCommand> keyHandler)
+        {
+            InitializeComponent();
+            this.searchFilter.KeyPress += SearchFilter_KeyPress;
+            this.keyHandkler = keyHandler;
+            this.cubaseKeyCommands = CubaseKeyCommandParser.Create().Parse();
+            this.commandSelectorListView.Populate(this.cubaseKeyCommands.GetAllocated(), keyHandler);
+        }
+
+        private void SearchFilter_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)System.Windows.Forms.Keys.Enter)
+            {
+                this.commandSelectorListView.Populate(this.cubaseKeyCommands.GetByName(searchFilter.Text), this.keyHandkler);
+            }
+        }
+    }
+}

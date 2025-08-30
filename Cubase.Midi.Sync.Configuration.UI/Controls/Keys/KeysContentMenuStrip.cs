@@ -46,7 +46,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     {
                         var command = currentItem.Command;
                         var commandExists =  this.cubaseCommandCollections.SelectMany(x => x.Commands)
-                                                                           .Any(x => x.Action.Trim() == command.Action.Trim());   
+                                                                           .Any(x => x.Action?.Trim() == command.Action.Trim());   
                         if (!commandExists)
                         {
                             var addForm = new AddKeyToCommandsForm(currentItem.Command, this.cubaseCommandCollections, this.cubaseServerSettings);

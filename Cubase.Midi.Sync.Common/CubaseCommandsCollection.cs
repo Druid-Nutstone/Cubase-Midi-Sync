@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 
 namespace Cubase.Midi.Sync.Common
@@ -80,9 +81,11 @@ namespace Cubase.Midi.Sync.Common
 
     public class CubaseCommand
     {
-        public string Name { get; set; }    
-    
+        public string Name { get; set; }
+
         public string Action { get; set; }
+
+        public List<string> ActionGroup { get; set; } = new List<string>();
 
         public string Category { get; set; }
 
@@ -180,6 +183,20 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
+        public static CubaseCommand CreateMacroButton(string name, List<string> actions)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                ActionGroup = actions,
+                ButtonType = CubaseButtonType.Macro, 
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+            };
+        }
+
         public static CubaseCommand CreateToggleButton(string name, string action)
         {
             return new CubaseCommand()
@@ -208,6 +225,10 @@ namespace Cubase.Midi.Sync.Common
         /// </summary>
         /// <remarks>This class or member is intended to encapsulate a transient or temporary state. 
         /// Additional context or functionality should be provided to clarify its specific use case.</remarks>
-        Momentory
+        Momentory,
+        /// <summary>
+        /// More that one command 
+        /// </summary>
+        Macro,
     }
 }

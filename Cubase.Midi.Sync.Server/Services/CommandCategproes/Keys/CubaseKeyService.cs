@@ -17,13 +17,32 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
         {
             try
             {
-                var keyPressed = this.keyboardService.SendKey(request.Action);
-                return keyPressed ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Failed to send key event");
+                if (request.ButtonType == Common.CubaseButtonType.Macro)
+                {
+                    foreach (var key in request.ActionGroup)
+                    {
+                        if (!this.SendKey(key))
+                        {
+                            CubaseActionResponse.CreateError($"Failed to send key event {key}");
+                        }
+                    }
+                    return CubaseActionResponse.CreateSuccess();
+                }
+                else
+                {
+                    var result = SendKey(request.Action);
+                    return result ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError($"Could not process key {request.Action}");
+                }
             }
             catch (Exception ex)
             {
                 return CubaseActionResponse.CreateError($"Exception sending key: {ex.Message}");
             }
+        }
+
+        private bool SendKey(string key)
+        {
+            return this.keyboardService.SendKey(key);
         }
     }
 }

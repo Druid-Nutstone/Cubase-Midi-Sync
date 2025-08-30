@@ -12,7 +12,6 @@ public class CubaseKeyCommandParser
 
     public static CubaseKeyCommandParser Create()
     {
-        // C:\Users\david\AppData\Roaming\Steinberg\Cubase 14_64
         var keyLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steinberg", "Cubase 14_64", "Key Commands.xml");
         return new CubaseKeyCommandParser() { filePath = keyLocation };   
     } 

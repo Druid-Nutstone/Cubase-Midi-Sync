@@ -33,7 +33,6 @@
             label2 = new Label();
             action = new TextBox();
             buttonAdd = new Button();
-            toggleButton = new CheckBox();
             label3 = new Label();
             label4 = new Label();
             backgroundColour = new TextBox();
@@ -50,6 +49,9 @@
             toggleTextColour = new TextBox();
             toggleBackgroundColourButton = new Button();
             toggleTextColourButton = new Button();
+            label9 = new Label();
+            cbButtonType = new ComboBox();
+            buttonCubaseCommands = new Button();
             SuspendLayout();
             // 
             // label1
@@ -95,21 +97,11 @@
             buttonAdd.Text = "Add";
             buttonAdd.UseVisualStyleBackColor = true;
             // 
-            // toggleButton
-            // 
-            toggleButton.AutoSize = true;
-            toggleButton.Location = new Point(576, 307);
-            toggleButton.Name = "toggleButton";
-            toggleButton.Size = new Size(104, 21);
-            toggleButton.TabIndex = 5;
-            toggleButton.Text = "ToggleButton";
-            toggleButton.UseVisualStyleBackColor = true;
-            // 
             // label3
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label3.Location = new Point(59, 192);
+            label3.Location = new Point(63, 238);
             label3.Name = "label3";
             label3.Size = new Size(127, 17);
             label3.TabIndex = 6;
@@ -119,7 +111,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label4.Location = new Point(315, 192);
+            label4.Location = new Point(315, 237);
             label4.Name = "label4";
             label4.Size = new Size(79, 17);
             label4.TabIndex = 7;
@@ -127,21 +119,21 @@
             // 
             // backgroundColour
             // 
-            backgroundColour.Location = new Point(59, 212);
+            backgroundColour.Location = new Point(63, 258);
             backgroundColour.Name = "backgroundColour";
             backgroundColour.Size = new Size(153, 25);
             backgroundColour.TabIndex = 8;
             // 
             // textColour
             // 
-            textColour.Location = new Point(315, 212);
+            textColour.Location = new Point(313, 257);
             textColour.Name = "textColour";
             textColour.Size = new Size(159, 25);
             textColour.TabIndex = 9;
             // 
             // backgroundColourButton
             // 
-            backgroundColourButton.Location = new Point(218, 212);
+            backgroundColourButton.Location = new Point(218, 257);
             backgroundColourButton.Name = "backgroundColourButton";
             backgroundColourButton.Size = new Size(53, 25);
             backgroundColourButton.TabIndex = 10;
@@ -150,7 +142,7 @@
             // 
             // textColourButton
             // 
-            textColourButton.Location = new Point(480, 211);
+            textColourButton.Location = new Point(478, 256);
             textColourButton.Name = "textColourButton";
             textColourButton.Size = new Size(52, 25);
             textColourButton.TabIndex = 11;
@@ -196,7 +188,7 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label7.Location = new Point(59, 287);
+            label7.Location = new Point(59, 306);
             label7.Name = "label7";
             label7.Size = new Size(173, 17);
             label7.TabIndex = 16;
@@ -206,7 +198,7 @@
             // 
             label8.AutoSize = true;
             label8.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label8.Location = new Point(313, 287);
+            label8.Location = new Point(313, 306);
             label8.Name = "label8";
             label8.Size = new Size(125, 17);
             label8.TabIndex = 17;
@@ -214,21 +206,21 @@
             // 
             // toggleBackgroundColour
             // 
-            toggleBackgroundColour.Location = new Point(63, 311);
+            toggleBackgroundColour.Location = new Point(63, 327);
             toggleBackgroundColour.Name = "toggleBackgroundColour";
             toggleBackgroundColour.Size = new Size(149, 25);
             toggleBackgroundColour.TabIndex = 18;
             // 
             // toggleTextColour
             // 
-            toggleTextColour.Location = new Point(313, 307);
+            toggleTextColour.Location = new Point(313, 326);
             toggleTextColour.Name = "toggleTextColour";
             toggleTextColour.Size = new Size(161, 25);
             toggleTextColour.TabIndex = 19;
             // 
             // toggleBackgroundColourButton
             // 
-            toggleBackgroundColourButton.Location = new Point(218, 310);
+            toggleBackgroundColourButton.Location = new Point(218, 326);
             toggleBackgroundColourButton.Name = "toggleBackgroundColourButton";
             toggleBackgroundColourButton.Size = new Size(53, 25);
             toggleBackgroundColourButton.TabIndex = 20;
@@ -237,19 +229,49 @@
             // 
             // toggleTextColourButton
             // 
-            toggleTextColourButton.Location = new Point(480, 307);
+            toggleTextColourButton.Location = new Point(480, 325);
             toggleTextColourButton.Name = "toggleTextColourButton";
             toggleTextColourButton.Size = new Size(52, 25);
             toggleTextColourButton.TabIndex = 21;
             toggleTextColourButton.Text = "Pick";
             toggleTextColourButton.UseVisualStyleBackColor = true;
             // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label9.Location = new Point(585, 35);
+            label9.Name = "label9";
+            label9.Size = new Size(83, 17);
+            label9.TabIndex = 22;
+            label9.Text = "Button Type";
+            // 
+            // cbButtonType
+            // 
+            cbButtonType.FormattingEnabled = true;
+            cbButtonType.Location = new Point(585, 58);
+            cbButtonType.Name = "cbButtonType";
+            cbButtonType.Size = new Size(158, 25);
+            cbButtonType.TabIndex = 23;
+            // 
+            // buttonCubaseCommands
+            // 
+            buttonCubaseCommands.Location = new Point(587, 142);
+            buttonCubaseCommands.Name = "buttonCubaseCommands";
+            buttonCubaseCommands.Size = new Size(156, 25);
+            buttonCubaseCommands.TabIndex = 24;
+            buttonCubaseCommands.Text = "Cubase Commands >>";
+            buttonCubaseCommands.UseVisualStyleBackColor = true;
+            // 
             // AddKeyToCommandsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
-            ClientSize = new Size(763, 471);
+            ClientSize = new Size(779, 471);
+            Controls.Add(buttonCubaseCommands);
+            Controls.Add(cbButtonType);
+            Controls.Add(label9);
             Controls.Add(toggleTextColourButton);
             Controls.Add(toggleBackgroundColourButton);
             Controls.Add(toggleTextColour);
@@ -266,7 +288,6 @@
             Controls.Add(backgroundColour);
             Controls.Add(label4);
             Controls.Add(label3);
-            Controls.Add(toggleButton);
             Controls.Add(buttonAdd);
             Controls.Add(action);
             Controls.Add(label2);
@@ -287,7 +308,6 @@
         private Label label2;
         private TextBox action;
         private Button buttonAdd;
-        private CheckBox toggleButton;
         private Label label3;
         private Label label4;
         private TextBox backgroundColour;
@@ -304,5 +324,8 @@
         private TextBox toggleTextColour;
         private Button toggleBackgroundColourButton;
         private Button toggleTextColourButton;
+        private Label label9;
+        private ComboBox cbButtonType;
+        private Button buttonCubaseCommands;
     }
 }

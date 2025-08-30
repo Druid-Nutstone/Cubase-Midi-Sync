@@ -10,7 +10,11 @@ namespace Cubase.Midi.Sync.Common.Requests
     {
         public string Action { get; set; }
 
+        public List<string> ActionGroup { get; set; }
+
         public string Category { get; set; }
+
+        public CubaseButtonType ButtonType { get; set; }
 
         public static CubaseActionRequest Create(string action)
         {
@@ -19,7 +23,24 @@ namespace Cubase.Midi.Sync.Common.Requests
 
         public static CubaseActionRequest CreateFromCommand(CubaseCommand command)
         {
-            return new CubaseActionRequest() { Action = command.Action, Category = command.Category };
+            if (command.ButtonType == CubaseButtonType.Macro)
+            {
+                return new CubaseActionRequest()
+                {
+                    ActionGroup = command.ActionGroup,
+                    Category = command.Category,
+                    ButtonType = command.ButtonType,
+                };
+            }
+            else
+            {
+                return new CubaseActionRequest()
+                {
+                    Action = command.Action,
+                    Category = command.Category,
+                    ButtonType = command.ButtonType,    
+                };
+            }
         }
     }
 }

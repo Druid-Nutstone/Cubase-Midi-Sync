@@ -31,14 +31,15 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
             if (cubase?.MainWindowHandle == IntPtr.Zero)
                 return false;
 
-            var maxCount = 10000;
-            var currentCount = 0;
+            // Bring Cubase to foreground
+            const int maxCount = 10000;
+            int currentCount = 0;
             while (GetForegroundWindow() != cubase.MainWindowHandle)
             {
-                if (currentCount < maxCount)
+                if (currentCount++ < maxCount)
                 {
                     SetForegroundWindow(cubase.MainWindowHandle);
-                    Thread.Sleep(50); // wait a bit for the window to come to the foreground
+                    Thread.Sleep(50);
                 }
                 else
                 {
@@ -46,24 +47,27 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
                 }
             }
 
+            // Split keyText into parts (modifiers + main key)
             var parts = keyText.ToUpper().Split('+');
             var modifiers = new List<byte>();
             byte key = 0;
 
             foreach (var part in parts)
             {
-                if (CubaseKeyMap.Map.ContainsKey(part))
+                // Normalize: remove spaces and handle Cubase naming quirks
+                var lookup = part.Replace(" ", "");
+
+                // Lookup in CubaseKeyMap
+                if (CubaseKeyMap.Map.TryGetValue(lookup, out byte vk))
                 {
-                    byte vk = CubaseKeyMap.Map[part];
-                    // Last part is the main key
                     if (part == parts[^1])
-                        key = vk;
+                        key = vk; // last part = main key
                     else
                         modifiers.Add(vk); // treat as modifier
                 }
                 else
                 {
-                    Console.WriteLine($"Unknown key: {part}");
+                    return false;
                 }
             }
 
@@ -82,5 +86,6 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
             return true;
         }
+
     }
 }

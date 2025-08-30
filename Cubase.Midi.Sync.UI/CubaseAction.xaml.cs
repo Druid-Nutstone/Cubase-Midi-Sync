@@ -27,8 +27,7 @@ public partial class CubaseAction : ContentPage
 
         foreach (var command in commands.Commands)
         {
-            
-            var button = RaisedButtonFactory.Create(command.Name, async (s, e) =>
+            var button = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
             {
                 try
                 {
@@ -49,14 +48,13 @@ public partial class CubaseAction : ContentPage
                 }
             }, toggleMode: true);
             this.SetButtonState(button.Button, command);
-           //  button.Button.Margin = new Thickness(5, 0, 5, -10);
             CommandsLayout.Children.Add(button.Button);
         }
     }
 
     private void SetButtonState(Button button, CubaseCommand command)
     {
-        button.BackgroundColor = command.GetBackgroundColour().ToMauiColour();
-        button.TextColor = command.ForeColor.ToMauiColour();
+        button.BackgroundColor = command.ButtonColour.ToMauiColour();
+        button.TextColor = command.TextColor.ToMauiColour();
     }
 }

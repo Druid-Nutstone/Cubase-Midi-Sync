@@ -40,7 +40,21 @@ namespace Cubase.Midi.Sync.Common
             return collection;
         }
 
+        public List<string> GetNames()
+        {
+            return this.Select(x=> x.Name).ToList();    
 
+        }
+
+        public bool HaveName(string name)
+        {
+            return this.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));   
+        }
+
+        public CubaseCommandCollection GetCommandCollectionByName(string name)
+        {
+            return this.First(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
     }
 
 
@@ -49,6 +63,10 @@ namespace Cubase.Midi.Sync.Common
         public string Name { get; set; }    
     
         public string Category { get; set; }
+
+        public SerializableColour BackgroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
+        
+        public SerializableColour TextColour { get; set; }  = ColourConstants.ButtonText.ToSerializableColour();    
 
         public List<CubaseCommand> Commands { get; set; } = new List<CubaseCommand>();
 
@@ -77,22 +95,19 @@ namespace Cubase.Midi.Sync.Common
 
         public bool IsToggled { get; set; }
 
-        //public Color ButtonColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
-        //    ? this.ToggleBackGroundColour
-        //    : ColourConstants.ButtonBackground;
+        public SerializableColour ButtonBackgroundColour { get; set; }
 
-        public SerializableColour ForeColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+        public SerializableColour ButtonTextColour { get; set; }
+
+        public SerializableColour ButtonColour => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+            ? this.ToggleBackGroundColour
+            : ButtonBackgroundColour;
+
+        public SerializableColour TextColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
             ? this.ToggleForeColour
-            : ColourConstants.ButtonText.ToSerializableColour();
+            : ButtonTextColour;
     
-        public SerializableColour GetBackgroundColour()
-        {
-            if (ButtonType == CubaseButtonType.Toggle && IsToggled)
-            {
-                return this.ToggleBackGroundColour;
-            }
-            return ColourConstants.ButtonBackground.ToSerializableColour();
-        }
+
         
         public CubaseCommand WithButtonType(CubaseButtonType buttonType)
         {
@@ -112,10 +127,33 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
+        public CubaseCommand WithButtonBackgroundColour(Color colour)
+        {
+            this.ButtonBackgroundColour = colour.ToSerializableColour();
+            return this;
+        }
+
+        public CubaseCommand WithButtonTextColour(Color color)
+        {
+            this.ButtonTextColour = color.ToSerializableColour();   
+            return this;
+        }
+
         public CubaseCommand WithCategory(string category)
         {
             this.Category = category;
             return this;
+        }
+
+        public static CubaseCommand Create()
+        {
+            return new CubaseCommand()
+            {
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+            };
         }
 
         public static CubaseCommand Create(string name, string action)
@@ -125,8 +163,8 @@ namespace Cubase.Midi.Sync.Common
                 Name = name,
                 Action = action,
                 ButtonType = CubaseButtonType.Momentory,
-                ToggleBackGroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
-                ToggleForeColour = ColourConstants.ButtonText.ToSerializableColour()
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
             };
         }
 
@@ -137,8 +175,8 @@ namespace Cubase.Midi.Sync.Common
                 Name = name,
                 Action = action,
                 ButtonType = CubaseButtonType.Momentory,
-                ToggleBackGroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
-                ToggleForeColour = ColourConstants.ButtonText.ToSerializableColour()
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
             };
         }
 
@@ -149,6 +187,8 @@ namespace Cubase.Midi.Sync.Common
                 Name = name,
                 Action = action,
                 ButtonType = CubaseButtonType.Toggle,
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
                 ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
             };

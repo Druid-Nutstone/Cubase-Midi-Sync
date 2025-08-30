@@ -1,4 +1,6 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.UI.Extensions;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 
@@ -8,7 +10,7 @@ public static class RaisedButtonFactory
 {
     public record RaisedButton(Button Button);
 
-    public static RaisedButton Create(string text, EventHandler onClicked, bool toggleMode = false)
+    public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, bool toggleMode = false)
     {
         var button = new Button
         {
@@ -16,8 +18,8 @@ public static class RaisedButtonFactory
             HeightRequest = 60,
             WidthRequest = double.NaN,
             HorizontalOptions = LayoutOptions.Start,
-            BackgroundColor = Colors.SkyBlue,
-            TextColor = Colors.Black,
+            BackgroundColor = backgroundColour.ToMauiColour(),
+            TextColor = textColour.ToMauiColour(),
             FontAttributes = FontAttributes.Bold,
             CornerRadius = 4,
             Margin = new Thickness(3),
@@ -41,7 +43,7 @@ public static class RaisedButtonFactory
                             Name = "Normal",
                             Setters =
                             {
-                                new Setter { Property = Button.BackgroundColorProperty, Value = Colors.SkyBlue },
+                                new Setter { Property = Button.BackgroundColorProperty, Value = backgroundColour.ToMauiColour() },
                                 new Setter { Property = Button.TranslationYProperty, Value = 0 }
                             }
                         },
@@ -50,7 +52,7 @@ public static class RaisedButtonFactory
                             Name = "Pressed",
                             Setters =
                             {
-                                new Setter { Property = Button.BackgroundColorProperty, Value = Colors.LightSkyBlue },
+                                new Setter { Property = Button.BackgroundColorProperty, Value = backgroundColour.ToMauiColour().AddLuminosity(20) },
                                 new Setter { Property = Button.TranslationYProperty, Value = 2 }
                             }
                         }

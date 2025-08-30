@@ -63,7 +63,7 @@ public partial class CubaseMainPage : ContentPage
             foreach (var collection in collections)
             {
 
-                var button = RaisedButtonFactory.Create(collection.Name, async (s, e) =>
+                var button = RaisedButtonFactory.Create(collection.Name, collection.BackgroundColour, collection.TextColour, async (s, e) =>
                 {
                     try
                     {

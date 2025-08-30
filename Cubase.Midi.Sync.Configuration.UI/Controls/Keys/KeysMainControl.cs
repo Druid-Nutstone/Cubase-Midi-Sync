@@ -25,6 +25,15 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             var keysTreeView = new KeysTreeView();
             this.ListViewPanel.Controls.Add(keysTreeView);
             keysTreeView.Populate(this.commands, this.DataPanel);
+            searchInput.KeyPress += SearchInput_KeyPress;
+        }
+
+        private void SearchInput_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)System.Windows.Forms.Keys.Enter)
+            {
+                SearchButton_Click(sender, e);  
+            } 
         }
 
         private void SearchButton_Click(object? sender, EventArgs e)

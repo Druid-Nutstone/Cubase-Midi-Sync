@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             InitializeComponent();
             this.cubaseCommand = CubaseCommand.Create();
+            this.cubaseCommandCollections = cubaseCommandCollections;
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
         }
 
@@ -53,13 +55,14 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             InitializeComponent();
             this.cubaseCommand = existingCommand;
+            this.cubaseCommandCollections = cubaseCommandCollections;
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
             this.cbAreaName.SelectedIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
             this.cbAreaName.Enabled = false;
-            textColour.Text = existingCommand.TextColor.FromSerializableColour().ToArgb().ToString();
-            toggleBackgroundColour.Text = existingCommand.ToggleBackGroundColour.FromSerializableColour().ToArgb().ToString();      
-            backgroundColour.Text = existingCommand.ButtonBackgroundColour.FromSerializableColour().ToArgb().ToString();    
-            toggleTextColour.Text = existingCommand.ToggleForeColour.FromSerializableColour().ToArgb().ToString();  
+            ButtonTextColour.SetColour(existingCommand.TextColor);
+            ButtonToggleBackgroundColour.SetColour(existingCommand.ToggleBackGroundColour);
+            ButtonBackgroundColour.SetColour(existingCommand.ButtonBackgroundColour);
+            ButtonToggleTextColour.SetColour(existingCommand.ToggleForeColour);  
             this.buttonAdd.Text = "Update";
         }
 
@@ -73,22 +76,25 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.buttonName.Text = cubaseKeyCommand?.Name ?? cubaseCommand.Name;
             this.action.Text = cubaseKeyCommand?.Key ?? cubaseCommand.Action;
             this.buttonAdd.Click += ButtonAdd_Click;
-            this.backgroundColourButton.Click += BackgroundColourButton_Click;
-            this.textColourButton.Click += TextColourButton_Click;
             this.InitialiseAreaName();
             
             this.cbAreaName.SelectedIndexChanged += CbAreaName_SelectedIndexChanged;
             this.newAreaName.Enabled = false;
             this.newAreaName.KeyPress += NewAreaName_KeyPress;
             this.newAreaName.LostFocus += NewAreaName_LostFocus;
-            this.toggleBackgroundColourButton.Click += ToggleBackgroundColourButton_Click;
-            this.toggleTextColourButton.Click += ToggleTextColourButton_Click;
             this.InitialiseButtonType();
             // set default or existing colours 
-            this.backgroundColour.BackColor = this.cubaseCommand.ButtonBackgroundColour.FromSerializableColour();
-            this.textColour.BackColor = this.cubaseCommand.ButtonTextColour.FromSerializableColour();    
-            this.toggleBackgroundColour.BackColor = this.cubaseCommand.ToggleBackGroundColour.FromSerializableColour();   
-            this.toggleTextColour.BackColor = this.cubaseCommand.ToggleForeColour.FromSerializableColour(); 
+            this.ButtonBackgroundColour.SetColour(this.cubaseCommand.ButtonBackgroundColour);
+            this.ButtonTextColour.SetColour(this.cubaseCommand.ButtonTextColour);    
+            this.ButtonToggleBackgroundColour.SetColour(this.cubaseCommand.ToggleBackGroundColour);   
+            this.ButtonToggleTextColour.SetColour(this.cubaseCommand.ToggleForeColour);
+            CopyColourFromArea.Click += CopyColourFromArea_Click;
+        }
+
+        private void CopyColourFromArea_Click(object? sender, EventArgs e)
+        {
+            ButtonBackgroundColour.SetColour(AreaBackgroundColour.JsonColour);
+            ButtonTextColour.SetColour(AreaButtonTextColour.JsonColour);    
         }
 
         private void ButtonCubaseCommands_Click(object? sender, EventArgs e)
@@ -164,27 +170,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cbAreaName.SelectedIndex = index;
         }
 
-        private void ToggleTextColourButton_Click(object? sender, EventArgs e)
-        {
-            var clr = GetColour();
-            if (clr != Color.Empty)
-            {
-                this.toggleTextColour.BackColor = clr;
-                this.toggleTextColour.Text = clr.ToArgb().ToString();
-            }
-        }
-
-        private void ToggleBackgroundColourButton_Click(object? sender, EventArgs e)
-        {
-            var clr = GetColour();
-            if (clr != Color.Empty)
-            {
-                this.toggleBackgroundColour.BackColor = clr;
-                this.toggleBackgroundColour.Text = clr.ToArgb().ToString();
-            }
-        }
-
-
 
         private void CbAreaName_SelectedIndexChanged(object? sender, EventArgs e)
         {
@@ -192,27 +177,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             {
                 newAreaName.Enabled = true;
             }
-        }
-
-        private void TextColourButton_Click(object? sender, EventArgs e)
-        {
-            var clr = GetColour();
-            if (clr != Color.Empty)
+            else
             {
-                this.textColour.BackColor = clr;
-                this.textColour.Text = clr.ToArgb().ToString();
+                AreaBackgroundColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).BackgroundColour);
+                AreaButtonTextColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).TextColour);
             }
-        }
-
-        private void BackgroundColourButton_Click(object? sender, EventArgs e)
-        {
-            var clr = GetColour();
-            if (clr != Color.Empty)
-            {
-                this.backgroundColour.BackColor = clr;
-                this.backgroundColour.Text = clr.ToArgb().ToString();
-            }
-
         }
 
         private void InitialiseAreaName()
@@ -244,7 +213,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     }
                     if (commandCollection == null)
                     {
-                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, "Keys");
+                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, "Keys")
+                                                                    .WithBackgroundColour(AreaBackgroundColour.JsonColour)
+                                                                    .WithTextColour(AreaButtonTextColour.JsonColour);
                     }
 
                     CubaseCommand cubaseCommand = CubaseCommand.CreateStandardButton(buttonName.Text, action.Text);
@@ -260,25 +231,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                             break;
                     }
  
-                    if (!string.IsNullOrEmpty(backgroundColour.Text))
-                    {
-                        cubaseCommand.ButtonBackgroundColour = Color.FromArgb(int.Parse(backgroundColour.Text)).ToSerializableColour();
-                    }
-
-                    if (!string.IsNullOrEmpty(textColour.Text))
-                    {
-                        cubaseCommand.ButtonTextColour = Color.FromArgb(int.Parse(textColour.Text)).ToSerializableColour();
-                    }
-
-                    if (!string.IsNullOrEmpty(toggleBackgroundColour.Text))
-                    {
-                        cubaseCommand.ToggleBackGroundColour = Color.FromArgb(int.Parse(toggleBackgroundColour.Text)).ToSerializableColour();
-                    }
-
-                    if (!string.IsNullOrEmpty(toggleTextColour.Text))
-                    {
-                        cubaseCommand.ToggleForeColour = Color.FromArgb(int.Parse(toggleTextColour.Text)).ToSerializableColour();
-                    }
+                    cubaseCommand.ButtonBackgroundColour = ButtonBackgroundColour.JsonColour;
+                    cubaseCommand.ButtonTextColour = ButtonTextColour.JsonColour;
+                    cubaseCommand.ToggleBackGroundColour = ButtonToggleBackgroundColour.JsonColour;
+                    cubaseCommand.ToggleForeColour = ButtonToggleTextColour.JsonColour;
 
                     commandCollection.WithNewCubaseCommand(cubaseCommand);
                     cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);
@@ -294,10 +250,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         private void UpdateCubaseCommand()
         {
             cubaseCommand.ButtonType = this.GetSelectedButtonType();
-            cubaseCommand.ButtonTextColour = Color.FromArgb(int.Parse(textColour.Text)).ToSerializableColour();
-            cubaseCommand.ToggleBackGroundColour = Color.FromArgb(int.Parse(toggleBackgroundColour.Text)).ToSerializableColour();
-            cubaseCommand.ToggleForeColour = Color.FromArgb(int.Parse(toggleTextColour.Text)).ToSerializableColour();
-            cubaseCommand.ButtonBackgroundColour = Color.FromArgb(int.Parse(backgroundColour.Text)).ToSerializableColour();
+            cubaseCommand.ButtonTextColour = ButtonTextColour.JsonColour;
+            cubaseCommand.ToggleBackGroundColour = ButtonToggleBackgroundColour.JsonColour;
+            cubaseCommand.ToggleForeColour = ButtonToggleTextColour.JsonColour;
+            cubaseCommand.ButtonBackgroundColour = ButtonBackgroundColour.JsonColour;
             cubaseCommand.Action = action.Text;
             cubaseCommand.Name = buttonName.Text;
             this.cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);

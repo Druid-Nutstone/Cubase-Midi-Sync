@@ -77,6 +77,17 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
+        public CubaseCommandCollection WithBackgroundColour(SerializableColour backgroundColour) 
+        { 
+            this.BackgroundColour = backgroundColour;
+            return this;
+        }
+
+        public CubaseCommandCollection WithTextColour(SerializableColour textColour)
+        {
+            this.TextColour = textColour;
+            return this;
+        }
     }
 
     public class CubaseCommand

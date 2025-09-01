@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Colours;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +27,39 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             this.CreateButton.Click += CreateButton_Click;
             this.NewAreaName.KeyPress += NewAreaName_KeyPress;
             this.NewAreaName.LostFocus += NewAreaName_LostFocus;
-            this.ButtonCopy.Click += ButtonCopy_Click; 
+            this.ButtonCopy.Click += ButtonCopy_Click;
+            this.ExistingArea.SelectedIndexChanged += ExistingArea_SelectedIndexChanged;
+            this.AreaBackgroundColour.ColourChanged = this.AreaBackGroundColourChanged;
+            this.AreaTextColour.ColourChanged = this.AreaTextColourChanged;
+        }
+
+        private void AreaBackGroundColourChanged(SerializableColour colour)
+        {
+            if (this.currentCommand != null)
+            {
+                this.currentCommand.BackgroundColour = colour;  
+            }
+        }
+
+        private void AreaTextColourChanged(SerializableColour colour)
+        {
+            if (this.currentCommand != null)
+            {
+                this.currentCommand.TextColour = colour;    
+            }
+        }
+
+        private void ExistingArea_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            this.currentCommand = this.commands.FirstOrDefault(x => x.Name == ExistingArea.SelectedItem.ToString());
+            // NewAreaName.Enabled = false;
+            this.AreaBackgroundColour.SetColour(this.currentCommand.BackgroundColour);
+            this.AreaTextColour.SetColour(this.currentCommand.TextColour);
+            this.mappingListView.Items.Clear();
+            foreach (var command in this.currentCommand.Commands)
+            {
+                this.mappingListView.PopulateCubaseCommand(command);   
+            }
         }
 
         private void ButtonCopy_Click(object? sender, EventArgs e)
@@ -106,6 +139,13 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             this.commands = cubaseServerSettings.GetCubaseCommands();
             this.mappingListView.Items.Clear();
             this.PopulateCommandsListView();
+            this.PopulateExistingAreas();
+        }
+
+        private void PopulateExistingAreas()
+        {
+            this.ExistingArea.Items.Clear();
+            this.ExistingArea.Items.AddRange(this.commands.GetNames().ToArray());
         }
 
         private void PopulateCommandsListView()

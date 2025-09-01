@@ -14,13 +14,16 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
 
         private CubaseServerSettings cubaseServerSettings;
 
+        public string areaFilter;
+
+
         public CommandsListView() : base()
         {
             this.View = View.Details;
             this.DoubleBuffered = true;
             this.FullRowSelect = true;
             this.MultiSelect = false;
-            this.AddHeader("Category");
+            this.AddHeader("Area");
             this.AddHeader("Button Name");
             this.AddHeader("Action");
             this.AddHeader("Toggle Button");
@@ -57,14 +60,22 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.commands.ForEach(command => 
             {
                 command.Commands.ForEach(cubaseCommand => 
-                { 
-                    this.Items.Add(new CommandsListViewItem(command.Name, cubaseCommand)); 
+                {
+                    if (CanAddCommand(cubaseCommand))
+                    {
+                        this.Items.Add(new CommandsListViewItem(command.Name, cubaseCommand));
+                    }
                 });
             });
             this.AutoFit();
             this.ContextMenuStrip = null;
             this.ContextMenuStrip = new CommandsContextMenuStrip(commands, cubaseServerSettings, this);
         }
+
+        private bool CanAddCommand(CubaseCommand command)
+        {
+            return this.areaFilter == null ? true : command.ParentCollectionName == this.areaFilter;    
+        } 
 
         public bool HaveSelectedCubaseCommd => this.SelectedItems.Count > 0;
 
@@ -75,6 +86,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
                 return ((CommandsListViewItem)this.SelectedItems[0]).Command;
             }
             return null;
+        }
+
+        public void SetAreaFilter(string areName)
+        {
+            this.areaFilter = areName;  
+            this.Populate(commands, cubaseServerSettings);
         }
 
         public void RefreshCubaseCommands()

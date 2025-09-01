@@ -28,11 +28,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
         { 
             get
             {
-                return this.ButtonText.Text;
+                return this.ExampleButton.Text;
             } 
             set
             {
-                this.ButtonText.Text = value;   
+                this.ExampleButton.Text = value;   
             } 
         }
 
@@ -69,11 +69,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
 
         private void SetColours()
         {
-            this.BackColor = TestBackColour.FromSerializableColour();
-            this.ButtonText.Text = TestButtonText;
-            this.ButtonText.ForeColor = TestTextColour.FromSerializableColour();
-            ButtonText.Left = (ButtonText.Parent.ClientSize.Width - ButtonText.Width) / 2;
-            ButtonText.Top = (ButtonText.Parent.ClientSize.Height - ButtonText.Height) / 2;
+            this.ExampleButton.BackColor = TestBackColour.FromSerializableColour();
+            this.ExampleButton.ForeColor = TestTextColour.FromSerializableColour();
         }
     }
 }

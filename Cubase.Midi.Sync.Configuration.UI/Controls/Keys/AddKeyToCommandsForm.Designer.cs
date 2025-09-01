@@ -92,7 +92,7 @@
             // 
             // buttonAdd
             // 
-            buttonAdd.Location = new Point(21, 527);
+            buttonAdd.Location = new Point(21, 550);
             buttonAdd.Name = "buttonAdd";
             buttonAdd.Size = new Size(83, 25);
             buttonAdd.TabIndex = 4;
@@ -190,14 +190,14 @@
             groupBox1.Font = new Font("Segoe UI", 8.830189F);
             groupBox1.Location = new Point(21, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(720, 150);
+            groupBox1.Size = new Size(720, 164);
             groupBox1.TabIndex = 27;
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
             // 
             // AreaButtonTest
             // 
-            AreaButtonTest.Location = new Point(564, 80);
+            AreaButtonTest.Location = new Point(564, 97);
             AreaButtonTest.Name = "AreaButtonTest";
             AreaButtonTest.Size = new Size(113, 47);
             AreaButtonTest.TabIndex = 27;
@@ -220,23 +220,23 @@
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(label9);
             groupBox2.FlatStyle = FlatStyle.Flat;
-            groupBox2.Location = new Point(21, 182);
+            groupBox2.Location = new Point(21, 192);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(720, 315);
+            groupBox2.Size = new Size(720, 341);
             groupBox2.TabIndex = 28;
             groupBox2.TabStop = false;
             groupBox2.Text = "Button";
             // 
             // ToggleButtonTest
             // 
-            ToggleButtonTest.Location = new Point(564, 248);
+            ToggleButtonTest.Location = new Point(564, 262);
             ToggleButtonTest.Name = "ToggleButtonTest";
             ToggleButtonTest.Size = new Size(113, 47);
             ToggleButtonTest.TabIndex = 31;
             // 
             // NormalButtonTest
             // 
-            NormalButtonTest.Location = new Point(556, 171);
+            NormalButtonTest.Location = new Point(564, 185);
             NormalButtonTest.Name = "NormalButtonTest";
             NormalButtonTest.Size = new Size(113, 47);
             NormalButtonTest.TabIndex = 30;
@@ -288,7 +288,7 @@
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
-            ClientSize = new Size(779, 570);
+            ClientSize = new Size(779, 587);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(buttonAdd);

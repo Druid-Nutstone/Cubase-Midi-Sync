@@ -19,12 +19,30 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
         {
             InitializeComponent();
             this.Dock = DockStyle.Fill;
+            this.FilterBox.SelectedIndexChanged += FilterBox_SelectedIndexChanged;
+            this.ClearFilter.Click += ClearFilter_Click;
+        }
+
+        private void ClearFilter_Click(object? sender, EventArgs e)
+        {
+            this.FilterBox.SelectedIndex = -1;
+            this.commandsListView.SetAreaFilter(null);
+        }
+
+        private void FilterBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (this.FilterBox.SelectedIndex > -1)
+            {
+                this.commandsListView.SetAreaFilter(this.FilterBox.SelectedItem.ToString());
+            }
         }
 
         public void Populate()
         {
             var cubaseServerSettings = new CubaseServerSettings();
             this.commands = cubaseServerSettings.GetCubaseCommands();
+            this.FilterBox.Items.Clear();
+            this.FilterBox.Items.AddRange(this.commands.GetNames().ToArray());
             this.commandsListView.Populate(this.commands, cubaseServerSettings);
         }
     }

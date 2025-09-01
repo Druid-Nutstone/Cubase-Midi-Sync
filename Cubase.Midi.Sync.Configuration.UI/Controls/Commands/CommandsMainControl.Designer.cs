@@ -29,18 +29,43 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            label1 = new Label();
+            FilterBox = new ComboBox();
             dataPanel = new Panel();
             commandsListView = new CommandsListView();
+            ClearFilter = new Button();
+            panel1.SuspendLayout();
             dataPanel.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(ClearFilter);
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(FilterBox);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(536, 70);
             panel1.TabIndex = 0;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label1.Location = new Point(18, 26);
+            label1.Name = "label1";
+            label1.Size = new Size(63, 17);
+            label1.TabIndex = 1;
+            label1.Text = "Filter By:";
+            // 
+            // FilterBox
+            // 
+            FilterBox.FormattingEnabled = true;
+            FilterBox.Location = new Point(87, 23);
+            FilterBox.Name = "FilterBox";
+            FilterBox.Size = new Size(172, 25);
+            FilterBox.TabIndex = 0;
             // 
             // dataPanel
             // 
@@ -54,12 +79,25 @@
             // commandsListView
             // 
             commandsListView.Dock = DockStyle.Fill;
+            commandsListView.FullRowSelect = true;
             commandsListView.Location = new Point(0, 0);
+            commandsListView.MultiSelect = false;
             commandsListView.Name = "commandsListView";
             commandsListView.Size = new Size(536, 260);
             commandsListView.TabIndex = 0;
             commandsListView.UseCompatibleStateImageBehavior = false;
             commandsListView.View = View.Details;
+            // 
+            // ClearFilter
+            // 
+            ClearFilter.BackColor = SystemColors.Window;
+            ClearFilter.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            ClearFilter.Location = new Point(265, 23);
+            ClearFilter.Name = "ClearFilter";
+            ClearFilter.Size = new Size(27, 25);
+            ClearFilter.TabIndex = 2;
+            ClearFilter.Text = "X";
+            ClearFilter.UseVisualStyleBackColor = false;
             // 
             // CommandsMainControl
             // 
@@ -69,6 +107,8 @@
             Controls.Add(panel1);
             Name = "CommandsMainControl";
             Size = new Size(536, 330);
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             dataPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -78,5 +118,8 @@
         private Panel panel1;
         private Panel dataPanel;
         private CommandsListView commandsListView;
+        private Label label1;
+        private ComboBox FilterBox;
+        private Button ClearFilter;
     }
 }

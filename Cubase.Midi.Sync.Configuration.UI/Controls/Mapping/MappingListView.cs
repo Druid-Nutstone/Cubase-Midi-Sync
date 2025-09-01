@@ -15,10 +15,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
         { 
             this.FullRowSelect = true;
             this.View = View.Details;
-            this.Enabled = false;
             this.AddHeader("Area");
             this.AddHeader("Name");
-            this.AddHeader("Coomand");
+            this.AddHeader("Action");
+            this.Dock = DockStyle.Fill;
         }
 
         public void AddHeader(string header)

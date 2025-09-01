@@ -35,6 +35,8 @@
             RightPanel = new Panel();
             mappingListView = new MappingListView();
             panel2 = new Panel();
+            ExistingArea = new ComboBox();
+            label2 = new Label();
             AreaTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             CreateButton = new Button();
@@ -90,12 +92,13 @@
             // 
             // RightPanel
             // 
+            RightPanel.BackColor = SystemColors.Window;
             RightPanel.Controls.Add(mappingListView);
             RightPanel.Controls.Add(panel2);
             RightPanel.Dock = DockStyle.Fill;
             RightPanel.Location = new Point(366, 0);
             RightPanel.Name = "RightPanel";
-            RightPanel.Size = new Size(531, 387);
+            RightPanel.Size = new Size(577, 387);
             RightPanel.TabIndex = 2;
             // 
             // mappingListView
@@ -106,13 +109,15 @@
             mappingListView.FullRowSelect = true;
             mappingListView.Location = new Point(0, 136);
             mappingListView.Name = "mappingListView";
-            mappingListView.Size = new Size(531, 251);
+            mappingListView.Size = new Size(577, 251);
             mappingListView.TabIndex = 1;
             mappingListView.UseCompatibleStateImageBehavior = false;
             mappingListView.View = View.Details;
             // 
             // panel2
             // 
+            panel2.Controls.Add(ExistingArea);
+            panel2.Controls.Add(label2);
             panel2.Controls.Add(AreaTextColour);
             panel2.Controls.Add(AreaBackgroundColour);
             panel2.Controls.Add(CreateButton);
@@ -121,13 +126,31 @@
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(531, 136);
+            panel2.Size = new Size(577, 136);
             panel2.TabIndex = 0;
+            // 
+            // ExistingArea
+            // 
+            ExistingArea.FormattingEnabled = true;
+            ExistingArea.Location = new Point(313, 28);
+            ExistingArea.Name = "ExistingArea";
+            ExistingArea.Size = new Size(168, 25);
+            ExistingArea.TabIndex = 11;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label2.Location = new Point(313, 7);
+            label2.Name = "label2";
+            label2.Size = new Size(115, 17);
+            label2.TabIndex = 10;
+            label2.Text = "Use Existing Area";
             // 
             // AreaTextColour
             // 
             AreaTextColour.Label = "Area Button Text Colour";
-            AreaTextColour.Location = new Point(274, 68);
+            AreaTextColour.Location = new Point(313, 69);
             AreaTextColour.Name = "AreaTextColour";
             AreaTextColour.Size = new Size(259, 61);
             AreaTextColour.TabIndex = 9;
@@ -142,7 +165,7 @@
             // 
             // CreateButton
             // 
-            CreateButton.Location = new Point(253, 27);
+            CreateButton.Location = new Point(196, 27);
             CreateButton.Name = "CreateButton";
             CreateButton.Size = new Size(83, 25);
             CreateButton.TabIndex = 7;
@@ -153,7 +176,7 @@
             // 
             NewAreaName.Location = new Point(18, 27);
             NewAreaName.Name = "NewAreaName";
-            NewAreaName.Size = new Size(229, 25);
+            NewAreaName.Size = new Size(172, 25);
             NewAreaName.TabIndex = 6;
             // 
             // label1
@@ -170,11 +193,12 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.Window;
             Controls.Add(RightPanel);
             Controls.Add(ButtonPanel);
             Controls.Add(LeftPanel);
             Name = "MappingMainControl";
-            Size = new Size(897, 387);
+            Size = new Size(943, 387);
             LeftPanel.ResumeLayout(false);
             ButtonPanel.ResumeLayout(false);
             RightPanel.ResumeLayout(false);
@@ -197,5 +221,7 @@
         private TextBox NewAreaName;
         private Label label1;
         private Button ButtonCopy;
+        private ComboBox ExistingArea;
+        private Label label2;
     }
 }

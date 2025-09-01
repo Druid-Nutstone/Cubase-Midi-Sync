@@ -11,7 +11,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
     {
         private MappingMainControl mainControl;
         
-        public MappingTabControl() : base("Map To New Area")
+        public MappingTabControl() : base("Map Commands To Area")
         {
             BackColor = Color.FromKnownColor(KnownColor.Window);
             Controls.Clear();

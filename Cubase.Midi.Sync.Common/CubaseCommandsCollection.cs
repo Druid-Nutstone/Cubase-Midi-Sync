@@ -17,7 +17,7 @@ namespace Cubase.Midi.Sync.Common
 
         public bool HaveError { get; set; } = false;
 
-        public string Message { get; set; } 
+        public string Message { get; set; }
 
         public void SaveToFile(string fileName)
         {
@@ -32,10 +32,11 @@ namespace Cubase.Midi.Sync.Common
 
         public static CubaseCommandsCollection LoadFromFile(string fileName)
         {
-            return JsonSerializer.Deserialize<CubaseCommandsCollection>(File.ReadAllText(fileName)); 
+            return JsonSerializer.Deserialize<CubaseCommandsCollection>(File.ReadAllText(fileName));
         }
 
-        public CubaseCommandCollection WithNewCubaseCommand(string name, string category)         {
+        public CubaseCommandCollection WithNewCubaseCommand(string name, string category)
+        {
             var collection = new CubaseCommandCollection() { Name = name, Category = category };
             this.Add(collection);
             return collection;
@@ -43,21 +44,57 @@ namespace Cubase.Midi.Sync.Common
 
         public List<string> GetNames()
         {
-            return this.Select(x=> x.Name).ToList();    
+            return this.Select(x => x.Name).ToList();
 
         }
 
         public bool HaveName(string name)
         {
-            return this.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));   
+            return this.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public CubaseCommandCollection GetCommandCollectionByName(string name)
         {
-            return this.First(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (this.Any())
+            {
+                return this.First(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            }
+            return null;
+        }
+
+        public bool RemoveCubaseCommand(CubaseCommand command, bool fromAllInstances = false)
+        {
+            foreach (var commandColl in this)
+            {
+                for (int i=0; i < commandColl.Commands.Count; i++)
+                {
+                    if (commandColl.Commands[i].Name == command.Name)
+                    {
+                        if (fromAllInstances)
+                        {
+                            commandColl.Commands.RemoveAt(i);
+                        }
+                        else
+                        {
+                            if (commandColl.Name == command.ParentCollectionName)
+                            {
+                                commandColl.Commands.RemoveAt(i);
+                            }
+                        }
+                    }
+                }  
+            }
+            // clean up any empty collections 
+            for (int i=0; i < this.Count; i++)
+            {
+                if (this[i].Commands.Count == 0)
+                {
+                    this.RemoveAt(i);   
+                }
+            }
+            return true;
         }
     }
-
 
     public class CubaseCommandCollection
     {
@@ -73,7 +110,7 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseCommandCollection WithNewCubaseCommand(CubaseCommand cubaseCommand)
         {
-            Commands.Add(cubaseCommand.WithCategory(this.Category));
+            Commands.Add(cubaseCommand.WithCategory(this.Category).WithParentCollectionName(this.Name));
             return this;
         }
 
@@ -93,6 +130,8 @@ namespace Cubase.Midi.Sync.Common
     public class CubaseCommand
     {
         public string Name { get; set; }
+
+        public string ParentCollectionName { get; set; }
 
         public string Action { get; set; }
 
@@ -153,9 +192,33 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
+        public CubaseCommand WithParentCollectionName(string name)
+        {
+            this.ParentCollectionName = name;
+            return this;
+        }
+
         public CubaseCommand WithCategory(string category)
         {
             this.Category = category;
+            return this;
+        }
+
+        public CubaseCommand WithName(string name)
+        {
+            this.Name = name;
+            return this;
+        }
+
+        public CubaseCommand WithAction(string action)
+        {
+            this.Action = action;
+            return this;
+        }
+
+        public CubaseCommand WithActionGroup(List<string> actionGroups)
+        {
+            this.ActionGroup = actionGroups;
             return this;
         }
 

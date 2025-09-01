@@ -16,6 +16,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
     public partial class ColourPickerControl : UserControl
     {
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Action<SerializableColour> ColourChanged { get; set; }
+        
+        
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public string Label {  
             get
@@ -54,6 +58,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
         {
             this.ColourValue.BackColor = colour.FromSerializableColour();
             this.ColourValue.Text = this.ColourValue.BackColor.ToArgb().ToString();
+            if (ColourChanged != null)
+            {
+                this.ColourChanged(JsonColour);
+            }
         }
 
         public ColourPickerControl()
@@ -69,6 +77,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
             {
                 this.ColourValue.BackColor = colourDialog.Color;
                 this.ColourValue.Text = colourDialog.Color.ToArgb().ToString();
+                if (ColourChanged != null)
+                {
+                    this.ColourChanged.Invoke(JsonColour);
+                }
             }
         }
     }

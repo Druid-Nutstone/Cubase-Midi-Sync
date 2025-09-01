@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Commands;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             this.Dock = DockStyle.Fill;
             this.TabPages.Add(new KeysTabControl());
             this.TabPages.Add(new CommandsTabControl());
+            this.TabPages.Add(new MappingTabControl());
 
         }
 
@@ -24,6 +26,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             base.OnSelected(e);
             if (e.TabPage is CommandsTabControl stp)
                 stp.YouHaveBeenSelected();
+            if (e.TabPage is MappingTabControl mapping)
+                mapping.YouHaveBeenSelected();
         }
     }
 }

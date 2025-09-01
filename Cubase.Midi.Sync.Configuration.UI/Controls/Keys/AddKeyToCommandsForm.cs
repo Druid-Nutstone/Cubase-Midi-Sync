@@ -59,6 +59,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
             this.cbAreaName.SelectedIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
             this.cbAreaName.Enabled = false;
+            AreaButtonTest.TestButtonText = existingCommand.ParentCollectionName;
             ButtonTextColour.SetColour(existingCommand.TextColor);
             ButtonToggleBackgroundColour.SetColour(existingCommand.ToggleBackGroundColour);
             ButtonBackgroundColour.SetColour(existingCommand.ButtonBackgroundColour);
@@ -68,12 +69,26 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void InitialiseControls(CubaseKeyCommand cubaseKeyCommand, CubaseCommandsCollection cubaseCommandCollections, CubaseServerSettings cubaseServerSettings)
         {
+            // attach colour pickers 
+            AreaButtonTest.BackgroundColourPicker = AreaBackgroundColour;
+            AreaButtonTest.TextColourPicker = AreaButtonTextColour;
+            AreaButtonTest.Initialise();
+
+            NormalButtonTest.BackgroundColourPicker = ButtonBackgroundColour;
+            NormalButtonTest.TextColourPicker = ButtonTextColour;
+            NormalButtonTest.Initialise();
+
+            ToggleButtonTest.BackgroundColourPicker = ButtonToggleBackgroundColour;
+            ToggleButtonTest.TextColourPicker = ButtonToggleTextColour;
+            ToggleButtonTest.Initialise();
+
             this.buttonCubaseCommands.Visible = false;
             this.buttonCubaseCommands.Click += ButtonCubaseCommands_Click;
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.cubaseKeyCommand = cubaseKeyCommand;
             this.cubaseServerSettings = cubaseServerSettings;
             this.buttonName.Text = cubaseKeyCommand?.Name ?? cubaseCommand.Name;
+            this.buttonName.TextChanged += ButtonName_TextChanged;
             this.action.Text = cubaseKeyCommand?.Key ?? cubaseCommand.Action;
             this.buttonAdd.Click += ButtonAdd_Click;
             this.InitialiseAreaName();
@@ -89,6 +104,15 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.ButtonToggleBackgroundColour.SetColour(this.cubaseCommand.ToggleBackGroundColour);   
             this.ButtonToggleTextColour.SetColour(this.cubaseCommand.ToggleForeColour);
             CopyColourFromArea.Click += CopyColourFromArea_Click;
+            NormalButtonTest.TestButtonText = this.buttonName.Text;
+            ToggleButtonTest.TestButtonText = this.buttonName.Text;
+
+        }
+
+        private void ButtonName_TextChanged(object? sender, EventArgs e)
+        {
+            NormalButtonTest.TestButtonText = this.buttonName.Text;
+            ToggleButtonTest.TestButtonText = this.buttonName.Text;
         }
 
         private void CopyColourFromArea_Click(object? sender, EventArgs e)
@@ -165,6 +189,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             var index = (this.cbAreaName.Items.Count - 1);
             this.cbAreaName.Items.Insert(index, this.newAreaName.Text);
+            AreaButtonTest.TestButtonText = this.newAreaName.Text;
+            this.cubaseCommandCollections.WithNewCubaseCommand(this.newAreaName.Text, CubaseServiceConstants.KeyService);
             this.newAreaName.Text = "";
             this.newAreaName.Enabled = false;
             this.cbAreaName.SelectedIndex = index;
@@ -191,13 +217,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cbAreaName.Items.Add("New ..");
         }
 
-        private Color GetColour()
-        {
-            var colourDialog = new ColorDialog();
-            if (colourDialog.ShowDialog() == DialogResult.OK) { return colourDialog.Color; }
-            return Color.Empty;
-        }
-
         private void ButtonAdd_Click(object? sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(buttonName.Text) && !string.IsNullOrEmpty(action.Text) && this.cbAreaName.SelectedIndex > -1)
@@ -213,10 +232,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     }
                     if (commandCollection == null)
                     {
-                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, "Keys")
-                                                                    .WithBackgroundColour(AreaBackgroundColour.JsonColour)
-                                                                    .WithTextColour(AreaButtonTextColour.JsonColour);
+                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, CubaseServiceConstants.KeyService);
                     }
+
+                    commandCollection.WithBackgroundColour(AreaBackgroundColour.JsonColour)
+                                     .WithTextColour(AreaButtonTextColour.JsonColour);
 
                     CubaseCommand cubaseCommand = CubaseCommand.CreateStandardButton(buttonName.Text, action.Text);
                     

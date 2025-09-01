@@ -43,12 +43,15 @@
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             groupBox1 = new GroupBox();
+            AreaButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
             groupBox2 = new GroupBox();
+            ToggleButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
+            NormalButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
+            CopyColourFromArea = new LinkLabel();
             ButtonToggleTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
-            CopyColourFromArea = new LinkLabel();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -177,6 +180,7 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.WhiteSmoke;
+            groupBox1.Controls.Add(AreaButtonTest);
             groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(AreaButtonTextColour);
             groupBox1.Controls.Add(cbAreaName);
@@ -191,9 +195,18 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
             // 
+            // AreaButtonTest
+            // 
+            AreaButtonTest.Location = new Point(564, 80);
+            AreaButtonTest.Name = "AreaButtonTest";
+            AreaButtonTest.Size = new Size(113, 47);
+            AreaButtonTest.TabIndex = 27;
+            // 
             // groupBox2
             // 
             groupBox2.BackColor = Color.WhiteSmoke;
+            groupBox2.Controls.Add(ToggleButtonTest);
+            groupBox2.Controls.Add(NormalButtonTest);
             groupBox2.Controls.Add(CopyColourFromArea);
             groupBox2.Controls.Add(ButtonToggleTextColour);
             groupBox2.Controls.Add(ButtonToggleBackgroundColour);
@@ -213,6 +226,30 @@
             groupBox2.TabIndex = 28;
             groupBox2.TabStop = false;
             groupBox2.Text = "Button";
+            // 
+            // ToggleButtonTest
+            // 
+            ToggleButtonTest.Location = new Point(564, 248);
+            ToggleButtonTest.Name = "ToggleButtonTest";
+            ToggleButtonTest.Size = new Size(113, 47);
+            ToggleButtonTest.TabIndex = 31;
+            // 
+            // NormalButtonTest
+            // 
+            NormalButtonTest.Location = new Point(556, 171);
+            NormalButtonTest.Name = "NormalButtonTest";
+            NormalButtonTest.Size = new Size(113, 47);
+            NormalButtonTest.TabIndex = 30;
+            // 
+            // CopyColourFromArea
+            // 
+            CopyColourFromArea.AutoSize = true;
+            CopyColourFromArea.Location = new Point(24, 151);
+            CopyColourFromArea.Name = "CopyColourFromArea";
+            CopyColourFromArea.Size = new Size(142, 17);
+            CopyColourFromArea.TabIndex = 29;
+            CopyColourFromArea.TabStop = true;
+            CopyColourFromArea.Text = "Copy colour from Area";
             // 
             // ButtonToggleTextColour
             // 
@@ -245,16 +282,6 @@
             ButtonBackgroundColour.Name = "ButtonBackgroundColour";
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
-            // 
-            // CopyColourFromArea
-            // 
-            CopyColourFromArea.AutoSize = true;
-            CopyColourFromArea.Location = new Point(24, 151);
-            CopyColourFromArea.Name = "CopyColourFromArea";
-            CopyColourFromArea.Size = new Size(142, 17);
-            CopyColourFromArea.TabIndex = 29;
-            CopyColourFromArea.TabStop = true;
-            CopyColourFromArea.Text = "Copy colour from Area";
             // 
             // AddKeyToCommandsForm
             // 
@@ -299,5 +326,8 @@
         private Custom.ColourPickerControl ButtonToggleBackgroundColour;
         private Custom.ColourPickerControl ButtonToggleTextColour;
         private LinkLabel CopyColourFromArea;
+        private Custom.ButtonExampleControl AreaButtonTest;
+        private Custom.ButtonExampleControl ToggleButtonTest;
+        private Custom.ButtonExampleControl NormalButtonTest;
     }
 }

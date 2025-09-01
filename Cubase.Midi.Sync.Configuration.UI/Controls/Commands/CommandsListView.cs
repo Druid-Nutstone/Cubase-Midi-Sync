@@ -24,6 +24,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.AddHeader("Button Name");
             this.AddHeader("Action");
             this.AddHeader("Toggle Button");
+            this.Dock = DockStyle.Fill;
         }
 
         public void AddHeader(string header)
@@ -63,6 +64,23 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.AutoFit();
             this.ContextMenuStrip = null;
             this.ContextMenuStrip = new CommandsContextMenuStrip(commands, cubaseServerSettings, this);
+        }
+
+        public bool HaveSelectedCubaseCommd => this.SelectedItems.Count > 0;
+
+        public CubaseCommand GetSelectedCubaseCommand()
+        {
+            if (this.SelectedItems.Count > 0)
+            {
+                return ((CommandsListViewItem)this.SelectedItems[0]).Command;
+            }
+            return null;
+        }
+
+        public void RefreshCubaseCommands()
+        {
+            this.commands = cubaseServerSettings.GetCubaseCommands();
+            this.Populate(this.commands, this.cubaseServerSettings);
         }
     }
 

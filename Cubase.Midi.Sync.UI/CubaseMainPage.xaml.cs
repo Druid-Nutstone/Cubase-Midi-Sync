@@ -14,11 +14,18 @@ public partial class CubaseMainPage : ContentPage
 
     private bool loaded = false;
 
+    private bool serverAvailable = false;
+
     public CubaseMainPage(ICubaseHttpClient client)
     {
         InitializeComponent();
         this.client = client;
         CollectionsLayout.Clear();
+        this.serverAvailable = this.client.CanConnectToServer();
+        if (!this.serverAvailable)
+        {
+            DisplayAlert("Error", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
+        }
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         var label = new Label
         {
@@ -35,7 +42,7 @@ public partial class CubaseMainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (loaded) return;
+        if (loaded || !serverAvailable) return;
         SetSpinner(true);
         await LoadCommands();
         loaded = true;

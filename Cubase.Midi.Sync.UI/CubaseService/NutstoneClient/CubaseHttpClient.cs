@@ -19,6 +19,24 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             this.BaseAddress = new Uri(appSettings.CubaseConnection.BaseUrl);
         }
 
+        public string GetBaseConnection()
+        {
+            return this.BaseAddress.ToString();
+        }
+        
+        public bool CanConnectToServer()
+        {
+            try
+            {
+                var respone = this.GetAsync("api/cubase/test").Result;
+                return respone.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         public async Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler)
         {
             var response = await this.PostAsJsonAsync("api/cubase/execute", cubaseActionRequest);

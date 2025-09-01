@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
+using System;
 using System.Reflection;
 
 
@@ -27,8 +28,14 @@ namespace Cubase.Midi.Sync.UI
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+
+#if DEBUG
+            var environment = "development";
+#else
+             var environment = "production";
+#endif
             AppSettings appSettings;
-            using (var stream = FileSystem.OpenAppPackageFileAsync("appsettings.json").Result)
+            using (var stream = FileSystem.OpenAppPackageFileAsync($"appsettings.{environment}.json").Result)
             {
                 var config = new ConfigurationBuilder()
                     .AddJsonStream(stream)

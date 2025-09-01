@@ -14,5 +14,11 @@ namespace Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient
         Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler);
 
         Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler);
+
+        bool CanConnectToServer();
+
+        string GetBaseConnection();
+
+
     }
 }

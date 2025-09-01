@@ -22,7 +22,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<!-- Display name -->
-		<ApplicationTitle>Cubase.Midi.Sync.UI</ApplicationTitle>
+		<ApplicationTitle>Nutstone Cubase Remote</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.cubase.midi.sync.ui</ApplicationId>
@@ -44,10 +44,12 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\cubaseicon.png" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\nutstonesplash.png" Color="#154A70" BaseSize="128,128">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiSplashScreen>
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -61,11 +63,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="appsettings.development.json" />
 	  <None Remove="appsettings.json" />
+	  <None Remove="appsettings.production.json" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiAsset Include="appsettings.json" />
+	  <MauiAsset Include="appsettings.development.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <MauiAsset Include="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <MauiAsset Include="appsettings.production.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiAsset>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -92,6 +104,9 @@
 	<ItemGroup>
 	  <None Update="CubaseMainPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
+	  </None>
+	  <None Update="Resources\AppIcon\cubaseicon.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
 

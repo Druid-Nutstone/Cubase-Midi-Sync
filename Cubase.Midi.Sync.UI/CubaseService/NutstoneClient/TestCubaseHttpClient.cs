@@ -20,6 +20,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             this.appSettings = appSettings; 
         }
 
+        public bool CanConnectToServer()
+        {
+            return true;
+        }
+
         public Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler)
         {
             return Task.FromResult(new CubaseActionResponse
@@ -29,6 +34,10 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             });
         }
 
+        public string GetBaseConnection()
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler)
         {

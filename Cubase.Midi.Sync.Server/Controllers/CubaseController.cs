@@ -19,6 +19,14 @@ namespace Cubase.Midi.Sync.Server.Controllers
         }
 
         [HttpGet]
+        [Route("test")]
+        public async Task<IActionResult> TestConnection()
+        {
+            return Ok();
+        }
+
+
+        [HttpGet]
         [Route("commands")]
         public async Task<IActionResult> GetCommands()
         {

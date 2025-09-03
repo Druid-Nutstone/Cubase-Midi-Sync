@@ -80,6 +80,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
                                                   .WithButtonType(command.ButtonType)
                                                   .WithName(command.Name)
                                                   .WithCategory(this.NewAreaName.Text)
+                                                  .WithAction(command.Action)  
+                                                  .WithNameToggle(command.NameToggle)
+                                                  .WithParentCollectionName(this.currentCommand.Name)   
+                                                  .WithActionGroupToggleOff(command.ActionGroupToggleOff)   
                                                   .WithActionGroup(command.ActionGroup);
                     newCommand.ButtonBackgroundColour = command.ButtonBackgroundColour;
                     newCommand.ButtonTextColour = command.ButtonTextColour;

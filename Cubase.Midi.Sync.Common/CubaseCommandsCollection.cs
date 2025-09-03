@@ -212,6 +212,12 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
+        public CubaseCommand WithNameToggle(string nameToggle)
+        {
+            this.NameToggle = nameToggle;   
+            return this;
+        }
+
         public CubaseCommand WithButtonTextColour(Color color)
         {
             this.ButtonTextColour = color.ToSerializableColour();   
@@ -245,6 +251,12 @@ namespace Cubase.Midi.Sync.Common
         public CubaseCommand WithActionGroup(List<string> actionGroups)
         {
             this.ActionGroup = actionGroups;
+            return this;
+        }
+
+        public CubaseCommand WithActionGroupToggleOff(List<string> actionGroupsOff)
+        {
+            this.ActionGroupToggleOff = actionGroupsOff;
             return this;
         }
 

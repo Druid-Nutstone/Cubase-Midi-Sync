@@ -73,7 +73,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             ButtonBackgroundColour.SetColour(existingCommand.ButtonBackgroundColour);
             ButtonToggleTextColour.SetColour(existingCommand.ToggleForeColour);  
             this.buttonAdd.Text = "Update";
-            VisibleCheckBox.Visible = cubaseCommandCollections.GetCommandCollectionByName(this.cubaseCommand.ParentCollectionName).Visible;
+            VisibleCheckBox.Checked = cubaseCommandCollections.GetCommandCollectionByName(this.cubaseCommand.ParentCollectionName).Visible;
         }
 
         private void InitialiseControls(CubaseKeyCommand cubaseKeyCommand, CubaseCommandsCollection cubaseCommandCollections, CubaseServerSettings cubaseServerSettings)
@@ -273,6 +273,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
                     CubaseCommand cubaseCommand = null;
                     
+                    commandCollection.Visible = VisibleCheckBox.Checked;
+
                     switch (this.GetSelectedButtonType())
                     {
                         case CubaseButtonType.Momentory:

@@ -91,7 +91,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             ToggleButtonTest.TextColourPicker = ButtonToggleTextColour;
             ToggleButtonTest.Initialise();
 
-            this.buttonCubaseCommandsToggleOn.Visible = false;
             this.buttonNameToggled.Text = cubaseCommand?.NameToggle ?? string.Empty;
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.cubaseKeyCommand = cubaseKeyCommand;

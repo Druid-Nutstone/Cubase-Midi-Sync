@@ -35,10 +35,10 @@
             newAreaName = new TextBox();
             label9 = new Label();
             cbButtonType = new ComboBox();
-            buttonCubaseCommandsToggleOn = new Button();
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             groupBox1 = new GroupBox();
+            VisibleCheckBox = new CheckBox();
             AreaButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
             groupBox2 = new GroupBox();
             ButtonDataPanel = new GroupBox();
@@ -51,7 +51,6 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
-            VisibleCheckBox = new CheckBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -118,15 +117,6 @@
             cbButtonType.Size = new Size(158, 25);
             cbButtonType.TabIndex = 23;
             // 
-            // buttonCubaseCommandsToggleOn
-            // 
-            buttonCubaseCommandsToggleOn.Location = new Point(537, 217);
-            buttonCubaseCommandsToggleOn.Name = "buttonCubaseCommandsToggleOn";
-            buttonCubaseCommandsToggleOn.Size = new Size(156, 25);
-            buttonCubaseCommandsToggleOn.TabIndex = 24;
-            buttonCubaseCommandsToggleOn.Text = "Cubase Commands >>";
-            buttonCubaseCommandsToggleOn.UseVisualStyleBackColor = true;
-            // 
             // AreaBackgroundColour
             // 
             AreaBackgroundColour.Label = "Area Background Button Colour";
@@ -157,14 +147,24 @@
             groupBox1.Font = new Font("Segoe UI", 8.830189F);
             groupBox1.Location = new Point(21, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(720, 164);
+            groupBox1.Size = new Size(767, 164);
             groupBox1.TabIndex = 27;
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
             // 
+            // VisibleCheckBox
+            // 
+            VisibleCheckBox.AutoSize = true;
+            VisibleCheckBox.Location = new Point(607, 41);
+            VisibleCheckBox.Name = "VisibleCheckBox";
+            VisibleCheckBox.Size = new Size(65, 21);
+            VisibleCheckBox.TabIndex = 28;
+            VisibleCheckBox.Text = "Visible";
+            VisibleCheckBox.UseVisualStyleBackColor = true;
+            // 
             // AreaButtonTest
             // 
-            AreaButtonTest.Location = new Point(564, 97);
+            AreaButtonTest.Location = new Point(607, 80);
             AreaButtonTest.Name = "AreaButtonTest";
             AreaButtonTest.Size = new Size(113, 47);
             AreaButtonTest.TabIndex = 27;
@@ -175,7 +175,6 @@
             groupBox2.Controls.Add(ButtonDataPanel);
             groupBox2.Controls.Add(buttonNameToggled);
             groupBox2.Controls.Add(buttonName);
-            groupBox2.Controls.Add(buttonCubaseCommandsToggleOn);
             groupBox2.Controls.Add(ToggleButtonTest);
             groupBox2.Controls.Add(NormalButtonTest);
             groupBox2.Controls.Add(CopyColourFromArea);
@@ -188,7 +187,7 @@
             groupBox2.FlatStyle = FlatStyle.Flat;
             groupBox2.Location = new Point(21, 192);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(720, 425);
+            groupBox2.Size = new Size(767, 425);
             groupBox2.TabIndex = 28;
             groupBox2.TabStop = false;
             groupBox2.Text = "Button";
@@ -197,7 +196,7 @@
             // 
             ButtonDataPanel.Location = new Point(272, 24);
             ButtonDataPanel.Name = "ButtonDataPanel";
-            ButtonDataPanel.Size = new Size(421, 187);
+            ButtonDataPanel.Size = new Size(448, 187);
             ButtonDataPanel.TabIndex = 38;
             ButtonDataPanel.TabStop = false;
             ButtonDataPanel.Text = "Button Action(s)";
@@ -220,14 +219,14 @@
             // 
             // ToggleButtonTest
             // 
-            ToggleButtonTest.Location = new Point(564, 346);
+            ToggleButtonTest.Location = new Point(607, 332);
             ToggleButtonTest.Name = "ToggleButtonTest";
             ToggleButtonTest.Size = new Size(113, 47);
             ToggleButtonTest.TabIndex = 31;
             // 
             // NormalButtonTest
             // 
-            NormalButtonTest.Location = new Point(564, 263);
+            NormalButtonTest.Location = new Point(607, 249);
             NormalButtonTest.Name = "NormalButtonTest";
             NormalButtonTest.Size = new Size(113, 47);
             NormalButtonTest.TabIndex = 30;
@@ -274,22 +273,12 @@
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
             // 
-            // VisibleCheckBox
-            // 
-            VisibleCheckBox.AutoSize = true;
-            VisibleCheckBox.Location = new Point(564, 43);
-            VisibleCheckBox.Name = "VisibleCheckBox";
-            VisibleCheckBox.Size = new Size(65, 21);
-            VisibleCheckBox.TabIndex = 28;
-            VisibleCheckBox.Text = "Visible";
-            VisibleCheckBox.UseVisualStyleBackColor = true;
-            // 
             // AddKeyToCommandsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
-            ClientSize = new Size(779, 660);
+            ClientSize = new Size(818, 660);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(buttonAdd);
@@ -312,7 +301,6 @@
         private TextBox newAreaName;
         private Label label9;
         private ComboBox cbButtonType;
-        private Button buttonCubaseCommandsToggleOn;
         private Custom.ColourPickerControl AreaBackgroundColour;
         private Custom.ColourPickerControl AreaButtonTextColour;
         private GroupBox groupBox1;

@@ -70,18 +70,21 @@ public partial class CubaseMainPage : ContentPage
             foreach (var collection in collections)
             {
 
-                var button = RaisedButtonFactory.Create(collection.Name, collection.BackgroundColour, collection.TextColour, async (s, e) =>
+                if (collection.Visible)
                 {
-                    try
+                    var button = RaisedButtonFactory.Create(collection.Name, collection.BackgroundColour, collection.TextColour, async (s, e) =>
                     {
-                        await Navigation.PushAsync(new CubaseAction(collection, collections, this.client));
-                    }
-                    catch (Exception ex)
-                    {
-                        await DisplayAlert("Error", ex.Message, "OK");
-                    }
-                });
-                CollectionsLayout.Children.Add(button.Button);
+                        try
+                        {
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client));
+                        }
+                        catch (Exception ex)
+                        {
+                            await DisplayAlert("Error", ex.Message, "OK");
+                        }
+                    });
+                    CollectionsLayout.Children.Add(button.Button);
+                }
             }
             CollectionsLayout.Children.RemoveAt(0); // remove loading button    
         }

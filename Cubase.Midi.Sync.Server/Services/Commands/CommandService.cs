@@ -16,7 +16,7 @@ namespace Cubase.Midi.Sync.Server.Services.Commands
         public Task<CubaseCommandsCollection> GetCommands()
         {
             var cubaseServerSettings = new CubaseServerSettings();
-            var commands = cubaseServerSettings.GetVisibleCubaseCommands();
+            var commands = cubaseServerSettings.GetCubaseCommands();
 
             this.logger.LogInformation($"Loaded commands from {cubaseServerSettings.FilePath} Count: {commands.Count()}");
             return Task.FromResult(commands);

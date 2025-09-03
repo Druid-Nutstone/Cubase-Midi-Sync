@@ -112,7 +112,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.ButtonToggleTextColour.SetColour(this.cubaseCommand.ToggleForeColour);
             CopyColourFromArea.Click += CopyColourFromArea_Click;
             NormalButtonTest.TestButtonText = this.buttonName.Text;
-            ToggleButtonTest.TestButtonText = this.buttonName.Text;
+            ToggleButtonTest.TestButtonText = this.buttonNameToggled.Text;
 
         }
 
@@ -225,6 +225,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             {
                 AreaBackgroundColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).BackgroundColour);
                 AreaButtonTextColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).TextColour);
+                VisibleCheckBox.Checked = this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).Visible;
             }
         }
 

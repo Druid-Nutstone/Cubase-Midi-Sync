@@ -8,10 +8,10 @@ using Microsoft.Extensions.Logging.EventLog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//if (builder.Environment.IsProduction())
-//{
-    builder.Host.UseWindowsService();
-//}
+////if (builder.Environment.IsProduction())
+////{
+//    builder.Host.UseWindowsService();
+////}
 
 builder.Logging.AddEventLog(new EventLogSettings
 {

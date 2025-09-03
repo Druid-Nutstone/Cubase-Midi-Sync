@@ -12,11 +12,11 @@ if %errorlevel%==0 (
     timeout /t 2 /nobreak >nul
 )
 
-echo Creating service %SERVICE%...
-sc create "%SERVICE%" binPath= "%BINPATH%" start= auto
+Rem echo Creating service %SERVICE%...
+rem sc create "%SERVICE%" binPath= "%BINPATH%" start= auto
 
-echo Starting service %SERVICE%...
-sc start "%SERVICE%"
+rem echo Starting service %SERVICE%...
+rem sc start "%SERVICE%"
 
 echo Done.
 pause

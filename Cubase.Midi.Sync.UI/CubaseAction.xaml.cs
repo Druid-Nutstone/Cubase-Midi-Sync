@@ -111,6 +111,10 @@ public partial class CubaseAction : ContentPage
                                 }
                             }
                         }
+                        else
+                        {
+                            await DisplayAlert("Error", response.Message, "OK");
+                        }
                     }
                     else
                     {

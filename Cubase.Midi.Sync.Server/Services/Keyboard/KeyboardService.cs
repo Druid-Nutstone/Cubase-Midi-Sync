@@ -25,7 +25,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
         }
 
-        public bool SendKey(string keyText)
+        public bool SendKey(string keyText, Action<string> errHandler)
         {
             var cubase = CubaseExtensions.GetCubaseService();
             if (cubase?.MainWindowHandle == IntPtr.Zero)
@@ -67,6 +67,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
                 }
                 else
                 {
+                    errHandler($"Could not find a keyboard mapping for {part}");
                     return false;
                 }
             }

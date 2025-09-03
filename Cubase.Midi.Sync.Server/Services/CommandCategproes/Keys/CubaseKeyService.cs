@@ -17,22 +17,26 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
         {
             try
             {
+                CubaseActionResponse response = CubaseActionResponse.CreateSuccess();  
                 if (request.IsMacro())
                 {
                     foreach (var key in request.ActionGroup)
                     {
-                        if (!this.SendKey(key))
+                        if (!this.SendKey(key, (err) =>
                         {
-                            CubaseActionResponse.CreateError($"Failed to send key event {key}");
-                        }
+                            response = CubaseActionResponse.CreateError(err);
+                        }));
                     }
-                    return CubaseActionResponse.CreateSuccess();
+
                 }
                 else
                 {
-                    var result = SendKey(request.Action);
-                    return result ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError($"Could not process key {request.Action}");
+                    var result = SendKey(request.Action, (err) => 
+                    {
+                        response = CubaseActionResponse.CreateError(err);
+                    });
                 }
+                return response;
             }
             catch (Exception ex)
             {
@@ -40,9 +44,9 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
             }
         }
 
-        private bool SendKey(string key)
+        private bool SendKey(string key, Action<string> errHandler)
         {
-            return this.keyboardService.SendKey(key);
+            return this.keyboardService.SendKey(key, errHandler);
         }
     }
 }

@@ -1,0 +1,80 @@
+﻿using Cubase.Midi.Sync.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
+{
+    public class AreaListView : ListView
+    {
+        private CubaseCommandsCollection cubaseCommands;
+        private CubaseServerSettings cubaseServerSettings;
+
+        public AreaListView() : base() 
+        {
+            this.View = View.Details;
+            this.DoubleBuffered = true;
+            this.MultiSelect = false;
+            this.FullRowSelect = true;
+            this.AddHeader("Area Name");
+            this.AddHeader("Visible");
+            this.AddHeader("Command Count");
+
+        }
+        
+        public void AddHeader(string header)
+        {
+            this.Columns.Add(header);
+        }
+
+        private void AutoFit()
+        {
+            foreach (ColumnHeader column in this.Columns)
+            {
+                // Measure header width
+                this.AutoResizeColumn(column.Index, ColumnHeaderAutoResizeStyle.HeaderSize);
+                int headerWidth = column.Width;
+
+                // Measure content width
+                this.AutoResizeColumn(column.Index, ColumnHeaderAutoResizeStyle.ColumnContent);
+                int contentWidth = column.Width;
+
+                // Pick whichever is larger
+                column.Width = Math.Max(headerWidth, contentWidth);
+            }
+        }
+
+        public void Populate(CubaseCommandsCollection cubaseCommands, CubaseServerSettings cubaseServerSettings)
+        {
+            this.cubaseCommands = cubaseCommands;
+            this.cubaseServerSettings = cubaseServerSettings;   
+            this.ContextMenuStrip = new AreaContextMenuStrip(cubaseCommands, cubaseServerSettings, this);
+            this.Items.Clear();
+            foreach (var cmd in cubaseCommands)
+            {
+                this.Items.Add(new AreaListViewItem(cmd));
+            }
+            this.AutoFit();
+        }
+
+        public void RefreshCommands()
+        {
+            this.Populate(this.cubaseCommands, this.cubaseServerSettings);  
+        }
+    }
+
+    public class AreaListViewItem : ListViewItem
+    {
+        public CubaseCommandCollection Command { get; set; }
+
+        public AreaListViewItem(CubaseCommandCollection cubaseCoomandCollection) : base()
+        {
+            this.Command = cubaseCoomandCollection;
+            this.Text = this.Command.Name;
+            this.SubItems.Add(this.Command.Visible ? "Yes" : "No");
+            this.SubItems.Add(this.Command.Commands.Count.ToString()); 
+        }
+    }
+}

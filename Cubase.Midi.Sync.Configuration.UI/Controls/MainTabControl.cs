@@ -15,10 +15,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
         {
             this.TabPages.Clear();
             this.Dock = DockStyle.Fill;
-            this.TabPages.Add(new KeysTabControl());
             this.TabPages.Add(new CommandsTabControl());
             this.TabPages.Add(new MappingTabControl());
-
+            this.TabPages.Add(new KeysTabControl());
         }
 
         protected override void OnSelected(TabControlEventArgs e)

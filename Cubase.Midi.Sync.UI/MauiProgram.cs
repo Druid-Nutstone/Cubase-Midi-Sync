@@ -34,7 +34,24 @@ namespace Cubase.Midi.Sync.UI
 #else
              var environment = "production";
 #endif
-            AppSettings appSettings;
+
+            string fileName = $"appsettings.{environment}.json";
+            string writablePath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+
+            if (!File.Exists(writablePath))
+            {
+                using var assetStream = FileSystem.OpenAppPackageFileAsync(fileName).Result;
+                using var destStream = File.Create(writablePath);
+                assetStream.CopyTo(destStream);
+            }
+
+            // Always read from writable path
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(writablePath, optional: false, reloadOnChange: true)
+                .Build();
+
+
+            /*
             using (var stream = FileSystem.OpenAppPackageFileAsync($"appsettings.{environment}.json").Result)
             {
                 var config = new ConfigurationBuilder()
@@ -44,6 +61,10 @@ namespace Cubase.Midi.Sync.UI
                 appSettings = new AppSettings();
                 config.Bind(appSettings); // This now works because of the using above
             }
+            */
+            AppSettings appSettings;
+            appSettings = new AppSettings();
+            config.Bind(appSettings); // This now works because of the using above
 
             builder.Services.AddSingleton<ICubaseHttpClient, CubaseHttpClient>();
             // builder.Services.AddSingleton<ICubaseHttpClient, TestCubaseHttpClient>();

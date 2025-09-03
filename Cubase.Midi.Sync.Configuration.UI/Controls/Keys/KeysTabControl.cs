@@ -8,7 +8,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 {
     public class KeysTabControl : TabPage
     {
-        public KeysTabControl() : base("Keys")
+        public KeysTabControl() : base("Browse Cubase Defined Keys")
         {
             BackColor = Color.FromKnownColor(KnownColor.Window);
             Controls.Clear();

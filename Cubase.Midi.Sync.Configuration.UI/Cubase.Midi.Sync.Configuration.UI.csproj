@@ -6,7 +6,12 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Drum SH.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Drum SH.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Cubase.Midi.Sync.Common\Cubase.Midi.Sync.Common.csproj" />

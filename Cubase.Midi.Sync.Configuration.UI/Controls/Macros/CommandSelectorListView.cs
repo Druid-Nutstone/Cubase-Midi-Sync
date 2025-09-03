@@ -19,6 +19,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
             this.AddHeader("Category");
             this.AddHeader("Name");
             this.AddHeader("Key");
+            this.FullRowSelect = true;
         }
 
         public void AddHeader(string text)

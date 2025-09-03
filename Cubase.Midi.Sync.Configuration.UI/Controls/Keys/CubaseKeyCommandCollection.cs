@@ -41,5 +41,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         public string Name { get; set; } = string.Empty;
         public string Key { get; set; } = string.Empty;
         public string Action { get; set; } = string.Empty;
+
+        public static CubaseKeyCommand Create()
+        {
+            return new CubaseKeyCommand();
+        }
     }
 }

@@ -16,6 +16,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
 
         public string areaFilter;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Action<CubaseCommand> OnCommandSelected {  get; set; }   
 
         public CommandsListView() : base()
         {
@@ -99,6 +101,16 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.commands = cubaseServerSettings.GetCubaseCommands();
             this.Populate(this.commands, this.cubaseServerSettings);
         }
+
+        protected override void OnSelectedIndexChanged(EventArgs e)
+        {
+            if (this.SelectedItems.Count > 0)
+            {
+                var cubaseItem = (CommandsListViewItem)this.SelectedItems[0];
+                OnCommandSelected?.Invoke(cubaseItem.Command);
+            }
+        }
+
     }
 
     public class CommandsListViewItem : ListViewItem

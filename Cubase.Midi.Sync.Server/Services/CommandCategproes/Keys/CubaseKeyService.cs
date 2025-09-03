@@ -17,7 +17,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
         {
             try
             {
-                if (request.ButtonType == Common.CubaseButtonType.Macro)
+                if (request.IsMacro())
                 {
                     foreach (var key in request.ActionGroup)
                     {

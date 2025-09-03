@@ -63,7 +63,7 @@ public partial class CubaseMainPage : ContentPage
                 await DisplayAlert("Error", exception, "OK");
             });
 
-            if (collections == null) return;
+            if (collections == null || collections.Count == 0) return;
 
 
 
@@ -74,7 +74,7 @@ public partial class CubaseMainPage : ContentPage
                 {
                     try
                     {
-                        await Navigation.PushAsync(new CubaseAction(collection, this.client));
+                        await Navigation.PushAsync(new CubaseAction(collection, collections, this.client));
                     }
                     catch (Exception ex)
                     {

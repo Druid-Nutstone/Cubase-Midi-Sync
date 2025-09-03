@@ -15,7 +15,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             BackColor = Color.FromKnownColor(KnownColor.Window);
             Controls.Clear();
             this.Controls.Clear();
-            this.mainControl = new CommandsMainControl();   
+            this.mainControl = new CommandsMainControl();
+            this.mainControl.Populate();
             this.Controls.Add(this.mainControl);
         }
 

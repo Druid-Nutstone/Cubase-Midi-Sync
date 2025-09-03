@@ -16,30 +16,35 @@ namespace Cubase.Midi.Sync.Common.Requests
 
         public CubaseButtonType ButtonType { get; set; }
 
+        public bool IsMacro()
+        {
+            return ButtonType == CubaseButtonType.Macro || ButtonType == CubaseButtonType.MacroToggle;
+        }
+
         public static CubaseActionRequest Create(string action)
         {
             return new CubaseActionRequest() { Action = action };
         }
 
-        public static CubaseActionRequest CreateFromCommand(CubaseCommand command)
+        public static CubaseActionRequest CreateFromCommand(CubaseCommand command, List<string>? actionGroup = null)
         {
-            if (command.ButtonType == CubaseButtonType.Macro)
+            switch (command.ButtonType)
             {
-                return new CubaseActionRequest()
-                {
-                    ActionGroup = command.ActionGroup,
-                    Category = command.Category,
-                    ButtonType = command.ButtonType,
-                };
-            }
-            else
-            {
-                return new CubaseActionRequest()
-                {
-                    Action = command.Action,
-                    Category = command.Category,
-                    ButtonType = command.ButtonType,    
-                };
+                case CubaseButtonType.Macro:
+                case CubaseButtonType.MacroToggle:
+                    return new CubaseActionRequest()
+                    {
+                        ActionGroup = actionGroup,
+                        Category = command.Category,
+                        ButtonType = command.ButtonType,
+                    };
+                default:
+                    return new CubaseActionRequest()
+                    {
+                        Action = command.Action,
+                        Category = command.Category,
+                        ButtonType = command.ButtonType,
+                    };
             }
         }
     }

@@ -15,6 +15,13 @@ namespace Cubase.Midi.Sync.Common
     public class CubaseCommandsCollection : List<CubaseCommandCollection>
     {
 
+        public CubaseCommandsCollection() { }
+
+        public CubaseCommandsCollection(List<CubaseCommandCollection> commands)
+        {
+            this.AddRange(commands);
+        }
+        
         public bool HaveError { get; set; } = false;
 
         public string Message { get; set; }
@@ -94,6 +101,11 @@ namespace Cubase.Midi.Sync.Common
             }
             return true;
         }
+
+        public static CubaseCommandsCollection CreateFromList(List<CubaseCommandCollection> commands)
+        {
+            return new CubaseCommandsCollection(commands);
+        }
     }
 
     public class CubaseCommandCollection
@@ -101,6 +113,8 @@ namespace Cubase.Midi.Sync.Common
         public string Name { get; set; }    
     
         public string Category { get; set; }
+
+        public bool Visible { get; set; } = true;
 
         public SerializableColour BackgroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
         
@@ -131,11 +145,16 @@ namespace Cubase.Midi.Sync.Common
     {
         public string Name { get; set; }
 
+        // button text when toggled
+        public string NameToggle { get; set; }
+        
         public string ParentCollectionName { get; set; }
 
         public string Action { get; set; }
 
         public List<string> ActionGroup { get; set; } = new List<string>();
+
+        public List<string> ActionGroupToggleOff { get; set; } = new List<string>();  
 
         public string Category { get; set; }
 
@@ -145,6 +164,13 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseButtonType ButtonType { get; set; } = CubaseButtonType.Momentory;
 
+        public bool IsToggleButton
+        {
+            get
+            {
+                return this.ButtonType == CubaseButtonType.Toggle || this.ButtonType == CubaseButtonType.MacroToggle;
+            }
+        } 
 
         public bool IsToggled { get; set; }
 
@@ -152,11 +178,11 @@ namespace Cubase.Midi.Sync.Common
 
         public SerializableColour ButtonTextColour { get; set; }
 
-        public SerializableColour ButtonColour => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+        public SerializableColour ButtonColour => (IsToggleButton && IsToggled)
             ? this.ToggleBackGroundColour
             : ButtonBackgroundColour;
 
-        public SerializableColour TextColor => (ButtonType == CubaseButtonType.Toggle && IsToggled)
+        public SerializableColour TextColor => (IsToggleButton && IsToggled)
             ? this.ToggleForeColour
             : ButtonTextColour;
     
@@ -233,6 +259,19 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
+        public static CubaseCommand CreateMacroToggleButton(string name, List<string> actions, List<string> actionsToggleOff)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                ActionGroup = actions,
+                ActionGroupToggleOff= actionsToggleOff,
+                ButtonType = CubaseButtonType.MacroToggle,
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
+            };
+        }
+
         public static CubaseCommand Create(string name, string action)
         {
             return new CubaseCommand()
@@ -287,7 +326,6 @@ namespace Cubase.Midi.Sync.Common
 
     }
 
-
     public enum CubaseButtonType
     {
         /// <summary>
@@ -304,5 +342,6 @@ namespace Cubase.Midi.Sync.Common
         /// More that one command 
         /// </summary>
         Macro,
+        MacroToggle,
     }
 }

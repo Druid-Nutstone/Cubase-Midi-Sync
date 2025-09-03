@@ -29,25 +29,49 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            AddKeyCommandButton = new Button();
+            ClearFilter = new Button();
             label1 = new Label();
             FilterBox = new ComboBox();
             dataPanel = new Panel();
             commandsListView = new CommandsListView();
-            ClearFilter = new Button();
+            AddNewButton = new Button();
             panel1.SuspendLayout();
             dataPanel.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(AddNewButton);
+            panel1.Controls.Add(AddKeyCommandButton);
             panel1.Controls.Add(ClearFilter);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(FilterBox);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(536, 70);
+            panel1.Size = new Size(791, 70);
             panel1.TabIndex = 0;
+            // 
+            // AddKeyCommandButton
+            // 
+            AddKeyCommandButton.Location = new Point(310, 23);
+            AddKeyCommandButton.Name = "AddKeyCommandButton";
+            AddKeyCommandButton.Size = new Size(189, 25);
+            AddKeyCommandButton.TabIndex = 3;
+            AddKeyCommandButton.Text = "Add From Cubase Key";
+            AddKeyCommandButton.UseVisualStyleBackColor = true;
+            // 
+            // ClearFilter
+            // 
+            ClearFilter.BackColor = SystemColors.Window;
+            ClearFilter.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            ClearFilter.Location = new Point(265, 23);
+            ClearFilter.Name = "ClearFilter";
+            ClearFilter.Size = new Size(27, 25);
+            ClearFilter.TabIndex = 2;
+            ClearFilter.Text = "X";
+            ClearFilter.UseVisualStyleBackColor = false;
             // 
             // label1
             // 
@@ -73,7 +97,7 @@
             dataPanel.Dock = DockStyle.Fill;
             dataPanel.Location = new Point(0, 70);
             dataPanel.Name = "dataPanel";
-            dataPanel.Size = new Size(536, 260);
+            dataPanel.Size = new Size(791, 260);
             dataPanel.TabIndex = 1;
             // 
             // commandsListView
@@ -83,21 +107,19 @@
             commandsListView.Location = new Point(0, 0);
             commandsListView.MultiSelect = false;
             commandsListView.Name = "commandsListView";
-            commandsListView.Size = new Size(536, 260);
+            commandsListView.Size = new Size(791, 260);
             commandsListView.TabIndex = 0;
             commandsListView.UseCompatibleStateImageBehavior = false;
             commandsListView.View = View.Details;
             // 
-            // ClearFilter
+            // AddNewButton
             // 
-            ClearFilter.BackColor = SystemColors.Window;
-            ClearFilter.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            ClearFilter.Location = new Point(265, 23);
-            ClearFilter.Name = "ClearFilter";
-            ClearFilter.Size = new Size(27, 25);
-            ClearFilter.TabIndex = 2;
-            ClearFilter.Text = "X";
-            ClearFilter.UseVisualStyleBackColor = false;
+            AddNewButton.Location = new Point(521, 23);
+            AddNewButton.Name = "AddNewButton";
+            AddNewButton.Size = new Size(104, 25);
+            AddNewButton.TabIndex = 4;
+            AddNewButton.Text = "Add New ";
+            AddNewButton.UseVisualStyleBackColor = true;
             // 
             // CommandsMainControl
             // 
@@ -106,7 +128,7 @@
             Controls.Add(dataPanel);
             Controls.Add(panel1);
             Name = "CommandsMainControl";
-            Size = new Size(536, 330);
+            Size = new Size(791, 330);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             dataPanel.ResumeLayout(false);
@@ -121,5 +143,7 @@
         private Label label1;
         private ComboBox FilterBox;
         private Button ClearFilter;
+        private Button AddKeyCommandButton;
+        private Button AddNewButton;
     }
 }

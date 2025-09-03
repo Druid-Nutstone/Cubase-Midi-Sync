@@ -10,9 +10,14 @@ namespace Cubase.Midi.Sync.Common
     {
         public string FilePath { get; set; }    
         
+        public CubaseCommandsCollection GetVisibleCubaseCommands()
+        {
+            return CubaseCommandsCollection.CreateFromList(this.GetCubaseCommands().Where(c => c.Visible).ToList());
+        }
+        
         public CubaseCommandsCollection GetCubaseCommands()
         {
-            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cubase-Midi-Settings");
+            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings");
             if (!Directory.Exists(root))
             {
                 Directory.CreateDirectory(root);    

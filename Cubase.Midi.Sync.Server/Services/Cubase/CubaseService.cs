@@ -10,26 +10,29 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
     {
         private readonly IServiceProvider serviceProvider;
 
-        public CubaseService(IServiceProvider serviceProvider)
+        private readonly ILogger<CubaseService> logger;
+
+        public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger)
         {
             this.serviceProvider = serviceProvider; 
+            this.logger = logger;   
         }
 
         public async Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request)
         {
             if (!await EnsureCubaseIsActive())
             {
-                return new CubaseActionResponse
+                var respone = new CubaseActionResponse
                 {
                     Success = false,
                     Message = "Cubase is not running or not the active window."
                 };
+                this.logger.LogError("Cubase is not running so can't execute {request}", request);
+                return respone;
             }
             // locate the service processor 
             var catgeoryService = this.serviceProvider.GetKeyedService<ICategoryService>(request.Category);
             
-
-
             if (catgeoryService == null)
             {
                 return new CubaseActionResponse

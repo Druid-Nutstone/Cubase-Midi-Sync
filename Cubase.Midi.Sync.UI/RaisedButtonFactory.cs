@@ -23,7 +23,7 @@ public static class RaisedButtonFactory
             FontAttributes = FontAttributes.Bold,
             CornerRadius = 4,
             Margin = new Thickness(3),
-            BorderWidth = 0, // remove platform border
+            BorderWidth = 1, // remove platform border
             LineBreakMode = LineBreakMode.WordWrap, // allows wrapping
             TextTransform = TextTransform.None,     // preserves your arrow character
         };

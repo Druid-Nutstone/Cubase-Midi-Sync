@@ -8,7 +8,8 @@ namespace Cubase.Midi.Sync.Configuration.UI
         {
             InitializeComponent();
             this.DataPanel.Controls.Clear();
-            this.DataPanel.Controls.Add(new MainTabControl());  
+            this.DataPanel.Controls.Add(new MainTabControl());
+            var customMenuStrip = new CustomMenuStrip(this.menuStrip, this);
         }
     }
 }

@@ -28,19 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            menuStrip1 = new MenuStrip();
+            menuStrip = new MenuStrip();
             statusStrip1 = new StatusStrip();
             DataPanel = new Panel();
             SuspendLayout();
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            menuStrip1.ImageScalingSize = new Size(18, 18);
-            menuStrip1.Location = new Point(0, 0);
-            menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1097, 24);
-            menuStrip1.TabIndex = 0;
-            menuStrip1.Text = "menuStrip1";
+            menuStrip.ImageScalingSize = new Size(18, 18);
+            menuStrip.Location = new Point(0, 0);
+            menuStrip.Name = "menuStrip";
+            menuStrip.Size = new Size(1097, 25);
+            menuStrip.TabIndex = 0;
+            menuStrip.Text = "menuStrip1";
             // 
             // statusStrip1
             // 
@@ -54,9 +54,9 @@
             // DataPanel
             // 
             DataPanel.Dock = DockStyle.Fill;
-            DataPanel.Location = new Point(0, 24);
+            DataPanel.Location = new Point(0, 25);
             DataPanel.Name = "DataPanel";
-            DataPanel.Size = new Size(1097, 451);
+            DataPanel.Size = new Size(1097, 450);
             DataPanel.TabIndex = 2;
             // 
             // Form1
@@ -66,8 +66,8 @@
             ClientSize = new Size(1097, 497);
             Controls.Add(DataPanel);
             Controls.Add(statusStrip1);
-            Controls.Add(menuStrip1);
-            MainMenuStrip = menuStrip1;
+            Controls.Add(menuStrip);
+            MainMenuStrip = menuStrip;
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Cubase Commands";
@@ -77,7 +77,7 @@
 
         #endregion
 
-        private MenuStrip menuStrip1;
+        private MenuStrip menuStrip;
         private StatusStrip statusStrip1;
         private Panel DataPanel;
     }

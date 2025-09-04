@@ -26,6 +26,16 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             this.ListViewPanel.Controls.Add(keysTreeView);
             keysTreeView.Populate(this.commands, this.DataPanel);
             searchInput.KeyPress += SearchInput_KeyPress;
+            searchKey.TextChanged += SearchKey_TextChanged;
+        }
+
+        private void SearchKey_TextChanged(object? sender, EventArgs e)
+        {
+            var results = this.commands.GetByKey(searchKey.Text);
+            if (results.Count > 0)
+            {
+                this.ShowResults(results);  
+            }
         }
 
         private void SearchInput_KeyPress(object? sender, KeyPressEventArgs e)
@@ -44,9 +54,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
                 var results = this.commands.GetByName(searchInput.Text);    
                 if (results.Count > 0)
                 {
-                    var keysListView = new KeysListView();
-                    this.DataPanel.Controls.Add(keysListView);
-                    keysListView.Populate(results);
+                    this.ShowResults(results);  
                 }
                 else
                 {
@@ -55,6 +63,14 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
 
             }
 
+        }
+
+        private void ShowResults(List<CubaseKeyCommand> commands)
+        {
+            var keysListView = new KeysListView();
+            this.DataPanel.Controls.Clear();
+            this.DataPanel.Controls.Add(keysListView);
+            keysListView.Populate(commands);
         }
     }
 }

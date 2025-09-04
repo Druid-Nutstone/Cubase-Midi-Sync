@@ -35,10 +35,13 @@
             toolStripLabel1 = new ToolStripLabel();
             searchInput = new ToolStripTextBox();
             toolStripSeparator1 = new ToolStripSeparator();
+            searchButton = new ToolStripButton();
             ListViewPanel = new Panel();
             splitter1 = new Splitter();
             DataPanel = new Panel();
-            searchButton = new ToolStripButton();
+            toolStripSeparator2 = new ToolStripSeparator();
+            toolStripLabel2 = new ToolStripLabel();
+            searchKey = new ToolStripTextBox();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -46,7 +49,7 @@
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
             toolStrip1.ImageScalingSize = new Size(18, 18);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripLabel1, searchInput, toolStripSeparator1, searchButton });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripLabel1, searchInput, toolStripSeparator1, searchButton, toolStripSeparator2, toolStripLabel2, searchKey });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(683, 25);
@@ -68,6 +71,15 @@
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 25);
+            // 
+            // searchButton
+            // 
+            searchButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            searchButton.Image = (Image)resources.GetObject("searchButton.Image");
+            searchButton.ImageTransparentColor = Color.Magenta;
+            searchButton.Name = "searchButton";
+            searchButton.Size = new Size(51, 22);
+            searchButton.Text = "Search";
             // 
             // ListViewPanel
             // 
@@ -93,14 +105,21 @@
             DataPanel.Size = new Size(459, 355);
             DataPanel.TabIndex = 3;
             // 
-            // searchButton
+            // toolStripSeparator2
             // 
-            searchButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            searchButton.Image = (Image)resources.GetObject("searchButton.Image");
-            searchButton.ImageTransparentColor = Color.Magenta;
-            searchButton.Name = "searchButton";
-            searchButton.Size = new Size(51, 22);
-            searchButton.Text = "Search";
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(6, 25);
+            // 
+            // toolStripLabel2
+            // 
+            toolStripLabel2.Name = "toolStripLabel2";
+            toolStripLabel2.Size = new Size(92, 22);
+            toolStripLabel2.Text = "Search By Key:";
+            // 
+            // searchKey
+            // 
+            searchKey.Name = "searchKey";
+            searchKey.Size = new Size(100, 25);
             // 
             // KeysMainControl
             // 
@@ -129,5 +148,8 @@
         private ToolStripTextBox searchInput;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripButton searchButton;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripLabel toolStripLabel2;
+        private ToolStripTextBox searchKey;
     }
 }

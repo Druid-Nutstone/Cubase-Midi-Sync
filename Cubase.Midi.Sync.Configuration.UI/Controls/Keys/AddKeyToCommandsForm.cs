@@ -46,6 +46,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             InitializeComponent();
             VisibleCheckBox.Checked = true;
+            this.cubaseKeyCommand = cubaseKeyCommand;   
             this.cubaseCommand = CubaseCommand.Create();
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.cbButtonType.SelectedIndex = -1;
@@ -298,6 +299,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     cubaseCommand.ButtonTextColour = ButtonTextColour.JsonColour;
                     cubaseCommand.ToggleBackGroundColour = ButtonToggleBackgroundColour.JsonColour;
                     cubaseCommand.ToggleForeColour = ButtonToggleTextColour.JsonColour;
+
+                    cubaseCommand.CubaseCommandDefinition = cubaseKeyCommand.CubaseCommand;
 
                     cubaseCommand.NameToggle = string.IsNullOrEmpty(buttonNameToggled.Text) ? buttonName.Text : buttonNameToggled.Text; 
 

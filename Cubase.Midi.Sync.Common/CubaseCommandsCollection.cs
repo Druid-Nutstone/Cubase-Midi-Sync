@@ -164,6 +164,10 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseButtonType ButtonType { get; set; } = CubaseButtonType.Momentory;
 
+        public CubaseKnownCommand CubaseCommandDefinition { get; set; }   
+
+        public DateTime? Created { get; set; }   
+        
         public bool IsToggleButton
         {
             get
@@ -267,7 +271,8 @@ namespace Cubase.Midi.Sync.Common
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
-                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
+                Created = DateTime.Now
             };
         }
 
@@ -280,7 +285,8 @@ namespace Cubase.Midi.Sync.Common
                 ActionGroupToggleOff= actionsToggleOff,
                 ButtonType = CubaseButtonType.MacroToggle,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
-                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                Created = DateTime.Now,
             };
         }
 
@@ -292,7 +298,8 @@ namespace Cubase.Midi.Sync.Common
                 Action = action,
                 ButtonType = CubaseButtonType.Momentory,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
-                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                Created = DateTime.Now,
             };
         }
 
@@ -304,7 +311,8 @@ namespace Cubase.Midi.Sync.Common
                 Action = action,
                 ButtonType = CubaseButtonType.Momentory,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
-                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour()
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                Created = DateTime.Now,
             };
         }
 
@@ -318,7 +326,8 @@ namespace Cubase.Midi.Sync.Common
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
-                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
+                Created = DateTime.Now
             };
         }
 
@@ -332,7 +341,8 @@ namespace Cubase.Midi.Sync.Common
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
-                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour()
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
+                Created = DateTime.Now
             };
         }
 

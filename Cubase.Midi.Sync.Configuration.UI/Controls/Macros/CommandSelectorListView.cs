@@ -19,6 +19,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
             this.AddHeader("Category");
             this.AddHeader("Name");
             this.AddHeader("Key");
+            this.AddHeader("Cubase Description");
             this.FullRowSelect = true;
         }
 
@@ -79,6 +80,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
             this.Text = cubaseKeyCommand.Category;
             this.SubItems.Add(cubaseKeyCommand.Name);
             this.SubItems.Add(cubaseKeyCommand.Key);
+            this.SubItems.Add(cubaseKeyCommand.CubaseCommand?.CommandDescription);
         }
     }
 }

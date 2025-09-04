@@ -10,7 +10,7 @@ namespace Cubase.Midi.Sync.Common.Colours
     public static class ColourConstants
     {
         public static readonly System.Drawing.Color WindowBackground = Color.Black;
-        public static readonly System.Drawing.Color ButtonBackground = Color.SkyBlue;   
+        public static readonly System.Drawing.Color ButtonBackground = Color.Gray;  
         public static readonly System.Drawing.Color ButtonText = Color.Black;
         public static readonly System.Drawing.Color ButtonToggledBackground = Color.Green;
         public static readonly System.Drawing.Color ButtonToggledText = Color.White;

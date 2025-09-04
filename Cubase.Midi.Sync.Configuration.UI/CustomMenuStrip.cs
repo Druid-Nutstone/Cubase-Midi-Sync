@@ -25,6 +25,57 @@ namespace Cubase.Midi.Sync.Configuration.UI
             this.menu.Items.Clear();
             this.menu.Items.Add(new FileMenuStripItem(this.form));
             this.menu.Items.Add(new ButtonMenuStripItem());
+            this.menu.Items.Add(new ExportMenuStripItem());
+            this.menu.Items.Add(new ImportMenuStripItem());
+        }
+    }
+
+
+    public class ImportMenuStripItem : ToolStripMenuItem
+    {
+        public ImportMenuStripItem()
+        {
+            this.Text = "Import";
+            this.DropDownItems.Add(new ImportButtonsItem());
+        }
+    }
+
+    public class ImportButtonsItem : ToolStripMenuItem
+    {
+        public ImportButtonsItem()
+        {
+            this.Text = "Buttons";
+
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var importForm = new ImportButtonsForm();
+            importForm.ShowDialog();
+        }
+    }
+
+    public class ExportMenuStripItem : ToolStripMenuItem
+    {
+        public ExportMenuStripItem()
+        {
+            this.Text = "Export";
+            this.DropDownItems.Add(new ExportButtonsItem());
+        }
+    }
+
+    public class ExportButtonsItem : ToolStripMenuItem
+    {
+        public ExportButtonsItem()
+        {
+            this.Text = "Buttons";
+            
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var exportForm = new ExportButtonsForm();   
+            exportForm.ShowDialog();
         }
     }
 

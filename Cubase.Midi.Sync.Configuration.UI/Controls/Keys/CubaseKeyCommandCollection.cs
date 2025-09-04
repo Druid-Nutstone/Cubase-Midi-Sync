@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cubase.Midi.Sync.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,21 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             return this.Select(c => c.Key).Where(k => !string.IsNullOrWhiteSpace(k)).Distinct().OrderBy(k => k).ToList();
         }
 
+        public List<CubaseKeyCommand> GetByKey(string key)
+        {
+            return this.Where(x => x.Key.Contains(key, StringComparison.OrdinalIgnoreCase)).ToList();   
+        }
+
+        public bool IsInCubase(CubaseKnownCommand command, string key)
+        {
+            var existingCommand = this.FirstOrDefault(x => x.CubaseCommand.CommandName == command.CommandName);
+            if (existingCommand != null) 
+            {
+                return existingCommand.Key.Equals(key);
+            }
+            return false;
+        }
+
         public List<CubaseKeyCommand> GetByName(string name)
         {
             return this.Where(c => c.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0).OrderBy(c => c.Name).ToList();
@@ -32,6 +48,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             return this.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).OrderBy(c => c.Name).ToList();
         }
+
+
     }
 
 
@@ -41,6 +59,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         public string Name { get; set; } = string.Empty;
         public string Key { get; set; } = string.Empty;
         public string Action { get; set; } = string.Empty;
+
+        public CubaseKnownCommand CubaseCommand { get; set; }
 
         public static CubaseKeyCommand Create()
         {

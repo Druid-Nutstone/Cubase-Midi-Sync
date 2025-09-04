@@ -21,6 +21,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.Dock = DockStyle.Fill;
             this.AddHeader("Name");
             this.AddHeader("Key");
+            this.AddHeader("Cubase Description");
+            this.AddHeader("Cubase Command");
+            this.AddHeader("Cubase Area");
             this.ContextMenuStrip = new KeysContentMenuStrip(this.commands, this, cubaseServerSettings);
         }
 
@@ -29,12 +32,28 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.Columns.Add(header);
         }
 
+        private void AutoFit()
+        {
+            foreach (ColumnHeader column in this.Columns)
+            {
+                // Measure header width
+                this.AutoResizeColumn(column.Index, ColumnHeaderAutoResizeStyle.HeaderSize);
+                int headerWidth = column.Width;
+
+                // Measure content width
+                this.AutoResizeColumn(column.Index, ColumnHeaderAutoResizeStyle.ColumnContent);
+                int contentWidth = column.Width;
+
+                // Pick whichever is larger
+                column.Width = Math.Max(headerWidth, contentWidth);
+            }
+        }
+
         public void Populate(List<CubaseKeyCommand> commands)
         {
             this.Items.Clear();
             commands.ForEach(c => this.Items.Add(new KeysListViewItem(c)));
-            this.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            this.Columns[Columns.Count - 1].Width = -2; // auto size last column
+            this.AutoFit();
         }
     }
 
@@ -47,6 +66,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.Command = command; 
             this.Text = command.Name;
             this.SubItems.Add(command.Key);
+            this.SubItems.Add(command.CubaseCommand?.CommandDescription);
+            this.SubItems.Add(command.CubaseCommand?.CommandName);
+            this.SubItems.Add(command.CubaseCommand?.CommandBinding);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ public class CubaseKeyCommandParser
     {
         if (!File.Exists(filePath))
             throw new FileNotFoundException("Cubase 14 key commands XML file not found.", filePath);
-
+        var knownCommands = new CubaseKnownCollection();
         var doc = XDocument.Load(filePath);
         var list = new CubaseKeyCommandCollection();
 
@@ -55,7 +56,8 @@ public class CubaseKeyCommandParser
                         Category = categoryName,
                         Name = name,
                         Key = key,
-                        Action = action
+                        Action = action,
+                        CubaseCommand = knownCommands.GetCommandByName(name)
                     });
                 }
             }

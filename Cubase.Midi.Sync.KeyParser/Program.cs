@@ -27,7 +27,17 @@ CubaseKnownCommand GetCommandFromIdAndSnippet(string id, string snippet)
     var snippetBits = snippet.Split(",");
 
     var commandBinding = idBits[0].Trim().Replace("&amp;", "&");
-    var commandDescription = string.Join(' ', idBits.Skip(1)).Replace("&amp;", "&").Replace("/", "").Trim();
+    var commandDescription = idBits[1].Replace("$amp;", "&").Trim();
+    if (idBits.Length > 2)
+    {
+        commandDescription = idBits[1].Trim();
+        for (int i = 2; i < idBits.Length; i++)
+        {
+            commandDescription += $"/{idBits[i]}".Trim();
+        }
+        commandDescription = commandDescription.Replace("&amp;", "&").Trim();
+    }
+    // var commandDescription = string.Join(' ', idBits.Skip(1)).Replace("&amp;", "&").Trim();
     var commandName = snippetBits[1].Replace("'", "").Trim().Replace("&amp", "&");
 
     return new CubaseKnownCommand(commandBinding, commandDescription, commandName);

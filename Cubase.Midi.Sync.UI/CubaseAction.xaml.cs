@@ -34,8 +34,10 @@ public partial class CubaseAction : ContentPage
             {
                 try
                 {
+                    var button = (Button)s;
+                    
                     command.IsToggled = !command.IsToggled;
-                    this.SetButtonState((Button)s, command);
+                    this.SetButtonState(button, command);
                     CubaseActionResponse response = null;
 
                     if (command.ButtonType == CubaseButtonType.Macro || command.ButtonType == CubaseButtonType.MacroToggle)
@@ -82,6 +84,7 @@ public partial class CubaseAction : ContentPage
                                 actionStrings.Add(firstCommand.Action);
                             }
                         }
+                        VisualStateManager.GoToState(button, "Pressed");
                         response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionStrings), async (ex) =>
                         {
                             await DisplayAlert("Error", ex.Message, "OK");
@@ -114,11 +117,15 @@ public partial class CubaseAction : ContentPage
                         else
                         {
                             await DisplayAlert("Error", response.Message, "OK");
+                            command.IsToggled = !command.IsToggled;
                         }
+                        VisualStateManager.GoToState(button, "Normal");
+                        SetButtonState(button, command);
                     }
                     else
                     {
                         string errMsg = null;
+                        VisualStateManager.GoToState(button, "Pressed");
                         response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (ex) =>
                         {
                             errMsg = ex.Message;    
@@ -129,6 +136,8 @@ public partial class CubaseAction : ContentPage
                             await DisplayAlert("Error", errMsg ?? "Is cubase up?", "OK");
                             command.IsToggled = !command.IsToggled;
                         }
+                        VisualStateManager.GoToState(button, "Normal");
+                        SetButtonState(button, command);
                     }
                 }
                 catch (Exception ex)

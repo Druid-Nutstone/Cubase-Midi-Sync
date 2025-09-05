@@ -29,6 +29,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
         {
             InitializeComponent();
             this.searchFilter.KeyPress += SearchFilter_KeyPress;
+            this.searchFilter.TextChanged += SearchFilter_TextChanged;
             this.keyHandkler = keyHandler;
             this.cubaseKeyCommands = CubaseKeyCommandParser.Create().Parse();
             this.commandSelectorListView.Populate(this.cubaseKeyCommands.GetAllocated(), (key) => 
@@ -39,6 +40,17 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
                     this.Close();
                 }
             });
+        }
+
+        private void SearchFilter_TextChanged(object? sender, EventArgs e)
+        {
+            if (this.searchFilter.Text.Length > 3)
+            {
+                var commands = this.cubaseKeyCommands.GetByName(this.searchFilter.Text);
+                commands.AddRange(this.cubaseKeyCommands.GetByKey(this.searchFilter.Text));
+                commands.AddRange(this.cubaseKeyCommands.GetByCubaseDescription(this.searchFilter.Text));
+                this.commandSelectorListView.Populate(commands.Distinct().ToList(), this.keyHandkler);
+            }
         }
 
         private void SearchFilter_KeyPress(object? sender, KeyPressEventArgs e)

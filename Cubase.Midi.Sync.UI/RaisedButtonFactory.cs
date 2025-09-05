@@ -52,7 +52,7 @@ public static class RaisedButtonFactory
                             Name = "Pressed",
                             Setters =
                             {
-                                new Setter { Property = Button.BackgroundColorProperty, Value = backgroundColour.ToMauiColour().AddLuminosity(20) },
+                                new Setter { Property = Button.BackgroundColorProperty, Value = backgroundColour.ToMauiColour().AddLuminosity(40) },
                                 new Setter { Property = Button.TranslationYProperty, Value = 2 }
                             }
                         }

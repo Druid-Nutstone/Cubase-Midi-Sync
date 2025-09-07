@@ -49,11 +49,12 @@ namespace Cubase.Sync.Midi.Driver
             callbackHandle = GCHandle.Alloc(callback); // prevent delegate GC
 
             handle = CreatePort(
-                name, 
-                callback, 
-                IntPtr.Zero, 
+                name,
+                callback,
+                IntPtr.Zero,
                 maxSysexLength,
-                TE_VM_FLAGS_WINMM_ONLY);
+                // TE_VM_FLAGS_WINMM_ONLY);
+                0);
             if (handle == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to create virtual MIDI port.");
         }

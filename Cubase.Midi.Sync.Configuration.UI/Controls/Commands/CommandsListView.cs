@@ -54,6 +54,19 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             }
         }
 
+        public void PopulateSubset(CubaseCommandCollection commandSubset)
+        {
+            this.Items.Clear();
+            commandSubset.Commands.ForEach(cubaseCommand =>
+            {
+                if (CanAddCommand(cubaseCommand))
+                {
+                    this.Items.Add(new CommandsListViewItem(cubaseCommand.ParentCollectionName, cubaseCommand));
+                }
+            });
+            this.AutoFit();
+        }
+
         public void Populate(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings)
         {
             this.Items.Clear(); 
@@ -125,8 +138,17 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.Command = cmd;
             this.Category = category;   
             this.SubItems.Add(cmd.Name);
-            this.SubItems.Add(cmd.Action);
-            this.SubItems.Add(cmd.ButtonType == CubaseButtonType.Toggle ? "Yes" : "No");
+            this.SubItems.Add(string.IsNullOrEmpty(cmd.Action) ? "MACRO" : cmd.Action);
+            this.SubItems.Add(cmd.IsToggleButton ? "Yes" : "No");
+            this.SetColours();
+        }
+
+        private void SetColours()
+        {
+            if (this.Command.IsMacro)
+            {
+                this.ForeColor = Color.Blue;
+            }
         }
     }  
 }

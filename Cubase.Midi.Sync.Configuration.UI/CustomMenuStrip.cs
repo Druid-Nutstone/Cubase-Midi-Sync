@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Configuration.UI.Forms;
+using Cubase.Midi.Sync.Configuration.UI.Forms.CubaseCommands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,8 +86,24 @@ namespace Cubase.Midi.Sync.Configuration.UI
         {
             this.Text = "Buttons";
             this.DropDownItems.Add(new ButtonSetColoursItem());
+            this.DropDownItems.Add(new ButtonsShowCubaseCommands());
         }
     }
+
+    public class ButtonsShowCubaseCommands : ToolStripMenuItem
+    {
+        public ButtonsShowCubaseCommands()
+        {
+            this.Text = "Show All Cubase Commands";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var cubaseCommands = new CubaseCommandsForm();
+            cubaseCommands.ShowDialog();    
+        }
+    }
+
     public class ButtonSetColoursItem : ToolStripMenuItem
     {
         public ButtonSetColoursItem()

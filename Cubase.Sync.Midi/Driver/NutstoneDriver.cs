@@ -11,7 +11,7 @@ namespace Cubase.Sync.Midi.Driver
     /// <summary>
     /// 
     /// </summary>
-    public class VirtualMidiPort : IDisposable
+    public class NutstoneDriver : IDisposable
     {
         private IntPtr handle;
         private GCHandle callbackHandle;
@@ -41,7 +41,7 @@ namespace Cubase.Sync.Midi.Driver
         private static extern void ClosePort(IntPtr midiPort);
         #endregion
 
-        public VirtualMidiPort(string name, uint maxSysexLength = 65535)
+        public NutstoneDriver(string name, uint maxSysexLength = 65535)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
 
@@ -68,7 +68,7 @@ namespace Cubase.Sync.Midi.Driver
         public void Send(params byte[] message)
         {
             if (handle == IntPtr.Zero)
-                throw new ObjectDisposedException(nameof(VirtualMidiPort));
+                throw new ObjectDisposedException(nameof(NutstoneDriver));
 
             SendData(handle, message, (uint)message.Length);
         }

@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Midi\MidiController.cs" />
+    <Compile Remove="Midi\MidiManager.cs" />
+    <Compile Remove="Midi\MidiMapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NAudio.Midi" Version="2.2.1" />
   </ItemGroup>
 
@@ -14,6 +20,10 @@
     <None Update="Control\controls.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Midi\" />
   </ItemGroup>
 
 </Project>

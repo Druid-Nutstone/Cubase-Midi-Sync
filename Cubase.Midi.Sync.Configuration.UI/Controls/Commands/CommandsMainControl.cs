@@ -33,6 +33,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.AddNewButton.Click += AddNewButton_Click;
         }
 
+
         private void AddNewButton_Click(object? sender, EventArgs e)
         {
             var keyCommandForm = new AddKeyToCommandsForm(CubaseKeyCommand.Create(), commands, cubaseServerSettings);
@@ -107,6 +108,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.FilterBox.Items.AddRange(this.commands.GetNames().ToArray());
             this.commandsListView.OnCommandSelected = this.OnCommandSelected;
             this.commandsListView.Populate(this.commands, cubaseServerSettings);
+             
         }
+
     }
 }

@@ -4,6 +4,8 @@ using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.EventLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,14 +15,22 @@ var builder = WebApplication.CreateBuilder(args);
 //    builder.Host.UseWindowsService();
 ////}
 
-builder.Logging.AddEventLog(new EventLogSettings
+//builder.Logging.AddEventLog(new EventLogSettings
+//{
+//    SourceName = "CubaseMidiSync",    // will appear in Event Viewer
+//    LogName = "Application",          // default log
+//    MachineName = "."                 // local machine
+//});
+
+
+builder.Logging.AddConsole();
+
+builder.Services.AddHttpLogging(logging =>
 {
-    SourceName = "CubaseMidiSync",    // will appear in Event Viewer
-    LogName = "Application",          // default log
-    MachineName = "."                 // local machine
+    logging.LoggingFields = HttpLoggingFields.All;
+    logging.CombineLogs = true;
 });
 
-// Add services to the container.
 builder.Services
       .AddTransient<ICommandService, CommandService>()
       .AddTransient<ICubaseService, CubaseService>()
@@ -40,6 +50,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 // app.UseHttpsRedirection();
+app.UseHttpLogging();
 
 app.UseAuthorization();
 

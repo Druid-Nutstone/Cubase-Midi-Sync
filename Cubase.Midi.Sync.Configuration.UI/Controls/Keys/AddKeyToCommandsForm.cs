@@ -269,6 +269,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                         commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, CubaseServiceConstants.KeyService);
                     }
 
+                    if (commandCollection.Commands.Any(c => c.Name == buttonName.Text))
+                    {
+                        MessageBox.Show($"There is already a button called {buttonName.Text} in this area");
+                        return;
+                    } 
+
                     commandCollection.WithBackgroundColour(AreaBackgroundColour.JsonColour)
                                      .WithTextColour(AreaButtonTextColour.JsonColour);
 
@@ -317,12 +323,21 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void UpdateCubaseCommand()
         {
-            cubaseCommandCollections.GetCommandCollectionByName(this.cubaseCommand.ParentCollectionName).Visible = VisibleCheckBox.Checked;
+            var commandCollection = cubaseCommandCollections.GetCommandCollectionByName(this.cubaseCommand.ParentCollectionName);
+            commandCollection.Visible = VisibleCheckBox.Checked;
             cubaseCommand.ButtonType = this.GetSelectedButtonType();
             cubaseCommand.ButtonTextColour = ButtonTextColour.JsonColour;
             cubaseCommand.ToggleBackGroundColour = ButtonToggleBackgroundColour.JsonColour;
             cubaseCommand.ToggleForeColour = ButtonToggleTextColour.JsonColour;
             cubaseCommand.ButtonBackgroundColour = ButtonBackgroundColour.JsonColour;
+
+
+            //if (commandCollection.Commands.Any(c => c.Name == buttonName.Text))
+            //{
+            //    MessageBox.Show($"There is already a button called {buttonName.Text} in this area");
+            //    return;
+            //}
+
             switch (this.GetSelectedButtonType())
             {
                 case CubaseButtonType.Momentory:

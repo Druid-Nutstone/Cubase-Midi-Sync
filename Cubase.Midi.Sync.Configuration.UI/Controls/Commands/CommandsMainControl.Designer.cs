@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            AddNewButton = new Button();
             AddKeyCommandButton = new Button();
             ClearFilter = new Button();
             label1 = new Label();
             FilterBox = new ComboBox();
             dataPanel = new Panel();
             commandsListView = new CommandsListView();
-            AddNewButton = new Button();
             panel1.SuspendLayout();
             dataPanel.SuspendLayout();
             SuspendLayout();
@@ -53,9 +53,18 @@
             panel1.Size = new Size(791, 70);
             panel1.TabIndex = 0;
             // 
+            // AddNewButton
+            // 
+            AddNewButton.Location = new Point(535, 22);
+            AddNewButton.Name = "AddNewButton";
+            AddNewButton.Size = new Size(104, 25);
+            AddNewButton.TabIndex = 4;
+            AddNewButton.Text = "Add New ";
+            AddNewButton.UseVisualStyleBackColor = true;
+            // 
             // AddKeyCommandButton
             // 
-            AddKeyCommandButton.Location = new Point(310, 23);
+            AddKeyCommandButton.Location = new Point(323, 23);
             AddKeyCommandButton.Name = "AddKeyCommandButton";
             AddKeyCommandButton.Size = new Size(189, 25);
             AddKeyCommandButton.TabIndex = 3;
@@ -111,15 +120,6 @@
             commandsListView.TabIndex = 0;
             commandsListView.UseCompatibleStateImageBehavior = false;
             commandsListView.View = View.Details;
-            // 
-            // AddNewButton
-            // 
-            AddNewButton.Location = new Point(521, 23);
-            AddNewButton.Name = "AddNewButton";
-            AddNewButton.Size = new Size(104, 25);
-            AddNewButton.TabIndex = 4;
-            AddNewButton.Text = "Add New ";
-            AddNewButton.UseVisualStyleBackColor = true;
             // 
             // CommandsMainControl
             // 

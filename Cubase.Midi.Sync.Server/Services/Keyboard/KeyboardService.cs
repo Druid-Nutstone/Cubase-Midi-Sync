@@ -9,6 +9,8 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
     public class KeyboardService : IKeyboardService
     {
 
+        private ILogger<KeyboardService> logger;
+        
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -20,33 +22,15 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
         private const int KEYEVENTF_KEYUP = 0x0002;
 
-        public KeyboardService()
+        public KeyboardService(ILogger<KeyboardService> logger)
         {
-
+            this.logger = logger;
         }
 
         public bool SendKey(string keyText, Action<string> errHandler)
         {
-            var cubase = CubaseExtensions.GetCubaseService();
-            if (cubase?.MainWindowHandle == IntPtr.Zero)
-                return false;
-
-            // Bring Cubase to foreground
-            const int maxCount = 10000;
-            int currentCount = 0;
-            while (GetForegroundWindow() != cubase.MainWindowHandle)
-            {
-                if (currentCount++ < maxCount)
-                {
-                    SetForegroundWindow(cubase.MainWindowHandle);
-                    Thread.Sleep(50);
-                }
-                else
-                {
-                    return false; // failed to bring Cubase to foreground
-                }
-            }
-
+            if (!this.MakeCubasePrimaryWindow()) return false;
+            
             // Split keyText into parts (modifiers + main key)
             var parts = keyText.ToUpper().Split('+');
             var modifiers = new List<byte>();
@@ -67,6 +51,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
                 }
                 else
                 {
+                    this.logger.LogWarning($"Could not find Could not find a keyboard mapping for {part}");
                     errHandler($"Could not find a keyboard mapping for {part}");
                     return false;
                 }
@@ -74,9 +59,13 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
             // Press modifiers
             foreach (var mod in modifiers)
+            {
+                this.logger.LogInformation($"Sending {mod}");
                 keybd_event(mod, 0, 0, UIntPtr.Zero);
+            }
 
             // Press main key
+            this.logger.LogInformation($"Sending main key {key}");
             keybd_event(key, 0, 0, UIntPtr.Zero);
             Thread.Sleep(50); // simulate key press
             keybd_event(key, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
@@ -88,5 +77,36 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
             return true;
         }
 
+        private bool MakeCubasePrimaryWindow()
+        {
+            const int maxCount = 10;
+            int currentCount = 0;
+            var cubase = GetCubase(); 
+            while (GetForegroundWindow() != cubase.MainWindowHandle)
+            {
+                this.logger.LogWarning($"Cubase is not the foregournd window Count:{currentCount}");
+                if (currentCount < maxCount)
+                {
+                    SetForegroundWindow(cubase.MainWindowHandle);
+                    Thread.Sleep(500);
+                    cubase = GetCubase();   
+                    currentCount++;
+                }
+                else
+                {
+                    return false; // failed to bring Cubase to foreground
+                }
+            }
+            return true;
+        }
+
+        private Process GetCubase()
+        {
+            var cubase = CubaseExtensions.GetCubaseService();
+            if (cubase == null) return null;
+            if (cubase.MainWindowHandle == IntPtr.Zero)
+                return null;
+            return cubase;
+        }
     }
 }

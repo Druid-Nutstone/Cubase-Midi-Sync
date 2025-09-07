@@ -168,6 +168,14 @@ namespace Cubase.Midi.Sync.Common
 
         public DateTime? Created { get; set; }   
         
+        public bool IsMacro 
+        { 
+            get
+            {
+                return this.ButtonType == CubaseButtonType.Macro || this.ButtonType == CubaseButtonType.MacroToggle;
+            } 
+        }
+
         public bool IsToggleButton
         {
             get

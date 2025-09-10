@@ -18,7 +18,77 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.Items.Add(new VisibleCommandMenu(commands, cubaseServerSettings, listView));
             this.Items.Add(new HideCommandMenu(commands, cubaseServerSettings, listView));
             this.Items.Add(new DeleteCommandMenu(commands, cubaseServerSettings, listView));
+            this.Items.Add(new CategoryMenu(commands, cubaseServerSettings, listView));
         }
+    }
+
+    public class CategoryMenu : ToolStripMenuItem
+    {
+        public CubaseCommandsCollection commands;
+
+        public CubaseServerSettings cubaseServerSettings;
+
+        public AreaListView listView;
+
+        public CategoryMenu(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings, AreaListView listView)
+        {
+            this.commands = commands;
+            this.cubaseServerSettings = cubaseServerSettings;
+            this.listView = listView;
+            this.Text = "Category";
+            this.DropDownItems.Add(new CategoryMenuKeys(this.commands, this.cubaseServerSettings, this.listView));
+            this.DropDownItems.Add(new CategoryMenuMidi(this.commands, this.cubaseServerSettings, this.listView));
+        }
+    }
+
+    public class CategoryMenuKeys : ToolStripMenuItem
+    {
+        public CubaseCommandsCollection commands;
+
+        public CubaseServerSettings cubaseServerSettings;
+
+        public AreaListView listView;
+
+        public CategoryMenuKeys(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings, AreaListView listView)
+        {
+            this.commands = commands;
+            this.cubaseServerSettings = cubaseServerSettings;
+            this.listView = listView;
+            this.Text = "Keys";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var cubase = (AreaListViewItem)this.listView.SelectedItems[0];
+            cubase.Command.Category = CubaseAreaTypes.Keys.ToString();  
+            this.commands.SaveToFile(this.cubaseServerSettings.FilePath);
+            listView.RefreshCommands();
+        }
+    }
+
+    public class CategoryMenuMidi : ToolStripMenuItem
+    {
+        public CubaseCommandsCollection commands;
+
+        public CubaseServerSettings cubaseServerSettings;
+
+        public AreaListView listView;
+
+        public CategoryMenuMidi(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings, AreaListView listView)
+        {
+            this.commands = commands;
+            this.cubaseServerSettings = cubaseServerSettings;
+            this.listView = listView;
+            this.Text = "Midi";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var cubase = (AreaListViewItem)this.listView.SelectedItems[0];
+            cubase.Command.Category = CubaseAreaTypes.Midi.ToString();
+            this.commands.SaveToFile(this.cubaseServerSettings.FilePath);
+            listView.RefreshCommands();
+        }   
     }
 
     public class MoveCommandUpMenu : ToolStripMenuItem

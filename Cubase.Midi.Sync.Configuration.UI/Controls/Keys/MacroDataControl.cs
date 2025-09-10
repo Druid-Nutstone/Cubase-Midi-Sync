@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
+﻿using Cubase.Midi.Sync.Common.InternalCommands;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +22,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.parent = parent;    
             this.ButtonAddCommand.Click += ButtonAddCommand_Click;
             this.ButtonRemoveCommand.Click += ButtonRemoveCommand_Click;
+            this.ButtonInternalCommand.OnCommand = this.AddInternalCommand;
         }
 
         private void ButtonRemoveCommand_Click(object? sender, EventArgs e)
@@ -35,8 +37,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         public void SetCommands(List<string> commands)
         {
-            
             this.stringListControl.Popsulate(commands);
+        }
+
+        public void AddInternalCommand(InternalCommand command)
+        {
+            this.stringListControl.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
         }
 
         private void ButtonAddCommand_Click(object? sender, EventArgs e)

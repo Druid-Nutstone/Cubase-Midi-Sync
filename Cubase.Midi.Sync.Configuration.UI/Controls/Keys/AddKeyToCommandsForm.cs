@@ -173,6 +173,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     break;
                 case CubaseButtonType.Macro:
                     this.macroDataControl = new MacroDataControl(this.GetParentForm(this));
+                    cubaseCommand.ActionGroupToggleOff = []; // ensure toggle off is cleared
                     this.macroDataControl.SetCommands(cubaseCommand.ActionGroup);
                     this.AddDataControl(this.macroDataControl);
                     break;

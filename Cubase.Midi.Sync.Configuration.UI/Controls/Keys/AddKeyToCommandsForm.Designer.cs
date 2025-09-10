@@ -38,6 +38,7 @@
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             groupBox1 = new GroupBox();
+            areaTypeComboBox = new ComboBox();
             label1 = new Label();
             VisibleCheckBox = new CheckBox();
             AreaButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
@@ -52,7 +53,6 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
-            areaTypeComboBox = new ComboBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -156,6 +156,14 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
             // 
+            // areaTypeComboBox
+            // 
+            areaTypeComboBox.FormattingEnabled = true;
+            areaTypeComboBox.Location = new Point(464, 41);
+            areaTypeComboBox.Name = "areaTypeComboBox";
+            areaTypeComboBox.Size = new Size(134, 25);
+            areaTypeComboBox.TabIndex = 30;
+            // 
             // label1
             // 
             label1.AutoSize = true;
@@ -210,7 +218,7 @@
             // 
             ButtonDataPanel.Location = new Point(272, 24);
             ButtonDataPanel.Name = "ButtonDataPanel";
-            ButtonDataPanel.Size = new Size(448, 187);
+            ButtonDataPanel.Size = new Size(448, 207);
             ButtonDataPanel.TabIndex = 38;
             ButtonDataPanel.TabStop = false;
             ButtonDataPanel.Text = "Button Action(s)";
@@ -286,14 +294,6 @@
             ButtonBackgroundColour.Name = "ButtonBackgroundColour";
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
-            // 
-            // areaTypeComboBox
-            // 
-            areaTypeComboBox.FormattingEnabled = true;
-            areaTypeComboBox.Location = new Point(464, 41);
-            areaTypeComboBox.Name = "areaTypeComboBox";
-            areaTypeComboBox.Size = new Size(134, 25);
-            areaTypeComboBox.TabIndex = 30;
             // 
             // AddKeyToCommandsForm
             // 

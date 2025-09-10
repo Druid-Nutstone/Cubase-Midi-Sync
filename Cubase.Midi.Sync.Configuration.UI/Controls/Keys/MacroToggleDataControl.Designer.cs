@@ -36,6 +36,8 @@
             ToggleOffAddButton = new Button();
             RemoveToggleOnButton = new Button();
             RemoveToggleOffButton = new Button();
+            ToggleOnInternalCommand = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.InternalCommandButton();
+            ToggleOffInternalCommand = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.InternalCommandButton();
             SuspendLayout();
             // 
             // label1
@@ -110,10 +112,30 @@
             RemoveToggleOffButton.Text = "< Del";
             RemoveToggleOffButton.UseVisualStyleBackColor = true;
             // 
+            // ToggleOnInternalCommand
+            // 
+            ToggleOnInternalCommand.Location = new Point(19, 142);
+            ToggleOnInternalCommand.Name = "ToggleOnInternalCommand";
+            ToggleOnInternalCommand.Size = new Size(138, 25);
+            ToggleOnInternalCommand.TabIndex = 8;
+            ToggleOnInternalCommand.Text = "Internal Command";
+            ToggleOnInternalCommand.UseVisualStyleBackColor = true;
+            // 
+            // ToggleOffInternalCommand
+            // 
+            ToggleOffInternalCommand.Location = new Point(223, 142);
+            ToggleOffInternalCommand.Name = "ToggleOffInternalCommand";
+            ToggleOffInternalCommand.Size = new Size(137, 25);
+            ToggleOffInternalCommand.TabIndex = 9;
+            ToggleOffInternalCommand.Text = "Internal Command";
+            ToggleOffInternalCommand.UseVisualStyleBackColor = true;
+            // 
             // MacroToggleDataControl
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(ToggleOffInternalCommand);
+            Controls.Add(ToggleOnInternalCommand);
             Controls.Add(RemoveToggleOffButton);
             Controls.Add(RemoveToggleOnButton);
             Controls.Add(ToggleOffAddButton);
@@ -138,5 +160,7 @@
         private Button ToggleOffAddButton;
         private Button RemoveToggleOnButton;
         private Button RemoveToggleOffButton;
+        private Custom.InternalCommandButton ToggleOnInternalCommand;
+        private Custom.InternalCommandButton ToggleOffInternalCommand;
     }
 }

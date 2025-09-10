@@ -1,5 +1,6 @@
 using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.UI.Extensions;
@@ -14,12 +15,19 @@ public partial class CubaseAction : ContentPage
     private readonly CubaseCommandCollection commands;
     private readonly ICubaseHttpClient client;
     private readonly List<CubaseCommandCollection> commandsCollection;
+
+    private Dictionary<InternalCommandType, Action<InternalCommand>> internalCommands;
+    
     public CubaseAction(CubaseCommandCollection commands, List<CubaseCommandCollection> commandsCollection, ICubaseHttpClient client)
     {
         InitializeComponent();
         this.commands = commands;
         this.client = client;
         this.commandsCollection = commandsCollection;   
+        this.internalCommands = new Dictionary<InternalCommandType, Action<InternalCommand>>()
+        {
+            { InternalCommandType.Navigate, this.ProcessInternalNavigate }
+        };
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         Title = commands.Name;
         LoadCommand();
@@ -93,34 +101,42 @@ public partial class CubaseAction : ContentPage
 
         foreach (var cmd in actionGroup)
         {
-            // find cubase command 
-            var cubaseCommands = this.commandsCollection.SelectMany(x => x.Commands)
-                                                       .Where(x => x.Name == cmd);
-            tmpCommands.AddRange(cubaseCommands);
-            tmpCommands.ForEach(x => x.IsToggled = command.IsToggled);
-            var firstCommand = cubaseCommands.First();
-            // if it's a macro - then we have to add all the commands 
-            if (firstCommand.IsMacro)
+            if (!InternalCommandsCollection.IsInternalCommand(cmd))
             {
-                if (firstCommand.ButtonType == CubaseButtonType.Macro)
+                // find cubase command 
+                var cubaseCommands = this.commandsCollection.SelectMany(x => x.Commands)
+                                                           .Where(x => x.Name == cmd);
+                tmpCommands.AddRange(cubaseCommands);
+                tmpCommands.ForEach(x => x.IsToggled = command.IsToggled);
+                var firstCommand = cubaseCommands.First();
+                // if it's a macro - then we have to add all the commands 
+                if (firstCommand.IsMacro)
                 {
-                    actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup)); ;
-                }
-                else
-                {
-                    if (command.IsToggled)
+                    if (firstCommand.ButtonType == CubaseButtonType.Macro)
                     {
-                        actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup));
+                        actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup)); ;
                     }
                     else
                     {
-                        actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroupToggleOff));
+                        if (command.IsToggled)
+                        {
+                            actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup));
+                        }
+                        else
+                        {
+                            actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroupToggleOff));
+                        }
                     }
+                }
+                else
+                {
+                    actionStrings.Add(firstCommand.Action);
                 }
             }
             else
             {
-                actionStrings.Add(firstCommand.Action);
+                var internalCommand = InternalCommandsCollection.DeserialiseCommand(cmd);  
+                this.internalCommands[internalCommand.CommandType](internalCommand);    
             }
         }
         VisualStateManager.GoToState(button, "Pressed");
@@ -132,6 +148,15 @@ public partial class CubaseAction : ContentPage
         if (response.Success)
         {
 
+        }
+    }
+
+    private void ProcessInternalNavigate(InternalCommand command)
+    {
+        var target = this.commandsCollection.FirstOrDefault(x => x.Name.Equals(command.Parameter, StringComparison.OrdinalIgnoreCase));
+        if (target != null)
+        {
+            Navigation.PushAsync(new CubaseAction(target, this.commandsCollection, this.client));
         }
     }
 

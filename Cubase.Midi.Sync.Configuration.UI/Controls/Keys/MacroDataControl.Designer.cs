@@ -32,6 +32,7 @@
             stringListControl = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.StringListControl();
             ButtonAddCommand = new Button();
             ButtonRemoveCommand = new Button();
+            ButtonInternalCommand = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.InternalCommandButton();
             SuspendLayout();
             // 
             // label1
@@ -70,10 +71,20 @@
             ButtonRemoveCommand.Text = "Remove Command";
             ButtonRemoveCommand.UseVisualStyleBackColor = true;
             // 
+            // ButtonInternalCommand
+            // 
+            ButtonInternalCommand.Location = new Point(168, 93);
+            ButtonInternalCommand.Name = "ButtonInternalCommand";
+            ButtonInternalCommand.Size = new Size(125, 25);
+            ButtonInternalCommand.TabIndex = 4;
+            ButtonInternalCommand.Text = "Internal Command";
+            ButtonInternalCommand.UseVisualStyleBackColor = true;
+            // 
             // MacroDataControl
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(ButtonInternalCommand);
             Controls.Add(ButtonRemoveCommand);
             Controls.Add(ButtonAddCommand);
             Controls.Add(stringListControl);
@@ -90,5 +101,6 @@
         private Custom.StringListControl stringListControl;
         private Button ButtonAddCommand;
         private Button ButtonRemoveCommand;
+        private Custom.InternalCommandButton ButtonInternalCommand;
     }
 }

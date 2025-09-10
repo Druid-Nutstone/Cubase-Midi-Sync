@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
+﻿using Cubase.Midi.Sync.Common.InternalCommands;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,6 +24,18 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.ToggleOffAddButton.Click += ToggleOffAddButton_Click;
             this.RemoveToggleOnButton.Click += RemoveToggleOnButton_Click;
             this.RemoveToggleOffButton.Click += RemoveToggleOffButton_Click;
+            this.ToggleOnInternalCommand.OnCommand = this.AddInternalCommand; 
+            this.ToggleOffInternalCommand.OnCommand = this.AddInternalOffCommand;
+        }
+
+        private void AddInternalCommand(InternalCommand command)
+        {
+            this.ToggleOnCommands.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
+        }
+
+        private void AddInternalOffCommand(InternalCommand command)
+        {
+            this.ToggleOffCommands.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
         }
 
         private void RemoveToggleOffButton_Click(object? sender, EventArgs e)

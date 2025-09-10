@@ -28,6 +28,15 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Record Enable", 0, 15, "Edit", "Record Enable", 127));
             this.Add(CubaseMidiCommand.Create("Collapse Tracks", 0, 16, "Project", "Folding: Fold Tracks", 127));
             this.Add(CubaseMidiCommand.Create("Expand Tracks", 0, 17, "Project", "Folding: Unfold Tracks", 127));
+            this.Add(CubaseMidiCommand.Create("Mixer", 0, 18, "Devices", "Mixer", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Audio", 0, 19, "Mixer", "Hide: Audio", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Groups", 0, 20, "Mixer", "Hide: Groups", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Inputs", 0, 21, "Mixer", "Hide: Inputs", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Instruments", 0, 22, "Mixer", "Hide: Instruments", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Midi", 0, 23, "Mixer", "Hide: MIDI", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Outputs", 0, 24, "Mixer", "Hide: Outputs", 127));
+            this.Add(CubaseMidiCommand.Create("Mixer Show All", 0, 25, "Mixer", "Hide: Reveal All", 127));
+
         }
 
         public CubaseMidiCommand GetCommandByCommand(string command)

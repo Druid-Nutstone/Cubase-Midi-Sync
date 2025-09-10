@@ -37,9 +37,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void ToggleOffAddButton_Click(object? sender, EventArgs e)
         {
-            var macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
+            macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
             {
                 this.ToggleOffCommands.PopulateSingle(selectedCubaseCommand.Name);
+                macroCommandSelectorForm.Close();
             });
 
             macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
@@ -54,9 +56,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void ToogleOnAddButton_Click(object? sender, EventArgs e)
         {
-            var macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
+            macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
             {
                 this.ToggleOnCommands.PopulateSingle(selectedCubaseCommand.Name);
+                macroCommandSelectorForm.Close();
             });
 
             macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;

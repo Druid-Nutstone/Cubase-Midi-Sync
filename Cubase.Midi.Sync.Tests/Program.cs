@@ -3,27 +3,51 @@ using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Sync.Midi.Driver;
 using System.Runtime.CompilerServices;
 
-var driverIn = new NutstoneDriver("Nutstone");
+NutstoneDriver driver = null;
+
+
+    driver = new NutstoneDriver("Nutstone");
+    driver.MidiMessageReceived += (message) =>
+    {
+        int index = 0;
+        while (index + 2 < message.Length) // at least 3 bytes remaining
+        {
+            byte status = message[index];
+            byte data1 = message[index + 1];
+            byte data2 = message[index + 2];
+
+            int command = status & 0xF0;
+            int channel = status & 0x0F;
+
+            switch (command)
+            {
+                case 0x80:
+                    Console.WriteLine($"Note Off - Ch:{channel} Note:{data1} Vel:{data2}");
+                    break;
+                case 0x90:
+                    Console.WriteLine($"Note On  - Ch:{channel} Note:{data1} Vel:{data2}");
+                    break;
+                case 0xA0:
+                    Console.WriteLine($"Poly Aftertouch - Ch:{channel} Note:{data1} Value:{data2}");
+                    break;
+                case 0xB0:
+                    Console.WriteLine($"Control Change - Ch:{channel} CC:{data1} Value:{data2}");
+                    break;
+                default:
+                    Console.WriteLine($"Other Status {status:X2} Data1:{data1} Data2:{data2}");
+                    break;
+            }
+
+            index += 3; // move to the next message
+        }
+    };
+
+
 
 Console.WriteLine($"is generic assinged ?");
 Console.ReadKey();
 
-var midiCommands = GenericMidiModel.LoadFromFile();
-
-driverIn.MidiMessageReceived += DriverIn_MidiMessageReceived;
-
-void DriverIn_MidiMessageReceived(byte[] message)
-{
-    byte status = message[0];
-    byte note = message[1];
-    byte value = message[2];
-
-    byte status1 = message[3];
-    byte note1 = message[4];
-    byte value1 = message[5];
-
-    Console.WriteLine($"Status:{status}  Note:{note}  Value:{value}  Status1:{status1} Note1: {note1} Value1:{value1}");
-}
+var midiCommands = new CubaseMidiCommandCollection();
 
 
 //var const_Solo = 0x08;
@@ -44,7 +68,7 @@ while (cmdReceived != "q")
         {
             var index = int.Parse(cmdReceived); 
             Console.WriteLine($"  Sending {midiCommands[index].Name}");
-            driverIn.SendNoteOn(midiCommands[index].Channel, midiCommands[index].Addr, 127);
+            driver.SendNoteOn(midiCommands[index].Channel, midiCommands[index].Note, midiCommands[index].Velocity);
         }
     }
 }

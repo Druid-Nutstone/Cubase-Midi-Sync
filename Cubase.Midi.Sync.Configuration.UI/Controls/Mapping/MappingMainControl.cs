@@ -31,6 +31,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             this.ExistingArea.SelectedIndexChanged += ExistingArea_SelectedIndexChanged;
             this.AreaBackgroundColour.ColourChanged = this.AreaBackGroundColourChanged;
             this.AreaTextColour.ColourChanged = this.AreaTextColourChanged;
+            this.buttonExampleControl.BackgroundColourPicker = this.AreaBackgroundColour;
+            this.buttonExampleControl.TextColourPicker = this.AreaTextColour;
+            this.buttonExampleControl.Initialise();
         }
 
         private void AreaBackGroundColourChanged(SerializableColour colour)
@@ -55,11 +58,14 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             // NewAreaName.Enabled = false;
             this.AreaBackgroundColour.SetColour(this.currentCommand.BackgroundColour);
             this.AreaTextColour.SetColour(this.currentCommand.TextColour);
+            this.buttonExampleControl.TestButtonText = this.currentCommand.Name;    
             this.mappingListView.Items.Clear();
             foreach (var command in this.currentCommand.Commands)
             {
-                this.mappingListView.PopulateCubaseCommand(command);   
+                this.mappingListView.PopulateCubaseCommand(command);
+                this.AreaTypeComboBox.SelectedIndex = this.AreaTypeComboBox.Items.IndexOf(this.currentCommand.Category);
             }
+
         }
 
         private void ButtonCopy_Click(object? sender, EventArgs e)
@@ -79,7 +85,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
                     var newCommand = CubaseCommand.Create()
                                                   .WithButtonType(command.ButtonType)
                                                   .WithName(command.Name)
-                                                  .WithCategory(this.NewAreaName.Text)
+                                                  .WithCategory(command.Category)
                                                   .WithAction(command.Action)  
                                                   .WithNameToggle(command.NameToggle)
                                                   .WithParentCollectionName(this.currentCommand.Name)   
@@ -127,6 +133,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
                     this.currentCommand = this.commands.WithNewCubaseCommand(this.NewAreaName.Text, CubaseServiceConstants.KeyService);
                     this.AreaBackgroundColour.SetColour(this.currentCommand.BackgroundColour);
                     this.AreaTextColour.SetColour(this.currentCommand.TextColour);
+                    this.buttonExampleControl.TestButtonText = this.currentCommand.Name;
                     this.mappingListView.Items.Clear();
                 }
             }
@@ -150,17 +157,20 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
         {
             this.ExistingArea.Items.Clear();
             this.ExistingArea.Items.AddRange(this.commands.GetNames().ToArray());
+            this.ExistingArea.SelectedIndex = -1;
         }
 
         private void PopulateCommandsListView()
         {
             this.commandsListView.Populate(this.commands, cubaseServerSettings);
+            this.AreaTypeComboBox.Items.Clear();
+            this.AreaTypeComboBox.Items.AddRange(Enum.GetNames(typeof(CubaseAreaTypes)));
             Resize();
         }
 
         public void Resize()
         {
-            LeftPanel.Width = this.Width * 40 / 100;
+            LeftPanel.Width = this.Width * 30 / 100;
             ButtonCopy.Left = (ButtonPanel.Width - ButtonCopy.Width) / 2; // horizontal center
             ButtonCopy.Top = (ButtonPanel.Height - ButtonCopy.Height) / 2;
         }

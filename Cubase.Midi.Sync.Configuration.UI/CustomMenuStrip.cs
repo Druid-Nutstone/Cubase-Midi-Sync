@@ -1,7 +1,9 @@
-﻿using Cubase.Midi.Sync.Configuration.UI.Forms;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Configuration.UI.Forms;
 using Cubase.Midi.Sync.Configuration.UI.Forms.CubaseCommands;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +27,7 @@ namespace Cubase.Midi.Sync.Configuration.UI
         {
             this.menu.Items.Clear();
             this.menu.Items.Add(new FileMenuStripItem(this.form));
-            this.menu.Items.Add(new ButtonMenuStripItem());
+            this.menu.Items.Add(new UtilityMenuStripItem());
             this.menu.Items.Add(new ExportMenuStripItem());
             this.menu.Items.Add(new ImportMenuStripItem());
         }
@@ -80,13 +82,33 @@ namespace Cubase.Midi.Sync.Configuration.UI
         }
     }
 
-    public class ButtonMenuStripItem : ToolStripMenuItem
+    public class UtilityMenuStripItem : ToolStripMenuItem
     {
-        public ButtonMenuStripItem()
+        public UtilityMenuStripItem()
         {
-            this.Text = "Buttons";
+            this.Text = "Utility";
             this.DropDownItems.Add(new ButtonSetColoursItem());
             this.DropDownItems.Add(new ButtonsShowCubaseCommands());
+            this.DropDownItems.Add(new ShowCommandsJsonFile());
+        }
+    }
+
+    public class ShowCommandsJsonFile : ToolStripMenuItem
+    {
+        public ShowCommandsJsonFile()
+        {
+            this.Text = "Edit Cubase Commands";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var cubaseServerSettings = new CubaseServerSettings();
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = true;
+            p.StartInfo.FileName = "notepad.exe";
+            p.StartInfo.Arguments = cubaseServerSettings.FilePath;
+
+            p.Start();
         }
     }
 

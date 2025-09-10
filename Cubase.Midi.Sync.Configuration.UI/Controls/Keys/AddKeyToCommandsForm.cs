@@ -66,8 +66,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cubaseCommand = existingCommand;
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
-            this.cbAreaName.SelectedIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
+            var areaIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
+            this.cbAreaName.SelectedIndex = areaIndex;
             this.cbAreaName.Enabled = false;
+            this.areaTypeComboBox.SelectedIndex = Enum.GetNames<CubaseAreaTypes>().ToList().IndexOf(cubaseCommandCollections[areaIndex].Category);  
+            this.areaTypeComboBox.Enabled = false;  
             AreaButtonTest.TestButtonText = existingCommand.ParentCollectionName;
             ButtonTextColour.SetColour(existingCommand.TextColor);
             ButtonToggleBackgroundColour.SetColour(existingCommand.ToggleBackGroundColour);
@@ -98,10 +101,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cubaseServerSettings = cubaseServerSettings;
             this.buttonName.Text = cubaseKeyCommand?.Name ?? cubaseCommand.Name;
             this.buttonName.TextChanged += ButtonName_TextChanged;
+            this.buttonNameToggled.TextChanged += ButtonNameToggled_TextChanged;  
             this.buttonAdd.Click += ButtonAdd_Click;
             this.InitialiseAreaName();
             
             this.cbAreaName.SelectedIndexChanged += CbAreaName_SelectedIndexChanged;
+            this.areaTypeComboBox.SelectedIndexChanged += AreaTypeComboBox_SelectedIndexChanged;
             this.newAreaName.Enabled = false;
             this.newAreaName.KeyPress += NewAreaName_KeyPress;
             this.newAreaName.LostFocus += NewAreaName_LostFocus;
@@ -115,6 +120,23 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             NormalButtonTest.TestButtonText = this.buttonName.Text;
             ToggleButtonTest.TestButtonText = this.buttonNameToggled.Text;
 
+        }
+
+        private void ButtonNameToggled_TextChanged(object? sender, EventArgs e)
+        {
+            ToggleButtonTest.TestButtonText = this.buttonNameToggled.Text;  
+        }
+
+        private void AreaTypeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            var areaCollection = this.GetSelectAreaCollection(); 
+            if (areaCollection != null)
+            {
+                if (areaTypeComboBox.SelectedIndex > -1)
+                {
+                    areaCollection.WithCategory(areaTypeComboBox.SelectedItem.ToString());
+                }
+            }
         }
 
         private void ButtonName_TextChanged(object? sender, EventArgs e)
@@ -224,9 +246,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             }
             else
             {
-                AreaBackgroundColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).BackgroundColour);
-                AreaButtonTextColour.SetColour(this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).TextColour);
-                VisibleCheckBox.Checked = this.cubaseCommandCollections.GetCommandCollectionByName(this.cbAreaName.SelectedItem.ToString()).Visible;
+                AreaBackgroundColour.SetColour(this.GetSelectAreaCollection().BackgroundColour);
+                AreaButtonTextColour.SetColour(this.GetSelectAreaCollection().TextColour);
+                areaTypeComboBox.SelectedIndex = Enum.GetNames<CubaseAreaTypes>().ToList().IndexOf(this.GetSelectAreaCollection().Category);
+                VisibleCheckBox.Checked = this.GetSelectAreaCollection().Visible;
             }
         }
 
@@ -235,6 +258,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cbAreaName.Items.Clear();
             this.cbAreaName.Items.AddRange(this.cubaseCommandCollections.GetNames().ToArray());
             this.cbAreaName.Items.Add("New ..");
+            this.areaTypeComboBox.Items.Clear();
+            this.areaTypeComboBox.Items.AddRange(Enum.GetNames(typeof(CubaseAreaTypes)));
         }
 
         private void ButtonAdd_Click(object? sender, EventArgs e)
@@ -257,6 +282,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                             break;
                     }
 
+                    if (this.areaTypeComboBox.SelectedIndex < 0)
+                    {
+                        MessageBox.Show($"You must select an Area Type");
+                        return; 
+                    }
+
                     // does area exist
                     var areaName = cbAreaName.SelectedItem as string;
                     CubaseCommandCollection commandCollection = null;
@@ -266,7 +297,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     }
                     if (commandCollection == null)
                     {
-                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, CubaseServiceConstants.KeyService);
+                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, this.areaTypeComboBox.SelectedItem.ToString());
                     }
 
                     if (commandCollection.Commands.Any(c => c.Name == buttonName.Text))
@@ -310,7 +341,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
                     cubaseCommand.NameToggle = string.IsNullOrEmpty(buttonNameToggled.Text) ? buttonName.Text : buttonNameToggled.Text; 
 
+                    cubaseCommand.WithCategory(commandCollection.Category);
+
                     commandCollection.WithNewCubaseCommand(cubaseCommand);
+                    
                     cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);
                     this.Close();
                 }
@@ -363,6 +397,24 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         private CubaseButtonType GetSelectedButtonType()
         {
             return Enum.Parse<CubaseButtonType>(cbButtonType.SelectedItem.ToString(), true);
+        }
+
+        private string GetSelectedArea()
+        {
+            if (this.cbAreaName.SelectedIndex > -1)
+            {
+                return this.cbAreaName.SelectedItem.ToString();
+            }
+            return null;
+        }
+
+        private CubaseCommandCollection GetSelectAreaCollection()
+        {
+            if (!string.IsNullOrEmpty(this.GetSelectedArea()))
+            {
+                return this.cubaseCommandCollections.GetCommandCollectionByName(this.GetSelectedArea());
+            }
+            return null;
         }
     }
 }

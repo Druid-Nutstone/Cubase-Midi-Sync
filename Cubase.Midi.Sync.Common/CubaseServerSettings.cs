@@ -8,8 +8,8 @@ namespace Cubase.Midi.Sync.Common
 {
     public class CubaseServerSettings
     {
-        public string FilePath { get; set; }    
-        
+        public string FilePath { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings", "CubaseCommands.json");
+
         public CubaseCommandsCollection GetVisibleCubaseCommands()
         {
             return CubaseCommandsCollection.CreateFromList(this.GetCubaseCommands().Where(c => c.Visible).ToList());

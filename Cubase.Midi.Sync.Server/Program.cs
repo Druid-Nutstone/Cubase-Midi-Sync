@@ -1,9 +1,11 @@
 using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
+using Cubase.Midi.Sync.Server.Services.Midi;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.EventLog;
@@ -35,6 +37,8 @@ builder.Services
       .AddTransient<ICommandService, CommandService>()
       .AddTransient<ICubaseService, CubaseService>()
       .AddTransient<IKeyboardService, KeyboardService>()
+      .AddSingleton<IMidiService, MidiService>()   
+      .AddKeyedTransient<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
       .AddKeyedTransient<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
 
@@ -59,4 +63,6 @@ app.MapControllers();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("CubaseMidiSync service started at {time}", DateTimeOffset.Now);
 
+var midi = app.Services.GetRequiredService<IMidiService>();
+midi.Initialise();
 app.Run();

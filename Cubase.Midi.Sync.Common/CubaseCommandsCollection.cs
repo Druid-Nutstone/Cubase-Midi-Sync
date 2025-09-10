@@ -124,7 +124,7 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseCommandCollection WithNewCubaseCommand(CubaseCommand cubaseCommand)
         {
-            Commands.Add(cubaseCommand.WithCategory(this.Category).WithParentCollectionName(this.Name));
+            Commands.Add(cubaseCommand.WithParentCollectionName(this.Name));
             return this;
         }
 
@@ -137,6 +137,12 @@ namespace Cubase.Midi.Sync.Common
         public CubaseCommandCollection WithTextColour(SerializableColour textColour)
         {
             this.TextColour = textColour;
+            return this;
+        }
+
+        public CubaseCommandCollection WithCategory(string category)
+        {
+            this.Category = category;
             return this;
         }
     }

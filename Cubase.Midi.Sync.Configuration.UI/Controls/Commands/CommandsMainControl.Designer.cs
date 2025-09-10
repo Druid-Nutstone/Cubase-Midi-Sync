@@ -36,12 +36,14 @@
             FilterBox = new ComboBox();
             dataPanel = new Panel();
             commandsListView = new CommandsListView();
+            AddMidiCommandButton = new Button();
             panel1.SuspendLayout();
             dataPanel.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(AddMidiCommandButton);
             panel1.Controls.Add(AddNewButton);
             panel1.Controls.Add(AddKeyCommandButton);
             panel1.Controls.Add(ClearFilter);
@@ -50,12 +52,12 @@
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(791, 70);
+            panel1.Size = new Size(810, 70);
             panel1.TabIndex = 0;
             // 
             // AddNewButton
             // 
-            AddNewButton.Location = new Point(535, 22);
+            AddNewButton.Location = new Point(684, 22);
             AddNewButton.Name = "AddNewButton";
             AddNewButton.Size = new Size(104, 25);
             AddNewButton.TabIndex = 4;
@@ -64,7 +66,7 @@
             // 
             // AddKeyCommandButton
             // 
-            AddKeyCommandButton.Location = new Point(323, 23);
+            AddKeyCommandButton.Location = new Point(310, 23);
             AddKeyCommandButton.Name = "AddKeyCommandButton";
             AddKeyCommandButton.Size = new Size(189, 25);
             AddKeyCommandButton.TabIndex = 3;
@@ -106,7 +108,7 @@
             dataPanel.Dock = DockStyle.Fill;
             dataPanel.Location = new Point(0, 70);
             dataPanel.Name = "dataPanel";
-            dataPanel.Size = new Size(791, 260);
+            dataPanel.Size = new Size(810, 260);
             dataPanel.TabIndex = 1;
             // 
             // commandsListView
@@ -116,10 +118,19 @@
             commandsListView.Location = new Point(0, 0);
             commandsListView.MultiSelect = false;
             commandsListView.Name = "commandsListView";
-            commandsListView.Size = new Size(791, 260);
+            commandsListView.Size = new Size(810, 260);
             commandsListView.TabIndex = 0;
             commandsListView.UseCompatibleStateImageBehavior = false;
             commandsListView.View = View.Details;
+            // 
+            // AddMidiCommandButton
+            // 
+            AddMidiCommandButton.Location = new Point(517, 22);
+            AddMidiCommandButton.Name = "AddMidiCommandButton";
+            AddMidiCommandButton.Size = new Size(148, 25);
+            AddMidiCommandButton.TabIndex = 5;
+            AddMidiCommandButton.Text = "Add Midi Command";
+            AddMidiCommandButton.UseVisualStyleBackColor = true;
             // 
             // CommandsMainControl
             // 
@@ -128,7 +139,7 @@
             Controls.Add(dataPanel);
             Controls.Add(panel1);
             Name = "CommandsMainControl";
-            Size = new Size(791, 330);
+            Size = new Size(810, 330);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             dataPanel.ResumeLayout(false);
@@ -145,5 +156,6 @@
         private Button ClearFilter;
         private Button AddKeyCommandButton;
         private Button AddNewButton;
+        private Button AddMidiCommandButton;
     }
 }

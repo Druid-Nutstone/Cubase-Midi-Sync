@@ -38,6 +38,7 @@
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             groupBox1 = new GroupBox();
+            label1 = new Label();
             VisibleCheckBox = new CheckBox();
             AreaButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
             groupBox2 = new GroupBox();
@@ -51,6 +52,7 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
+            areaTypeComboBox = new ComboBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -96,7 +98,7 @@
             // 
             newAreaName.Location = new Point(276, 41);
             newAreaName.Name = "newAreaName";
-            newAreaName.Size = new Size(217, 25);
+            newAreaName.Size = new Size(174, 25);
             newAreaName.TabIndex = 15;
             // 
             // label9
@@ -136,6 +138,8 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.WhiteSmoke;
+            groupBox1.Controls.Add(areaTypeComboBox);
+            groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(VisibleCheckBox);
             groupBox1.Controls.Add(AreaButtonTest);
             groupBox1.Controls.Add(label5);
@@ -152,10 +156,20 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label1.Location = new Point(464, 21);
+            label1.Name = "label1";
+            label1.Size = new Size(69, 17);
+            label1.TabIndex = 29;
+            label1.Text = "Area Type";
+            // 
             // VisibleCheckBox
             // 
             VisibleCheckBox.AutoSize = true;
-            VisibleCheckBox.Location = new Point(607, 41);
+            VisibleCheckBox.Location = new Point(655, 43);
             VisibleCheckBox.Name = "VisibleCheckBox";
             VisibleCheckBox.Size = new Size(65, 21);
             VisibleCheckBox.TabIndex = 28;
@@ -273,6 +287,14 @@
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
             // 
+            // areaTypeComboBox
+            // 
+            areaTypeComboBox.FormattingEnabled = true;
+            areaTypeComboBox.Location = new Point(464, 41);
+            areaTypeComboBox.Name = "areaTypeComboBox";
+            areaTypeComboBox.Size = new Size(134, 25);
+            areaTypeComboBox.TabIndex = 30;
+            // 
             // AddKeyToCommandsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -317,5 +339,7 @@
         private Custom.TextBoxLabel buttonNameToggled;
         private GroupBox ButtonDataPanel;
         private CheckBox VisibleCheckBox;
+        private Label label1;
+        private ComboBox areaTypeComboBox;
     }
 }

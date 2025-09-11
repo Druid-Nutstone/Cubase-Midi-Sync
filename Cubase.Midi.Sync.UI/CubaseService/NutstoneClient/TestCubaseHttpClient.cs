@@ -84,5 +84,10 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
         {
             throw new NotImplementedException();
         }
+
+        public Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

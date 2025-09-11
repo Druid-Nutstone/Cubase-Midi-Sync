@@ -12,7 +12,7 @@ namespace Cubase.Midi.Sync.Common.Midi
         ChannelChange,
         Message,
         Ready,
-        SelectTrack,
+        SelectTracks,
         Tracks,
         TrackUpdate,
         TrackComplete

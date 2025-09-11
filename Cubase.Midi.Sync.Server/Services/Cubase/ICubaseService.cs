@@ -9,5 +9,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
        Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request);
 
         Task<MidiChannelCollection> GetTracks();
+
+        Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels);
     }
 }

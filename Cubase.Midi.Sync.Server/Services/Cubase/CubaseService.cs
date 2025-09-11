@@ -55,6 +55,16 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             return await Task.Run(this.midiService.GetChannels);
         }
 
+        public async Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels)
+        {
+            return await Task.Run(() => 
+            {
+                this.midiService.SendSysExMessage(MidiCommand.SelectTracks, midiChannels);
+                return this.midiService.MidiChannels;
+            });
+
+        }
+
         private async Task<bool> EnsureCubaseIsActive()
         {
             return await Task.Run(() =>

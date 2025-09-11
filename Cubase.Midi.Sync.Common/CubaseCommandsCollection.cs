@@ -345,6 +345,26 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
+        public static CubaseCommand CreateToggleButton(string name, IEnumerable<string> actions, string toggleName)
+        {
+            return CreateToggleButton(name, actions).WithNameToggle(toggleName);
+        }
+
+        public static CubaseCommand CreateToggleButton(string name, IEnumerable<string> actions)
+        {
+            return new CubaseCommand()
+            {
+                Name = name,
+                ActionGroup = actions.ToList(),
+                ButtonType = CubaseButtonType.Toggle,
+                ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
+                ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
+                ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
+                ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
+                Created = DateTime.Now
+            };
+        }
+
         public static CubaseCommand CreateToggleButton(string name, string action)
         {
             return new CubaseCommand()
@@ -358,6 +378,11 @@ namespace Cubase.Midi.Sync.Common
                 ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
                 Created = DateTime.Now
             };
+        }
+
+        public static CubaseCommand CreateToggleButton(string name, string action, string toggleName)
+        {
+            return CreateToggleButton(name, action).WithNameToggle(toggleName);
         }
 
     }

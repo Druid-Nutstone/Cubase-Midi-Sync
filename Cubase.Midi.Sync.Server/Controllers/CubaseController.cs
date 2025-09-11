@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
@@ -39,6 +40,14 @@ namespace Cubase.Midi.Sync.Server.Controllers
         public async Task<IActionResult> GetTracks()
         {
             var tracks = await cubaseService.GetTracks();
+            return Ok(tracks);
+        }
+
+        [HttpPost]
+        [Route("tracks/selected")]
+        public async Task<IActionResult> SetSelectedTracks([FromBody] List<MidiChannel> midiChannels)
+        {
+            var tracks = await cubaseService.SetSelectedTracks(midiChannels);
             return Ok(tracks);
         }
 

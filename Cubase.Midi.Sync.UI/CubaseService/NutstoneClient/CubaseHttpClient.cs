@@ -85,5 +85,19 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             return result ?? new MidiChannelCollection();
         }
 
+        public async Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels)
+        {
+            var response = await this.PostAsJsonAsync("api/cubase/tracks/selected", midiChannels);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<MidiChannelCollection>() ?? new MidiChannelCollection();
+            }
+            else
+            {
+                return new MidiChannelCollection();
+                //exceptionHandler?.Invoke(new Exception($"Error executing action: {response.ReasonPhrase}"));
+                //return new CubaseActionResponse { Success = false, Message = $"Error executing action: {response.ReasonPhrase}" };
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
-        private MidiChannelCollection midiChannels = new MidiChannelCollection();
+        public MidiChannelCollection MidiChannels { get; set; } = new MidiChannelCollection();
 
         private CubaseTransport transport;
 
@@ -57,10 +57,12 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             }
         }
 
+
+
         public MidiChannelCollection GetChannels()
         {
             this.tracksReceived = false;
-            this.midiChannels = new MidiChannelCollection();    
+            this.MidiChannels = new MidiChannelCollection();    
             this.midiDriver.SendMessage(MidiCommand.Tracks, "");
             var maxCount = 1000;
             var count = 0;
@@ -69,7 +71,12 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 Task.Delay(50).Wait();
                 count++; 
             }
-            return this.midiChannels;
+            return this.MidiChannels;
+        }
+
+        public void SendSysExMessage<T>(MidiCommand command, T request)
+        {
+            this.midiDriver.SendMessage(command, request);  
         }
 
         private void MidiDriver_MidiMessageReceived(byte[] message)
@@ -104,14 +111,14 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private void ClearChannels(string emptyString)
         {
-            this.midiChannels = new MidiChannelCollection();
+            this.MidiChannels = new MidiChannelCollection();
             this.logger.LogWarning($"Clearing current midi channels..");
         }
 
         private void ChannelChange(string channelInfo)
         {
             var channelData = JsonSerializer.Deserialize<MidiChannel>(channelInfo);
-            var newChannel = this.midiChannels.AddOrUpdateChannel(channelData);
+            var newChannel = this.MidiChannels.AddOrUpdateChannel(channelData);
             //if (!string.IsNullOrEmpty(newChannel?.Name))
             //{
 
@@ -127,13 +134,13 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private void TracksReceived(string tracksJson)
         {
             var channel = JsonSerializer.Deserialize<MidiChannel>(tracksJson);
-            this.midiChannels.AddOrUpdateChannel(channel);
+            this.MidiChannels.AddOrUpdateChannel(channel);
         }
 
         private void TracksComplete(string emptyString)
         {
             this.tracksReceived = true;
-            this.logger.LogInformation($"Tracks received complete. Total channels: {this.midiChannels.Count}");
+            this.logger.LogInformation($"Tracks received complete. Total channels: {this.MidiChannels.Count}");
         }
 
         private void Ready(string emptyString)

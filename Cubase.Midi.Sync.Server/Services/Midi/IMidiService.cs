@@ -4,9 +4,13 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 {
     public interface IMidiService
     {
+        MidiChannelCollection MidiChannels { get; set; }    
+
         public void Initialise();
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand);
+
+        public void SendSysExMessage<T>(MidiCommand command, T request);
 
         public MidiChannelCollection GetChannels(); 
     }

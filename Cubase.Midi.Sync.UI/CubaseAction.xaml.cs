@@ -10,6 +10,14 @@ using Microsoft.Maui.Graphics;
 
 namespace Cubase.Midi.Sync.UI;
 
+// To fix CS0263, ensure all partial declarations of 'CubaseAction' specify the same base class.
+// If you have another file (e.g., CubaseAction.xaml) with a partial class declaration like:
+// public partial class CubaseAction : ContentPage
+// Change it to:
+// public partial class CubaseAction : BasePage
+//
+// No code changes are needed in this file if the base class is correct here.
+// Please update the other partial class declaration(s) to match this base class: BasePage.
 public partial class CubaseAction : ContentPage
 {
     private readonly CubaseCommandCollection commands;
@@ -18,8 +26,12 @@ public partial class CubaseAction : ContentPage
 
     private Dictionary<InternalCommandType, Action<InternalCommand>> internalCommands;
     
-    public CubaseAction(CubaseCommandCollection commands, List<CubaseCommandCollection> commandsCollection, ICubaseHttpClient client)
+    private BasePage basePage;  
+
+    public CubaseAction(CubaseCommandCollection commands, List<CubaseCommandCollection> commandsCollection, ICubaseHttpClient client, BasePage basePage)
     {
+        this.basePage = basePage;
+        basePage.AddToolbars(this);  
         InitializeComponent();
         this.commands = commands;
         this.client = client;
@@ -156,7 +168,7 @@ public partial class CubaseAction : ContentPage
         var target = this.commandsCollection.FirstOrDefault(x => x.Name.Equals(command.Parameter, StringComparison.OrdinalIgnoreCase));
         if (target != null)
         {
-            Navigation.PushAsync(new CubaseAction(target, this.commandsCollection, this.client));
+            Navigation.PushAsync(new CubaseAction(target, this.commandsCollection, this.client, this.basePage));
         }
     }
 

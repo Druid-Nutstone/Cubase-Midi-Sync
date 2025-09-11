@@ -69,6 +69,8 @@ namespace Cubase.Midi.Sync.UI
             builder.Services.AddSingleton<ICubaseHttpClient, CubaseHttpClient>();
             // builder.Services.AddSingleton<ICubaseHttpClient, TestCubaseHttpClient>();
             builder.Services.AddSingleton(appSettings)
+                            .AddTransient<BasePage>()
+                            .AddTransient<MixerPage>()
                             .AddTransient<CubaseMainPage>();
 
 

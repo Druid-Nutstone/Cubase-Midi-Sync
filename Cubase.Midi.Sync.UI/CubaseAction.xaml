@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Cubase.Midi.Sync.UI.CubaseAction"
              Title="{Binding Name}">
+
     <ScrollView Orientation="Vertical">
         <FlexLayout x:Name="CommandsLayout"
                 Direction="Row"
@@ -12,16 +13,5 @@
                 AlignContent="Start"
                 Margin="10"
                 Padding="5"/>
-        <!--<Grid RowSpacing="70">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="80" />
-            </Grid.RowDefinitions>
-            <FlexLayout x:Name="CommandsLayout"
-                Direction="Row"
-                Wrap="Wrap"
-                JustifyContent="Start"
-                AlignItems="Start"
-                Padding="10" />
-        </Grid>-->
     </ScrollView>
 </ContentPage>

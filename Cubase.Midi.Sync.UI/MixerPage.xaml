@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Cubase.Midi.Sync.UI.MixerPage"
+             Title="MixerPage">
+    <Grid RowDefinitions="Auto,*" Padding="10" RowSpacing="10">
+
+        <ScrollView Orientation="Vertical" Grid.Row="1" Grid.RowSpan="2">
+            <VerticalStackLayout Spacing="10">
+                <!-- Top flexible toolbar -->
+                <Border BackgroundColor="LightGray"
+                       Padding="10">
+                    <Label Text="Standard Show/Hide Mixer Views"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Border>
+                <FlexLayout x:Name="StaticButtons"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Start" />
+                <Border BackgroundColor="LightGray"
+                       Padding="10">
+                    <Label Text="Tracks Toggle To View"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Border>
+                <!-- Lower flexible button area -->
+                <FlexLayout x:Name="TrackButtons"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Start"
+                    AlignContent="Start" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

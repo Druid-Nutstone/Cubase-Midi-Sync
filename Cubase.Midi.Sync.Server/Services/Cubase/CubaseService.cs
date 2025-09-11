@@ -3,6 +3,8 @@ using Cubase.Midi.Sync.Common.Responses;
 using System.Diagnostics;
 using Cubase.Midi.Sync.Server.Extensions;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
+using Cubase.Midi.Sync.Server.Services.Midi;
+using Cubase.Midi.Sync.Common.Midi;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -12,9 +14,12 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private readonly ILogger<CubaseService> logger;
 
-        public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger)
+        private readonly IMidiService midiService;  
+
+        public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger, IMidiService midiService)
         {
             this.serviceProvider = serviceProvider; 
+            this.midiService = midiService;
             this.logger = logger;   
         }
 
@@ -45,8 +50,10 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             return catgeoryService.ProcessAction(request);    
         }
 
-
-
+        public async Task<MidiChannelCollection> GetTracks()
+        {
+            return await Task.Run(this.midiService.GetChannels);
+        }
 
         private async Task<bool> EnsureCubaseIsActive()
         {

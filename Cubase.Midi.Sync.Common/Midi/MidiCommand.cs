@@ -13,5 +13,8 @@ namespace Cubase.Midi.Sync.Common.Midi
         Message,
         Ready,
         SelectTrack,
+        Tracks,
+        TrackUpdate,
+        TrackComplete
     }
 }

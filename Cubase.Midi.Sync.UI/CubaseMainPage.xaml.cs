@@ -16,9 +16,13 @@ public partial class CubaseMainPage : ContentPage
 
     private bool serverAvailable = false;
 
-    public CubaseMainPage(ICubaseHttpClient client)
+    private BasePage basePage;
+
+    public CubaseMainPage(ICubaseHttpClient client, BasePage basePage)
     {
         InitializeComponent();
+        this.basePage = basePage;   
+        basePage.AddToolbars(this);
         this.client = client;
         CollectionsLayout.Clear();
         this.serverAvailable = this.client.CanConnectToServer();
@@ -49,6 +53,7 @@ public partial class CubaseMainPage : ContentPage
         SetSpinner(false);
     }
 
+ 
 
     private async Task LoadCommands()
     {
@@ -76,7 +81,7 @@ public partial class CubaseMainPage : ContentPage
                     {
                         try
                         {
-                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client));
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client, this.basePage));
                         }
                         catch (Exception ex)
                         {

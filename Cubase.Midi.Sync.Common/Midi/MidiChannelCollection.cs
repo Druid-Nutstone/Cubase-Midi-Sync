@@ -9,7 +9,11 @@ namespace Cubase.Midi.Sync.Common.Midi
     public class MidiChannelCollection : List<MidiChannel>
     {
         
-        
+        public List<MidiChannel> GetActiveChannels()
+        {
+            return this.Where(x => !string.IsNullOrEmpty(x.Name)).ToList();
+        }
+
         public MidiChannel AddOrUpdateChannel(MidiChannel midiChannel)
         {
             var channel = this.FirstOrDefault(x => x.Index == midiChannel.Index);

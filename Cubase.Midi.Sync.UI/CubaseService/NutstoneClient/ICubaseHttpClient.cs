@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using System;
@@ -14,6 +15,8 @@ namespace Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient
         Task<CubaseCommandsCollection> GetCommands(Action<string> msgHandler, Action<string> exceptionHandler);
 
         Task<CubaseActionResponse> ExecuteCubaseAction(CubaseActionRequest cubaseActionRequest, Action<Exception> exceptionHandler);
+
+        Task<MidiChannelCollection> GetTracks();
 
         bool CanConnectToServer();
 

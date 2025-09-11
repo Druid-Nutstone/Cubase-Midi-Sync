@@ -66,3 +66,5 @@ logger.LogInformation("CubaseMidiSync service started at {time}", DateTimeOffset
 var midi = app.Services.GetRequiredService<IMidiService>();
 midi.Initialise();
 app.Run();
+
+public partial class Program { } 

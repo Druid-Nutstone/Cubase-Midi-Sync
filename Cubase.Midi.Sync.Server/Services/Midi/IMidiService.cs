@@ -7,5 +7,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         public void Initialise();
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand);
+
+        public MidiChannelCollection GetChannels(); 
     }
 }

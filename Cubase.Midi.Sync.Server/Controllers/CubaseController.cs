@@ -34,6 +34,14 @@ namespace Cubase.Midi.Sync.Server.Controllers
             return Ok(commands);
         }
 
+        [HttpGet]
+        [Route("tracks")]
+        public async Task<IActionResult> GetTracks()
+        {
+            var tracks = await cubaseService.GetTracks();
+            return Ok(tracks);
+        }
+
         [HttpPost]
         [Route("execute")]
         public async Task<IActionResult> ExecureCubaseCommand([FromBody] CubaseActionRequest cubaseActionRequest)

@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
@@ -68,5 +69,21 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             var result = await response.Content.ReadFromJsonAsync<CubaseCommandsCollection>();
             return result ?? new CubaseCommandsCollection();
         }
+
+        public async Task<MidiChannelCollection> GetTracks()
+        {
+            var response = await GetAsync("api/cubase/tracks");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // log status code + error body
+                var errorBody = await response.Content.ReadAsStringAsync();
+            }
+
+            // success → deserialize
+            var result = await response.Content.ReadFromJsonAsync<MidiChannelCollection>();
+            return result ?? new MidiChannelCollection();
+        }
+
     }
 }

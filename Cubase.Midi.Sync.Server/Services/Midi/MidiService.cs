@@ -19,6 +19,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private Dictionary<string, Action<string>> commandProcessors;
 
+        private bool tracksReceived = false;
+
         public MidiService(ILogger<MidiService> logger) 
         { 
             this.logger = logger;
@@ -27,7 +29,9 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 {MidiCommand.ClearChannels.ToString(), this.ClearChannels},
                 {MidiCommand.ChannelChange.ToString(), this.ChannelChange },
                 {MidiCommand.Message.ToString(),this.MessageReceived },
-                {MidiCommand.Ready.ToString(), this.Ready }
+                {MidiCommand.Ready.ToString(), this.Ready },
+                {MidiCommand.TrackUpdate.ToString(), this.TracksReceived },
+                {MidiCommand.TrackComplete.ToString(), this.TracksComplete },   
               
             };
         }
@@ -51,6 +55,21 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             {
                 return false;
             }
+        }
+
+        public MidiChannelCollection GetChannels()
+        {
+            this.tracksReceived = false;
+            this.midiChannels = new MidiChannelCollection();    
+            this.midiDriver.SendMessage(MidiCommand.Tracks, "");
+            var maxCount = 1000;
+            var count = 0;
+            while (!this.tracksReceived && count < maxCount)
+            {
+                Task.Delay(50).Wait();
+                count++; 
+            }
+            return this.midiChannels;
         }
 
         private void MidiDriver_MidiMessageReceived(byte[] message)
@@ -105,11 +124,24 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.logger.LogInformation($"Message received: {message}");
         }
 
+        private void TracksReceived(string tracksJson)
+        {
+            var channel = JsonSerializer.Deserialize<MidiChannel>(tracksJson);
+            this.midiChannels.AddOrUpdateChannel(channel);
+        }
+
+        private void TracksComplete(string emptyString)
+        {
+            this.tracksReceived = true;
+            this.logger.LogInformation($"Tracks received complete. Total channels: {this.midiChannels.Count}");
+        }
+
         private void Ready(string emptyString)
         {
             this.logger.LogInformation($"Cubase Midi Sync is ready..");
             // this.midiDriver.SendMessage("Nutstone Midi Javascript Service is ready");
         }
+
 
     }
 }

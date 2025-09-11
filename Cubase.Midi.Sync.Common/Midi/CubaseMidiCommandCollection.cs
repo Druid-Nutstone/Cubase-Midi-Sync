@@ -44,6 +44,15 @@ namespace Cubase.Midi.Sync.Common.Midi
             return this.FirstOrDefault(x => x.Command.Equals(command, StringComparison.OrdinalIgnoreCase));
         }
 
+        public string GetCommandByName(KnownCubaseMidiCommands name)
+        {
+            var found = this.FirstOrDefault(x => x.Name.Equals(name.ToString().Replace("_", " ")));
+            if (found != null)
+            {
+                return found.Command;
+            }
+            return null;
+        }
     }
 
     public class CubaseMidiCommand
@@ -68,5 +77,34 @@ namespace Cubase.Midi.Sync.Common.Midi
                 Velocity = velocity
             };
         }
+    }
+
+    public enum KnownCubaseMidiCommands
+    {
+        Rewind_To_Start,
+        Start,
+        Stop,
+        Punch_In,
+        Punch_Out,
+        Set_Marker_1,
+        Set_Marker_2,
+        Go_To_Marker_1,
+        Go_To_Marker_2,
+        Show_Tracks_With_Data,
+        Show_All_Tracks,
+        Show_Selected_Tracks,
+        Zoom_Selected_Tracks,
+        Undo_Zoom,
+        Record_Enable,
+        Collapse_Tracks,
+        Expand_Tracks,
+        Mixer,
+        Hide_Audio,
+        Hide_Groups,
+        Hide_Inputs,
+        Hide_Instruments,
+        Hide_Midi,
+        Hide_Outputs,
+        Mixer_Show_All
     }
 }

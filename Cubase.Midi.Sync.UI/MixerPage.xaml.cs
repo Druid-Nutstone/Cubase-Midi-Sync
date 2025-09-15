@@ -22,6 +22,20 @@ namespace Cubase.Midi.Sync.UI
 
         private CubaseMidiCommandCollection commandCollection = new CubaseMidiCommandCollection();
 
+        private string hideShowAudio;
+        private string hideShowGroups;
+        private string hideShowInputs;
+        private string hideShowInstruments;
+        private string hideShowMidi;
+        private string hideShowOutputs;
+        private string showSelectedTracks;
+
+        private string mixerShowAll;
+
+        private CubaseCommand showHideAll;
+
+        private List<CubaseCommand> staticCommands;
+
         public MixerPage(ICubaseHttpClient cubaseHttpClient, IServiceProvider serviceProvider)
         {
             InitializeComponent();
@@ -33,23 +47,39 @@ namespace Cubase.Midi.Sync.UI
 
         protected override async void OnDisappearing()
         {
+            if (this.showHideAll != null)
+            {
+                if (!this.showHideAll.IsToggled)
+                {
+                    var result = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(showHideAll), async (err) =>
+                    {
+                        await DisplayAlert("Error", err.Message, "OK");
+                    });
+                }
+            }
             await this.OpenCloseMixer();
+
             base.OnDisappearing();
         }
 
         public async Task LoadTracks()
         {
+            var trackCommands = new List<CubaseCommand>();
+
             TrackButtons.Children.Clear();
-            // To do implement this - The backend is implemented and the http client    
-            foreach (var track in this.tracks)
+            trackCommands.AddRange(this.tracks.Select(x => CubaseCommand.CreateStandardButton(x.Name, x.Index.ToString())
+                                                                        .WithCategory(CubaseServiceConstants.MidiService)));
+
+            foreach (var trackCommand in trackCommands)
             {
-                // trackCommands.Add(MidiMixerCommand.Create(track.Name,null));
-                var btn = RaisedButtonFactory.Create(track.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
+                var btn = RaisedButtonFactory.Create(trackCommand.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
                 {
-                    //var result = await this.cubaseHttpClient.ExecuteCubaseAction(command.Request, async (err) =>
-                    //{
-                    //    await DisplayAlert("Error", err.Message, "OK");
-                    //});
+                    var selectedTrack = this.tracks
+                                            .First(tracks => tracks.Name == trackCommand.Name);
+                    var newTracks = await this.cubaseHttpClient.SetSelectedTrack(selectedTrack);
+                    this.tracks = newTracks.GetActiveChannels();
+                    // this.SetButtonState((Button)s, trackCommand);
+
                 }, true);
                 TrackButtons.Children.Add(btn.Button);
             }
@@ -59,16 +89,22 @@ namespace Cubase.Midi.Sync.UI
         {
             StaticButtons.Children.Clear();
 
+            this.hideShowAudio = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Audio);
+            this.hideShowGroups = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Groups);
+            this.hideShowInputs = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Inputs);
+            this.hideShowInstruments = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Instruments);
+            this.hideShowMidi = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Midi);
+            this.hideShowOutputs = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Outputs);
+            // this.showSelectedTracks = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Show_Selected_Tracks);
+            this.mixerShowAll = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Show_All_Tracks);
 
-            var hideShowAudio = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Audio);
-            var hideShowGroups = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Groups);
-            var hideShowInputs = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Inputs);
-            var hideShowInstruments = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Instruments);
-            var hideShowMidi = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Midi);
-            var hideShowOutputs = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Hide_Outputs);
-            var mixerShowAll = this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Mixer_Show_All);
+            this.showHideAll = CubaseCommand.CreateMacroToggleButton("Show All", [hideShowAudio, hideShowGroups, hideShowInputs, hideShowInstruments, hideShowMidi, hideShowOutputs], [hideShowAudio, hideShowGroups, hideShowInputs, hideShowInstruments, hideShowMidi, hideShowOutputs])
+                                .WithNameToggle("Hide All")
+                                .WithCategory(CubaseServiceConstants.MidiService)
+                                .WithToggleBackGroundColour(ColourConstants.ButtonToggledBackground)
+                                .WithToggleForeColour(ColourConstants.ButtonToggledText);
 
-            var staticCommands = new List<CubaseCommand>
+            this.staticCommands = new List<CubaseCommand>
             {
                 CubaseCommand.CreateToggleButton("Show Groups", hideShowGroups, "Hide Groups").WithCategory(CubaseServiceConstants.MidiService),
                 CubaseCommand.CreateToggleButton("Show Audio", hideShowAudio, "Hide Audio").WithCategory(CubaseServiceConstants.MidiService),
@@ -76,49 +112,73 @@ namespace Cubase.Midi.Sync.UI
                 CubaseCommand.CreateToggleButton("Show Midi", hideShowMidi, "Hide Midi").WithCategory(CubaseServiceConstants.MidiService),
                 CubaseCommand.CreateToggleButton("Show Inputs", hideShowInputs, "Hide Inputs").WithCategory(CubaseServiceConstants.MidiService),
                 CubaseCommand.CreateToggleButton("Show Outputs", hideShowOutputs, "Hide Outputs").WithCategory(CubaseServiceConstants.MidiService),
-                CubaseCommand.CreateStandardButton("Show All", mixerShowAll).WithCategory(CubaseServiceConstants.MidiService),
+                CubaseCommand.CreateMacroToggleButton("Show Selected", [this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Show_Selected_Tracks)],[this.commandCollection.GetCommandByName(KnownCubaseMidiCommands.Show_All_Tracks)]).WithNameToggle("Show All").WithCategory(CubaseServiceConstants.MidiService),
+                showHideAll,
             };
 
-            // start by showing everything
-            await cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(staticCommands.Last()), async (err) =>
-            {
-                await DisplayAlert("Error", err.Message, "OK");
-            });
-
-            // then hide everything
-            await cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateMidiActionGroup([hideShowAudio, hideShowGroups, hideShowInputs, hideShowInstruments, hideShowMidi, hideShowOutputs]), async (err) =>
-            {
-                await DisplayAlert("Error", err.Message, "OK");
-            });
-
-            foreach (var command in staticCommands)
+            foreach (var command in this.staticCommands)
             {
                 var btn = RaisedButtonFactory.Create(command.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
                 {
-                    command.IsToggled = !command.IsToggled;
-                    if (command.Name == "Show All")
+                    if (command == this.showHideAll)
                     {
-                        var toggled = staticCommands.Where(x => x.IsToggleButton && !x.IsToggled).ToList();
-                        foreach (var resetToggle in toggled)
+                        var mixerToggleStates = GetMixerStates(command);
+                        command.IsToggled = !command.IsToggled;
+                        var actionGroup = GetShowHideAllAction(mixerToggleStates);
+                        await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionGroup), async (err) =>
                         {
-                            await cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(resetToggle), async (err) =>
-                            {
-                                await DisplayAlert("Error", err.Message, "OK");
-                            });
-                            resetToggle.IsToggled = !resetToggle.IsToggled;
-                            var restBtn = this.StaticButtons.Children.OfType<Button>().First(x => x.Text == resetToggle.Name);
-                            this.SetButtonState((Button)restBtn, resetToggle);
-                        }
+                            await DisplayAlert("Error", err.Message, "OK");
+                        });
+                        this.SetStaticButtonState(command);
                     }
+                    else
+                    { 
+                        command.IsToggled = !command.IsToggled;
+
+
                     var result = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (err) =>
                     {
                         await DisplayAlert("Error", err.Message, "OK");
                     });
+                    }
                     this.SetButtonState((Button)s, command);
                 }, command.IsToggleButton);
                 StaticButtons.Children.Add(btn.Button);
             }
+            // await ShowAllChannels();
+            var showHideBtn = this.StaticButtons.Children.OfType<Button>().First(x => x.Text == showHideAll.Name);
+            SetButtonState(showHideBtn, showHideAll.WithFlipToggle());
+            this.SetStaticButtonState(showHideAll);
+        }
 
+        private List<string> GetShowHideAllAction(List<CubaseCommand> mixerStates)
+        {
+            var actionGroup = showHideAll.IsToggled ? showHideAll.ActionGroupToggleOff : showHideAll.ActionGroup;
+            return actionGroup.Where(ag => !mixerStates.Select(x => x.Action).Contains(ag)).ToList();
+        }
+
+        private List<CubaseCommand> GetMixerStates(CubaseCommand toggleCommand)
+        {
+            return staticCommands.Where(x => x.ButtonType == CubaseButtonType.Toggle)
+                            .Where(x => x != showHideAll)
+                            .Where(x => x.IsToggled != toggleCommand.IsToggled)
+                            .ToList();
+        }
+
+
+        private void SetStaticButtonState(CubaseCommand toggleCommand)
+        {
+            var toggled = GetMixerStates(toggleCommand);    
+            foreach (var resetToggle in toggled)
+            {
+                var targetTextName = resetToggle.IsToggled ? resetToggle.NameToggle : resetToggle.Name;
+                var restBtn = this.StaticButtons.Children.OfType<Button>().FirstOrDefault(x => x.Text == targetTextName);
+                if (restBtn != null)
+                {
+                    resetToggle.IsToggled = !resetToggle.IsToggled;
+                    this.SetButtonState((Button)restBtn, resetToggle);
+                }
+            }
         }
 
         private async Task<bool> OpenCloseMixer()

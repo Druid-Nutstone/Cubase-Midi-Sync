@@ -84,10 +84,10 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             var result = await response.Content.ReadFromJsonAsync<MidiChannelCollection>();
             return result ?? new MidiChannelCollection();
         }
-
-        public async Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels)
+         
+        public async Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel)
         {
-            var response = await this.PostAsJsonAsync("api/cubase/tracks/selected", midiChannels);
+            var response = await this.PostAsJsonAsync("api/cubase/tracks/select", midiChannel);
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<MidiChannelCollection>() ?? new MidiChannelCollection();

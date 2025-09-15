@@ -36,7 +36,8 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Hide Midi", 0, 23, "Mixer", "Hide: MIDI", 127));
             this.Add(CubaseMidiCommand.Create("Hide Outputs", 0, 24, "Mixer", "Hide: Outputs", 127));
             this.Add(CubaseMidiCommand.Create("Mixer Show All", 0, 25, "Mixer", "Hide: Reveal All", 127));
-
+            this.Add(CubaseMidiCommand.Create("Next Track", 0, 26, "Project", "Select Track: Next", 127));
+            this.Add(CubaseMidiCommand.Create("Previous Track", 0, 27, "Project", "Select Track: Prev", 127));
         }
 
         public CubaseMidiCommand GetCommandByCommand(string command)
@@ -52,6 +53,12 @@ namespace Cubase.Midi.Sync.Common.Midi
                 return found.Command;
             }
             return null;
+        }
+
+        public CubaseMidiCommand GetMidiCommandByName(KnownCubaseMidiCommands name)
+        {
+            var commandName = this.GetCommandByName(name);  
+            return this.GetCommandByCommand(commandName);
         }
     }
 
@@ -105,6 +112,8 @@ namespace Cubase.Midi.Sync.Common.Midi
         Hide_Instruments,
         Hide_Midi,
         Hide_Outputs,
-        Mixer_Show_All
+        Mixer_Show_All,
+        Next_Track,
+        Previous_Track
     }
 }

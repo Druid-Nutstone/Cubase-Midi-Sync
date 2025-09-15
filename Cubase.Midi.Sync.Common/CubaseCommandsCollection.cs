@@ -212,6 +212,12 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }   
 
+        public CubaseCommand WithFlipToggle()
+        {
+            this.IsToggled = !this.IsToggled;
+            return this;
+        }
+
         public CubaseCommand WithToggleBackGroundColour(Color colour)
         {
             this.ToggleBackGroundColour = colour.ToSerializableColour();
@@ -290,13 +296,13 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateMacroToggleButton(string name, List<string> actions, List<string> actionsToggleOff)
+        public static CubaseCommand CreateMacroToggleButton(string name, IEnumerable<string> actions, IEnumerable<string> actionsToggleOff)
         {
             return new CubaseCommand()
             {
                 Name = name,
-                ActionGroup = actions,
-                ActionGroupToggleOff= actionsToggleOff,
+                ActionGroup = actions.ToList(),
+                ActionGroupToggleOff= actionsToggleOff.ToList(),
                 ButtonType = CubaseButtonType.MacroToggle,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
@@ -363,6 +369,11 @@ namespace Cubase.Midi.Sync.Common
                 ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
                 Created = DateTime.Now
             };
+        }
+
+        public static CubaseCommand CreateToggleButtonByName(string name, string toggleName)
+        {
+            return CreateToggleButton(name, string.Empty,toggleName);
         }
 
         public static CubaseCommand CreateToggleButton(string name, string action)

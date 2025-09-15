@@ -44,10 +44,10 @@ namespace Cubase.Midi.Sync.Server.Controllers
         }
 
         [HttpPost]
-        [Route("tracks/selected")]
-        public async Task<IActionResult> SetSelectedTracks([FromBody] List<MidiChannel> midiChannels)
+        [Route("tracks/select")]
+        public async Task<IActionResult> SetSelectedTracks([FromBody] MidiChannel midiChannel)
         {
-            var tracks = await cubaseService.SetSelectedTracks(midiChannels);
+            var tracks = await cubaseService.SetSelectedTrack(midiChannel);
             return Ok(tracks);
         }
 

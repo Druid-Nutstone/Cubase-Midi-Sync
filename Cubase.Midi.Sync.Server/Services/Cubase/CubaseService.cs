@@ -14,13 +14,16 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private readonly ILogger<CubaseService> logger;
 
-        private readonly IMidiService midiService;  
+        private readonly IMidiService midiService;
+
+        private CubaseMidiCommandCollection cubaseMidiCommands;
 
         public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger, IMidiService midiService)
         {
             this.serviceProvider = serviceProvider; 
             this.midiService = midiService;
             this.logger = logger;   
+            this.cubaseMidiCommands = new CubaseMidiCommandCollection();
         }
 
         public async Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request)
@@ -55,13 +58,35 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             return await Task.Run(this.midiService.GetChannels);
         }
 
-        public async Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels)
+        public async Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel)
         {
-            return await Task.Run(() => 
-            {
-                this.midiService.SendSysExMessage(MidiCommand.SelectTracks, midiChannels);
+
+                var targetTrack = this.midiService.MidiChannels.GetChannelByName(midiChannel.Name);
+                var currentTrack = this.midiService.MidiChannels.GetSelectedTrack();
+
+                if (targetTrack != null && currentTrack != null)
+                {
+                   if (targetTrack.Index > currentTrack.Index)
+                   {
+                       var steps = targetTrack.Index - currentTrack.Index;
+                       for (int i = 0; i < steps; i++)
+                       {
+                           this.midiService.SendMidiMessage(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Next_Track));
+                           await Task.Delay(20); // give Cubase time to process   
+                       }
+                   }
+                   else if (targetTrack.Index < currentTrack.Index)
+                   {
+                       var steps = currentTrack.Index - targetTrack.Index;
+                       for (int i = 0; i < steps; i++)
+                       {
+                           this.midiService.SendMidiMessage(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Previous_Track));
+                           await Task.Delay(20); // give Cubase time to process   
+                       }
+                    }
+                }
                 return this.midiService.MidiChannels;
-            });
+
 
         }
 

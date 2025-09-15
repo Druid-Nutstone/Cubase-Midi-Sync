@@ -41,7 +41,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.logger.LogInformation("Initialising Nutstone Midi ..");
             this.midiDriver = new NutstoneDriver("Nutstone");
             this.midiDriver.MidiMessageReceived += MidiDriver_MidiMessageReceived;
-            this.cubaseMidiCommands = new CubaseMidiCommandCollection();    
+            this.cubaseMidiCommands = new CubaseMidiCommandCollection();
         }
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand)

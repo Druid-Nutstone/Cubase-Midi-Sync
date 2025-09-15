@@ -10,6 +10,6 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         Task<MidiChannelCollection> GetTracks();
 
-        Task<MidiChannelCollection> SetSelectedTracks(List<MidiChannel> midiChannels);
+        Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel);
     }
 }

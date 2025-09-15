@@ -44,7 +44,7 @@ namespace Cubase.Midi.Sync.Common.Requests
                 case CubaseButtonType.MacroToggle:
                     return new CubaseActionRequest()
                     {
-                        ActionGroup = actionGroup,
+                        ActionGroup = actionGroup != null ? actionGroup : (command.IsToggled ? command.ActionGroup : command.ActionGroupToggleOff),
                         Category = command.Category,
                         ButtonType = command.ButtonType,
                     };

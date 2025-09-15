@@ -14,6 +14,16 @@ namespace Cubase.Midi.Sync.Common.Midi
             return this.Where(x => !string.IsNullOrEmpty(x.Name)).ToList();
         }
 
+        public MidiChannel GetChannelByName(string name)
+        {
+            return this.FirstOrDefault(x => x.Name != null && x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public MidiChannel GetSelectedTrack()
+        {
+            return this.FirstOrDefault(x => x.Selected.HasValue && x.Selected.Value);
+        }
+
         public MidiChannel AddOrUpdateChannel(MidiChannel midiChannel)
         {
             var channel = this.FirstOrDefault(x => x.Index == midiChannel.Index);

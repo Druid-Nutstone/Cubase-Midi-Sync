@@ -36,7 +36,7 @@ public class BasePage
 
     protected async virtual void OnMixerClicked()
     {
-        this.contentPage.Navigation.PushAsync(this.mixerPage);
+        await this.contentPage.Navigation.PushAsync(this.mixerPage);
         await this.mixerPage.Initialise(); 
     }
 

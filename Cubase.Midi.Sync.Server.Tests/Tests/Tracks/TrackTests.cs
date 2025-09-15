@@ -18,7 +18,16 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Tracks
             Thread.Sleep(10000);
             
             var tracks = await this.Client.GetFromJsonAsync<MidiChannelCollection>("api/cubase/tracks");
-            var activeChannels = tracks.GetActiveChannels();    
+            var activeChannels = tracks.GetActiveChannels();
+
+            // select 2 
+            var megstargroup = activeChannels.Take(2).ToList();
+            foreach (var channel in megstargroup)
+            {
+                channel.Selected = true;
+            }
+            var updated = await this.Client.PostAsJsonAsync("api/cubase/tracks/selected", megstargroup);
+           
         }
     }
 }

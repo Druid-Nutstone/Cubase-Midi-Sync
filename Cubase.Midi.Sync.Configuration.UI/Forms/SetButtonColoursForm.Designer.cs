@@ -32,6 +32,7 @@
             TextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonExampleControl = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
             ButtonOK = new Button();
+            UseDefaultsCheckBox = new CheckBox();
             SuspendLayout();
             // 
             // BackgroundColour
@@ -66,12 +67,23 @@
             ButtonOK.Text = "OK";
             ButtonOK.UseVisualStyleBackColor = true;
             // 
+            // UseDefaultsCheckBox
+            // 
+            UseDefaultsCheckBox.AutoSize = true;
+            UseDefaultsCheckBox.Location = new Point(604, 130);
+            UseDefaultsCheckBox.Name = "UseDefaultsCheckBox";
+            UseDefaultsCheckBox.Size = new Size(100, 21);
+            UseDefaultsCheckBox.TabIndex = 4;
+            UseDefaultsCheckBox.Text = "Use Defaults";
+            UseDefaultsCheckBox.UseVisualStyleBackColor = true;
+            // 
             // SetButtonColoursForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
             ClientSize = new Size(800, 195);
+            Controls.Add(UseDefaultsCheckBox);
             Controls.Add(ButtonOK);
             Controls.Add(ButtonExampleControl);
             Controls.Add(TextColour);
@@ -81,6 +93,7 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Reset Button Colours ";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -89,5 +102,6 @@
         private Controls.Custom.ColourPickerControl TextColour;
         private Controls.Custom.ButtonExampleControl ButtonExampleControl;
         private Button ButtonOK;
+        private CheckBox UseDefaultsCheckBox;
     }
 }

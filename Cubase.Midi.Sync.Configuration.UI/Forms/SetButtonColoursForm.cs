@@ -1,4 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +23,13 @@ namespace Cubase.Midi.Sync.Configuration.UI.Forms
             ButtonExampleControl.TextColourPicker = this.TextColour;
             ButtonOK.Click += ButtonOK_Click;
             ButtonExampleControl.Initialise();
+            UseDefaultsCheckBox.CheckedChanged += UseDefaultsCheckBox_CheckedChanged;
+        }
+
+        private void UseDefaultsCheckBox_CheckedChanged(object? sender, EventArgs e)
+        {
+            this.BackgroundColour.SetColour(ColourConstants.ButtonBackground.ToSerializableColour());
+            this.TextColour.SetColour(ColourConstants.ButtonText.ToSerializableColour());
         }
 
         private void ButtonOK_Click(object? sender, EventArgs e)

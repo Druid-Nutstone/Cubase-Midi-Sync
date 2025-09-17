@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using System;
@@ -19,6 +20,10 @@ namespace Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient
         Task<MidiChannelCollection> GetTracks();
 
         Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel);  
+
+        Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer);
+
+        Task<CubaseMixerCollection> GetMixer();
 
         bool CanConnectToServer();
 

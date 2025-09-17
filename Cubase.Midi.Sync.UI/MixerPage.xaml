@@ -22,13 +22,13 @@
                     AlignItems="Start" />
                 <Border BackgroundColor="LightGray"
                        Padding="10">
-                    <Label Text="Tracks Toggle To View"
+                    <Label Text="Link To Pages"
                            FontSize="20"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"/>
                 </Border>
                 <!-- Lower flexible button area -->
-                <FlexLayout x:Name="TrackButtons"
+                <FlexLayout x:Name="Pages"
                     Direction="Row"
                     Wrap="Wrap"
                     JustifyContent="Start"

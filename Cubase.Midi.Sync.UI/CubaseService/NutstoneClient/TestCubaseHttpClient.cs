@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
@@ -80,7 +81,17 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             */
         }
 
+        public Task<CubaseMixerCollection> GetMixer()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<MidiChannelCollection> GetTracks()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer)
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,6 @@
 using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.Common.Extensions;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Microsoft.Maui.Controls.Shapes;
@@ -18,9 +19,12 @@ public partial class CubaseMainPage : ContentPage
 
     private BasePage basePage;
 
-    public CubaseMainPage(ICubaseHttpClient client, BasePage basePage)
+    private MixerPage mixerPage;    
+
+    public CubaseMainPage(ICubaseHttpClient client, BasePage basePage, MixerPage mixerPage)
     {
         InitializeComponent();
+        this.mixerPage = mixerPage; 
         this.basePage = basePage;   
         basePage.AddToolbars(this);
         this.client = client;
@@ -67,6 +71,20 @@ public partial class CubaseMainPage : ContentPage
             {
                 await DisplayAlert("Error", exception, "OK");
             });
+
+            var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
+            {
+                try
+                {
+                    await this.mixerPage.Initialise(collections);
+                    await Navigation.PushAsync(this.mixerPage);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", ex.Message, "OK");
+                }
+            });
+            CollectionsLayout.Children.Add(mixerButton.Button);
 
             if (collections == null || collections.Count == 0) return;
 

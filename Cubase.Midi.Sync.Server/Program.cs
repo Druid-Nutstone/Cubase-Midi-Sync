@@ -1,4 +1,5 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi;
@@ -6,6 +7,7 @@ using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
 using Cubase.Midi.Sync.Server.Services.Midi;
+using Cubase.Midi.Sync.Server.Services.Mixer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.EventLog;
@@ -37,7 +39,9 @@ builder.Services
       .AddTransient<ICommandService, CommandService>()
       .AddTransient<ICubaseService, CubaseService>()
       .AddTransient<IKeyboardService, KeyboardService>()
-      .AddSingleton<IMidiService, MidiService>()   
+      .AddSingleton<IMidiService, MidiService>() 
+      .AddSingleton<ICacheService, CacheService>()  
+      .AddTransient<IMixerService, MixerService>()  
       .AddKeyedTransient<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
       .AddKeyedTransient<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
@@ -65,6 +69,8 @@ logger.LogInformation("CubaseMidiSync service started at {time}", DateTimeOffset
 
 var midi = app.Services.GetRequiredService<IMidiService>();
 midi.Initialise();
+var cache = app.Services.GetRequiredService<ICacheService>();
+cache.Initialise();
 app.Run();
 
 public partial class Program { } 

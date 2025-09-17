@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
@@ -98,6 +99,34 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
                 //exceptionHandler?.Invoke(new Exception($"Error executing action: {response.ReasonPhrase}"));
                 //return new CubaseActionResponse { Success = false, Message = $"Error executing action: {response.ReasonPhrase}" };
             }
+        }
+
+        public async Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer)
+        {
+            var response = await this.PostAsJsonAsync("api/mixer", mixer);
+            if (response.IsSuccessStatusCode) 
+            {
+                var cmc = await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
+                return cmc ?? [];
+            }
+            else
+            {
+                return [];
+            }
+        }
+
+        public async Task<CubaseMixerCollection> GetMixer()
+        {
+            var response = await GetAsync("api/mixer");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // log status code + error body
+                var errorBody = await response.Content.ReadAsStringAsync();
+            }
+
+            // success → deserialize
+            return await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
         }
     }
 }

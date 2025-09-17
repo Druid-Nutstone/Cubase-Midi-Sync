@@ -10,7 +10,7 @@ public static class RaisedButtonFactory
 {
     public record RaisedButton(Button Button);
 
-    public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, bool toggleMode = false)
+    public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, bool toggleMode = false, string? id = null)
     {
         var button = new Button
         {
@@ -26,6 +26,7 @@ public static class RaisedButtonFactory
             BorderWidth = 1, // remove platform border
             LineBreakMode = LineBreakMode.WordWrap, // allows wrapping
             TextTransform = TextTransform.None,     // preserves your arrow character
+            AutomationId = id
         };
 
         // Visual states

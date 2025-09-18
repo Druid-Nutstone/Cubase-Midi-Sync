@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.DirectoryServices;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,20 @@ namespace Cubase.Midi.Sync.Configuration.UI.Forms.CubaseCommands
             this.allCommands = new CubaseKnownCollection();
             this.cubaseCommandsListView.Populate(this.allCommands);
             this.searchFilter.TextChanged += SearchFilter_TextChanged;
+            this.ShowAssignedCheckBox.CheckedChanged += ShowAssignedCheckBox_CheckedChanged;
+        }
+
+        private void ShowAssignedCheckBox_CheckedChanged(object? sender, EventArgs e)
+        {
+            if (this.ShowAssignedCheckBox.Checked)
+            {
+                var assigned = this.allCommands.Where(x => !string.IsNullOrEmpty(x.CommandBinding));
+                this.cubaseCommandsListView.Populate(assigned.ToList());
+            }
+            else
+            {
+                this.cubaseCommandsListView.Populate(this.allCommands);
+            }
         }
 
         private void SearchFilter_TextChanged(object? sender, EventArgs e)

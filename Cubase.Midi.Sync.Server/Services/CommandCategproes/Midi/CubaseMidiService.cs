@@ -1,7 +1,10 @@
-﻿using Cubase.Midi.Sync.Common.Midi;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
+using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
@@ -13,12 +16,24 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
         
         private readonly IMidiService midiService;
         
+        private readonly ICacheService cacheService;    
+
+        private readonly IServiceProvider services;
+
         private CubaseMidiCommandCollection commandCollection;
 
-        public CubaseMidiService(ILogger<CubaseMidiService> logger, IMidiService midiService) 
+        private ICategoryService keyService;
+
+        public CubaseMidiService(ILogger<CubaseMidiService> logger, 
+                                 IMidiService midiService, 
+                                 ICacheService cacheService,
+                                 IServiceProvider serviceCollection) 
         { 
-            this.logger = logger;   
+            this.logger = logger;
+            this.services = serviceCollection;
+            this.keyService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
             this.midiService = midiService;
+            this.cacheService = cacheService;
             this.commandCollection = new CubaseMidiCommandCollection(); 
         } 
         
@@ -64,7 +79,10 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             {
                 return this.midiService.SendMidiMessage(currentMidiCommand);
             }
-            return false;
+            else
+            {
+                return this.keyService.ProcessAction(CubaseActionRequest.Create(midiCommand)).Success; 
+            }
         }
     }
 }

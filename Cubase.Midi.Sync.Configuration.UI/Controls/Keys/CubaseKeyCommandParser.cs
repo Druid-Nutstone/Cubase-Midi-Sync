@@ -17,6 +17,27 @@ public class CubaseKeyCommandParser
         return new CubaseKeyCommandParser() { filePath = keyLocation };   
     } 
     
+    public CubaseMacroCommandCollection ParseMacros()
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Cubase 14 key commands XML file not found.", filePath);
+        var doc = XDocument.Load(filePath);
+        var list = new CubaseMacroCommandCollection();
+        foreach (var categoryItem in doc.Descendants("list"))
+        {
+            if (categoryItem.Attribute("name")?.Value != "Macros")
+                continue;
+
+            foreach (var cat in categoryItem.Elements("item"))
+            {
+                string macroName = cat.Element("string")?.Attribute("value")?.Value ?? "Unknown";
+
+                list.Add(new CubaseMacroCommand() { Name = macroName });     
+            }
+        }
+        return list;
+    }
+
     public CubaseKeyCommandCollection Parse()
     {
         if (!File.Exists(filePath))

@@ -17,6 +17,7 @@ namespace Cubase.Midi.Sync.Common.Midi
         TrackUpdate,
         TrackComplete,
         NextTrack,
-        PreviousTrack
+        PreviousTrack,
+        MacroCommand
     }
 }

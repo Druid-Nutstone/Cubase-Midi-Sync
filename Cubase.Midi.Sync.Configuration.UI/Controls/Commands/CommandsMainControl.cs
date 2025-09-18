@@ -2,6 +2,7 @@
 using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Midi;
+using Cubase.Midi.Sync.Configuration.UI.Controls.MidiMacros.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -104,7 +104,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.buttonNameToggled.TextChanged += ButtonNameToggled_TextChanged;  
             this.buttonAdd.Click += ButtonAdd_Click;
             this.InitialiseAreaName();
-            
+
+            this.availableToMixer.Checked = this.cubaseCommand.IsAvailableToTheMixer;
+
             this.cbAreaName.SelectedIndexChanged += CbAreaName_SelectedIndexChanged;
             this.areaTypeComboBox.SelectedIndexChanged += AreaTypeComboBox_SelectedIndexChanged;
             this.newAreaName.Enabled = false;
@@ -340,6 +342,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
                     cubaseCommand.CubaseCommandDefinition = cubaseKeyCommand.CubaseCommand;
 
+                    cubaseCommand.IsAvailableToTheMixer = this.availableToMixer.Checked;
+
                     cubaseCommand.NameToggle = string.IsNullOrEmpty(buttonNameToggled.Text) ? buttonName.Text : buttonNameToggled.Text; 
 
                     cubaseCommand.WithCategory(commandCollection.Category);
@@ -366,6 +370,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             cubaseCommand.ToggleForeColour = ButtonToggleTextColour.JsonColour;
             cubaseCommand.ButtonBackgroundColour = ButtonBackgroundColour.JsonColour;
 
+            cubaseCommand.IsAvailableToTheMixer = this.availableToMixer.Checked;
 
             //if (commandCollection.Commands.Any(c => c.Name == buttonName.Text))
             //{

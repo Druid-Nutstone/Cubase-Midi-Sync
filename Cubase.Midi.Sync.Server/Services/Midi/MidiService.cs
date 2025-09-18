@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.Midi;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -42,6 +43,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.midiDriver = new NutstoneDriver("Nutstone");
             this.midiDriver.MidiMessageReceived += MidiDriver_MidiMessageReceived;
             this.cubaseMidiCommands = new CubaseMidiCommandCollection();
+
         }
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand)
@@ -146,9 +148,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private void Ready(string emptyString)
         {
             this.logger.LogInformation($"Cubase Midi Sync is ready..");
-            // this.midiDriver.SendMessage("Nutstone Midi Javascript Service is ready");
         }
-
-
+            
     }
 }

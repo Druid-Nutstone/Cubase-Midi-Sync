@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.Mixer;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Mixer;
 
 namespace Cubase.Midi.Sync.Server.Services.Cache
 {
@@ -8,7 +9,6 @@ namespace Cubase.Midi.Sync.Server.Services.Cache
 
         public void Initialise()
         {
-            // nop
         }
     }
 }

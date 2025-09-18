@@ -12,12 +12,15 @@ namespace Cubase.Midi.Sync.Common
 
         public static string MidiService = "Midi";
 
+        public static string MidiMacroService = "MidiMacro";
+
         public static string GenericMidiFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steinberg", "Cubase 14_64", "Generic Remote.xml");
     }
 
     public enum CubaseAreaTypes
     {
         Keys,
-        Midi
+        Midi,
+        MidiMacro
     }
 }

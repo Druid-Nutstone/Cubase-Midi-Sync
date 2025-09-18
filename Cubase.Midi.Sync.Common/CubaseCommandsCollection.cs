@@ -21,7 +21,7 @@ namespace Cubase.Midi.Sync.Common
         {
             this.AddRange(commands);
         }
-        
+
         public bool HaveError { get; set; } = false;
 
         public string Message { get; set; }
@@ -163,6 +163,8 @@ namespace Cubase.Midi.Sync.Common
         public List<string> ActionGroupToggleOff { get; set; } = new List<string>();  
 
         public string Category { get; set; }
+
+        public bool IsAvailableToTheMixer { get; set; } = false;
 
         public SerializableColour ToggleBackGroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
 

@@ -15,6 +15,8 @@ namespace Cubase.Midi.Sync.Common
             return CubaseCommandsCollection.CreateFromList(this.GetCubaseCommands().Where(c => c.Visible).ToList());
         }
         
+        
+       
         public CubaseCommandsCollection GetCubaseCommands()
         {
             var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings");

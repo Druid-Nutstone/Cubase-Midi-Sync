@@ -22,6 +22,20 @@
                     AlignItems="Start" />
                 <Border BackgroundColor="LightGray"
                        Padding="10">
+                    <Label Text="Custom Commands"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Border>
+                <!-- Lower flexible button area -->
+                <FlexLayout x:Name="CustomCommands"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Start"
+                    AlignContent="Start" />                
+                <Border BackgroundColor="LightGray"
+                       Padding="10">
                     <Label Text="Link To Pages"
                            FontSize="20"
                            FontAttributes="Bold"

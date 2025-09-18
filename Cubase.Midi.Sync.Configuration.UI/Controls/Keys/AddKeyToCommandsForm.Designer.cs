@@ -53,6 +53,7 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
+            availableToMixer = new CheckBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -194,6 +195,7 @@
             // groupBox2
             // 
             groupBox2.BackColor = Color.WhiteSmoke;
+            groupBox2.Controls.Add(availableToMixer);
             groupBox2.Controls.Add(ButtonDataPanel);
             groupBox2.Controls.Add(buttonNameToggled);
             groupBox2.Controls.Add(buttonName);
@@ -241,14 +243,14 @@
             // 
             // ToggleButtonTest
             // 
-            ToggleButtonTest.Location = new Point(607, 332);
+            ToggleButtonTest.Location = new Point(607, 345);
             ToggleButtonTest.Name = "ToggleButtonTest";
             ToggleButtonTest.Size = new Size(113, 47);
             ToggleButtonTest.TabIndex = 31;
             // 
             // NormalButtonTest
             // 
-            NormalButtonTest.Location = new Point(607, 249);
+            NormalButtonTest.Location = new Point(607, 263);
             NormalButtonTest.Name = "NormalButtonTest";
             NormalButtonTest.Size = new Size(113, 47);
             NormalButtonTest.TabIndex = 30;
@@ -256,7 +258,7 @@
             // CopyColourFromArea
             // 
             CopyColourFromArea.AutoSize = true;
-            CopyColourFromArea.Location = new Point(24, 229);
+            CopyColourFromArea.Location = new Point(24, 243);
             CopyColourFromArea.Name = "CopyColourFromArea";
             CopyColourFromArea.Size = new Size(142, 17);
             CopyColourFromArea.TabIndex = 29;
@@ -266,7 +268,7 @@
             // ButtonToggleTextColour
             // 
             ButtonToggleTextColour.Label = "Button Toggle Text Colour";
-            ButtonToggleTextColour.Location = new Point(276, 332);
+            ButtonToggleTextColour.Location = new Point(276, 345);
             ButtonToggleTextColour.Name = "ButtonToggleTextColour";
             ButtonToggleTextColour.Size = new Size(259, 61);
             ButtonToggleTextColour.TabIndex = 28;
@@ -274,7 +276,7 @@
             // ButtonToggleBackgroundColour
             // 
             ButtonToggleBackgroundColour.Label = "Button Toggle Background Colour";
-            ButtonToggleBackgroundColour.Location = new Point(24, 332);
+            ButtonToggleBackgroundColour.Location = new Point(24, 345);
             ButtonToggleBackgroundColour.Name = "ButtonToggleBackgroundColour";
             ButtonToggleBackgroundColour.Size = new Size(246, 61);
             ButtonToggleBackgroundColour.TabIndex = 27;
@@ -282,7 +284,7 @@
             // ButtonTextColour
             // 
             ButtonTextColour.Label = "Button Text Colour";
-            ButtonTextColour.Location = new Point(276, 249);
+            ButtonTextColour.Location = new Point(276, 263);
             ButtonTextColour.Name = "ButtonTextColour";
             ButtonTextColour.Size = new Size(259, 61);
             ButtonTextColour.TabIndex = 26;
@@ -290,10 +292,20 @@
             // ButtonBackgroundColour
             // 
             ButtonBackgroundColour.Label = "Button Background Colour";
-            ButtonBackgroundColour.Location = new Point(24, 249);
+            ButtonBackgroundColour.Location = new Point(21, 263);
             ButtonBackgroundColour.Name = "ButtonBackgroundColour";
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
+            // 
+            // availableToMixer
+            // 
+            availableToMixer.AutoSize = true;
+            availableToMixer.Location = new Point(28, 200);
+            availableToMixer.Name = "availableToMixer";
+            availableToMixer.Size = new Size(230, 21);
+            availableToMixer.TabIndex = 39;
+            availableToMixer.Text = "Command is available to the Mixer";
+            availableToMixer.UseVisualStyleBackColor = true;
             // 
             // AddKeyToCommandsForm
             // 
@@ -341,5 +353,6 @@
         private CheckBox VisibleCheckBox;
         private Label label1;
         private ComboBox areaTypeComboBox;
+        private CheckBox availableToMixer;
     }
 }

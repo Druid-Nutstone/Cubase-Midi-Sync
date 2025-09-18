@@ -29,16 +29,18 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            searchFilter = new TextBox();
+            label1 = new Label();
             panel2 = new Panel();
             cubaseCommandsListView = new CubaseCommandsListView();
-            label1 = new Label();
-            searchFilter = new TextBox();
+            ShowAssignedCheckBox = new CheckBox();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(ShowAssignedCheckBox);
             panel1.Controls.Add(searchFilter);
             panel1.Controls.Add(label1);
             panel1.Dock = DockStyle.Top;
@@ -46,6 +48,23 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(486, 77);
             panel1.TabIndex = 0;
+            // 
+            // searchFilter
+            // 
+            searchFilter.Location = new Point(80, 22);
+            searchFilter.Name = "searchFilter";
+            searchFilter.Size = new Size(211, 25);
+            searchFilter.TabIndex = 1;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label1.Location = new Point(29, 25);
+            label1.Name = "label1";
+            label1.Size = new Size(45, 17);
+            label1.TabIndex = 0;
+            label1.Text = "Filter:";
             // 
             // panel2
             // 
@@ -68,22 +87,15 @@
             cubaseCommandsListView.UseCompatibleStateImageBehavior = false;
             cubaseCommandsListView.View = View.Details;
             // 
-            // label1
+            // ShowAssignedCheckBox
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label1.Location = new Point(29, 25);
-            label1.Name = "label1";
-            label1.Size = new Size(45, 17);
-            label1.TabIndex = 0;
-            label1.Text = "Filter:";
-            // 
-            // searchFilter
-            // 
-            searchFilter.Location = new Point(80, 22);
-            searchFilter.Name = "searchFilter";
-            searchFilter.Size = new Size(211, 25);
-            searchFilter.TabIndex = 1;
+            ShowAssignedCheckBox.AutoSize = true;
+            ShowAssignedCheckBox.Location = new Point(317, 24);
+            ShowAssignedCheckBox.Name = "ShowAssignedCheckBox";
+            ShowAssignedCheckBox.Size = new Size(115, 21);
+            ShowAssignedCheckBox.TabIndex = 2;
+            ShowAssignedCheckBox.Text = "Show Assigned";
+            ShowAssignedCheckBox.UseVisualStyleBackColor = true;
             // 
             // CubaseCommandsControl
             // 
@@ -106,5 +118,6 @@
         private CubaseCommandsListView cubaseCommandsListView;
         private TextBox searchFilter;
         private Label label1;
+        private CheckBox ShowAssignedCheckBox;
     }
 }

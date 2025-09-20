@@ -1,5 +1,8 @@
-﻿using Cubase.Midi.Sync.Common.Mixer;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Mixer;
+using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Server.Services.Cache;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.Midi;
 
 namespace Cubase.Midi.Sync.Server.Services.Mixer
@@ -8,12 +11,18 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
     {
         private readonly ICacheService cacheService;    
 
-        private readonly IMidiService midiService;  
+        private readonly IMidiService midiService;
+        
+        private readonly IServiceProvider services;   
 
-        public MixerService(ICacheService cacheService, IMidiService midiService)
+        private ICategoryService categoryService;   
+
+        public MixerService(ICacheService cacheService, IMidiService midiService, IServiceProvider services)
         {
            this.cacheService = cacheService;    
            this.midiService = midiService;
+           this.services = services;
+           this.categoryService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
         }
 
         public async Task<CubaseMixerCollection> GetMixer()
@@ -25,11 +34,18 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         public async Task<CubaseMixerCollection> MixerCommand(CubaseMixer cubaseMixer)
         {
-            var commands = cacheService.CubaseMixer.GetCommands(cubaseMixer.Command);
-            foreach (var cmd in commands)
+            if (!string.IsNullOrEmpty(cubaseMixer.KeyAction))
             {
-                this.midiService.SendMidiMessage(cmd);  
-                await Task.Delay(50); // Small delay to ensure Cubase processes the command
+                this.categoryService.ProcessAction(CubaseActionRequest.Create(cubaseMixer.KeyAction));
+            }
+            else
+            {
+                var commands = cacheService.CubaseMixer.GetCommands(cubaseMixer.Command);
+                foreach (var cmd in commands)
+                {
+                    this.midiService.SendMidiMessage(cmd);
+                    await Task.Delay(50); // Small delay to ensure Cubase processes the command
+                }
             }
             return cacheService.CubaseMixer;
         }

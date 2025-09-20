@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cubase.Midi.Sync.Common.Keys;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace Cubase.Midi.Sync.Common.Midi
     {
         public CubaseMidiCommandCollection() 
         {
+            var requiredKeys = RequiredKeyMappingCollection.Create();
             this.Add(CubaseMidiCommand.Create("Rewind To Start", 0, 1, "Transport", "Return to Zero", 127));
             this.Add(CubaseMidiCommand.Create("Start", 0, 2, "Transport", "Start", 127));
             this.Add(CubaseMidiCommand.Create("Stop", 0, 3, "Transport", "Stop", 127));
@@ -38,6 +40,8 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Mixer Show All", 0, 25, "Mixer", "Hide: Reveal All", 127));
             this.Add(CubaseMidiCommand.Create("Next Track", 0, 26, "Project", "Select Track: Next", 127));
             this.Add(CubaseMidiCommand.Create("Previous Track", 0, 27, "Project", "Select Track: Prev", 127));
+            this.Add(CubaseMidiCommand.Create("Key Hide All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All),127));
+            this.Add(CubaseMidiCommand.Create("Key Show All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Show_All), 127));
         }
 
         public CubaseMidiCommand GetCommandByCommand(string command)
@@ -114,6 +118,9 @@ namespace Cubase.Midi.Sync.Common.Midi
         Hide_Outputs,
         Mixer_Show_All,
         Next_Track,
-        Previous_Track
+        Previous_Track,
+        // this is actually a mapped key command 
+        Key_Hide_All,
+        Key_Show_All
     }
 }

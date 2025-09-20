@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
+namespace Cubase.Midi.Sync.Common.Keys
 {
     public class CubaseKeyCommandCollection : List<CubaseKeyCommand>    
     {
@@ -45,6 +45,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                 return existingCommand.Key.Equals(key);
             }
             return false;
+        }
+
+        public CubaseKeyCommand GetByCategoryAndName(string category, string name)
+        {
+            return this.FirstOrDefault(x => x.Category.Equals(category, StringComparison.OrdinalIgnoreCase) && x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public List<CubaseKeyCommand> GetByName(string name)

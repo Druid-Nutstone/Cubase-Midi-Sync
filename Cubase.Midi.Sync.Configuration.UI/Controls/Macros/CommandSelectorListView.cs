@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+﻿using Cubase.Midi.Sync.Common.Keys;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using System;
 using System.Collections.Generic;
 using System.Linq;

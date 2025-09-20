@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Extensions;
+using Cubase.Midi.Sync.Common.Keys;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using System;
 using System.Collections.Generic;

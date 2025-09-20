@@ -1,5 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,21 +12,22 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
     {
         private NutstoneDriver midiDriver;
 
-        private ILogger<MidiService> logger;
+        private readonly ICategoryService keyService;
+        
+        private readonly ILogger<MidiService> logger;
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
         public MidiChannelCollection MidiChannels { get; set; } = new MidiChannelCollection();
 
-        private CubaseTransport transport;
-
         private Dictionary<string, Action<string>> commandProcessors;
 
         private bool tracksReceived = false;
 
-        public MidiService(ILogger<MidiService> logger) 
+        public MidiService(ILogger<MidiService> logger, IServiceProvider serviceProvider) 
         { 
             this.logger = logger;
+            this.keyService = serviceProvider.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
             this.commandProcessors = new Dictionary<string, Action<string>>()
             {
                 {MidiCommand.ClearChannels.ToString(), this.ClearChannels},
@@ -50,8 +53,16 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         {
             try
             {
-                this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
-                return true;
+                if (cubaseMidiCommand.Channel > -1)
+                {
+                    this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
+                    return true;
+                }
+                else
+                {
+                    var keyResult = this.keyService.ProcessAction(CubaseActionRequest.Create(cubaseMidiCommand.Command));
+                    return keyResult.Success;
+                }
             }
             catch (Exception ex) 
             {

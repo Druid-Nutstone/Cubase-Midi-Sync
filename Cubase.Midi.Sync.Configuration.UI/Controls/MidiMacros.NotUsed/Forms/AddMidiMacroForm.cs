@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.Midi;
+﻿using Cubase.Midi.Sync.Common.Keys;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using System;
 using System.Collections.Generic;
@@ -27,15 +28,15 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.MidiMacros.Forms
         public AddMidiMacroForm(Action<CubaseMacroCommand> keyHandler)
         {
             InitializeComponent();
-            this.macroCommands = CubaseKeyCommandParser.Create().ParseMacros();
-            this.midiMacroSelectListView.Populate(this.macroCommands, (command) => 
-            { 
-                keyHandler(command);    
-                if (this.CloseAfterSelect)
-                {
-                    this.Close();
-                }
-            });
+            //this.macroCommands = CubaseKeyCommandParser.Create().ParseMacros();
+            //this.midiMacroSelectListView.Populate(this.macroCommands, (command) => 
+            //{ 
+            //    keyHandler(command);    
+            //    if (this.CloseAfterSelect)
+            //    {
+            //        this.Close();
+            //    }
+            //});
         }
     }
 }

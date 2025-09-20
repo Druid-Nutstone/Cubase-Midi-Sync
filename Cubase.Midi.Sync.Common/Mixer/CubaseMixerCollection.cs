@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.Midi;
+﻿using Cubase.Midi.Sync.Common.Keys;
+using Cubase.Midi.Sync.Common.Midi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,17 @@ namespace Cubase.Midi.Sync.Common.Mixer
     {
         private CubaseMidiCommandCollection cubaseMidiCommands = new CubaseMidiCommandCollection();
         
-        
+        private bool areTracksHidden = false;   
+
+
         public CubaseMixerCollection()
         {
 
         }
+
+        public string ErrorMessage { get; set; }
+
+        public bool Success { get; set; } = true;
 
         public CubaseMidiCommand GetMidiCommandByName(KnownCubaseMidiCommands name)
         {
@@ -82,9 +89,12 @@ namespace Cubase.Midi.Sync.Common.Mixer
                         this.Toggle(KnownCubaseMidiCommands.Mixer);
                         // open mixer
                         commands.Add(cubaseMidiCommands.GetMidiCommandByName(cubaseMixer.Command));
+                        commands.Add(cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Key_Show_All));
+
+
                         // hide all
-                        commands.AddRange(this.ToggleGroups());
-                        this.GetMixerCommand(KnownCubaseMidiCommands.Show_Selected_Tracks).WithVisible(false).WithToggled(false);
+                        //commands.AddRange(this.ToggleGroups());
+                        this.GetMixerCommand(KnownCubaseMidiCommands.Show_Selected_Tracks).WithVisible(true).WithToggled(false);
                         this.GetMixerCommand(KnownCubaseMidiCommands.Hide_Groups).WithToggled(false).WithVisible(true);
                         this.GetMixerCommand(KnownCubaseMidiCommands.Hide_Audio).WithToggled(false).WithVisible(true);    
                         this.GetMixerCommand(KnownCubaseMidiCommands.Hide_Inputs).WithToggled(false).WithVisible(true);   
@@ -153,7 +163,17 @@ namespace Cubase.Midi.Sync.Common.Mixer
                 default:
                     if (cubaseMixer != null)
                     {
+                        if (!cubaseMixer.Toggled && !areTracksHidden)
+                        {
+                            commands.Add(cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Key_Hide_All));
+                            areTracksHidden = true;
+                        }
+                        else
+                        {
+                            areTracksHidden = false;
+                        }
                         this.Toggle(cubaseMixer.Command);
+                        
                         commands.Add(cubaseMidiCommands.GetMidiCommandByName(cubaseMixer.Command));
                         return commands;
                     }
@@ -200,7 +220,9 @@ namespace Cubase.Midi.Sync.Common.Mixer
 
         public static CubaseMixerCollection Create()
         {
-            return new CubaseMixerCollection() 
+            // get key commands 
+            var requiredKeys = RequiredKeyMappingCollection.Create();
+            return new CubaseMixerCollection()
             {
               CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, "Open Mixer", "Close Mixer", false, false),
               CubaseMixer.Create(KnownCubaseMidiCommands.Hide_Groups, "Show Groups", "Hide Groups"),
@@ -210,7 +232,9 @@ namespace Cubase.Midi.Sync.Common.Mixer
               CubaseMixer.Create(KnownCubaseMidiCommands.Hide_Inputs, "Show Inputs", "Hide Inputs"),
               CubaseMixer.Create(KnownCubaseMidiCommands.Hide_Outputs, "Show Outputs", "Hide Outputs"),
               CubaseMixer.Create(KnownCubaseMidiCommands.Show_All_Tracks, "Show All Tracks", "Hide Tracks"),
-              CubaseMixer.Create(KnownCubaseMidiCommands.Show_Selected_Tracks, "Show Selected Tracks", "Undo Selected Tracks").WithInitiallyVisible(false)
+              CubaseMixer.Create(KnownCubaseMidiCommands.Show_Selected_Tracks, "Show Selected Tracks", "Undo Selected Tracks").WithInitiallyVisible(false),
+              CubaseMixer.CreateKey(KnownCubaseMidiCommands.Key_Hide_All, requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All), "Hide Channel Types", "NA", false, false),
+              CubaseMixer.CreateKey(KnownCubaseMidiCommands.Key_Show_All, requiredKeys.GetKey(RequiredKeyId.Mixer_Show_All), "Show Channel Types", "NA", false, false)
             };
         }
     }
@@ -220,6 +244,8 @@ namespace Cubase.Midi.Sync.Common.Mixer
     {
         public KnownCubaseMidiCommands Command { get; set; }
 
+        public string KeyAction { get; set; }
+        
         public bool Toggled { get; set; }
 
         public bool Visible { get; set; }
@@ -251,6 +277,20 @@ namespace Cubase.Midi.Sync.Common.Mixer
         {
             this.IsInitiallyVisible = visible;
             return this;
+        }
+
+        public static CubaseMixer CreateKey(KnownCubaseMidiCommands command, string keyValue, string buttonText, string buttonTextToggled, bool toggled = false, bool visible = true)
+        {
+            return new CubaseMixer
+            {
+                Command = command,
+                KeyAction = keyValue,
+                ButtonText = buttonText,
+                ButtonTextToggled = buttonTextToggled,
+                Toggled = toggled,
+
+                Visible = visible
+            };
         }
 
         public static CubaseMixer Create(KnownCubaseMidiCommands command, string buttonText, string buttonTextToggled, bool toggled = false, bool visible = true)

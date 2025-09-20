@@ -168,12 +168,19 @@ namespace Cubase.Midi.Sync.UI
             this.basePage.AddToolbars(this);
 
             this.mixerCollection = await this.cubaseHttpClient.GetMixer();
-            await this.OpenCloseMixer();
-            await this.InitialiseMixer();
-            if (mainCommands != null)
+            if (!this.mixerCollection.Success)
             {
-                await this.InitialisePages(mainCommands);
-                await this.InitialiseCustomCommands(mainCommands);
+                await DisplayAlert("ERROR", $"Cannot load the mixer {this.mixerCollection.ErrorMessage}", "OK");
+            }
+            else
+            {
+                await this.OpenCloseMixer();
+                await this.InitialiseMixer();
+                if (mainCommands != null)
+                {
+                    await this.InitialisePages(mainCommands);
+                    await this.InitialiseCustomCommands(mainCommands);
+                }
             }
         }
 

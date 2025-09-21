@@ -3,6 +3,7 @@ using Cubase.Midi.Sync.Common.Keys;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Cubase.Midi.Sync.Common.Keys
@@ -10,18 +11,13 @@ namespace Cubase.Midi.Sync.Common.Keys
 
     public class CubaseKeyCommandParser
     {
-        public string filePath { get; set; } = string.Empty;
 
-        public static CubaseKeyCommandParser Create()
-        {
-            var keyLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steinberg", "Cubase 14_64", "Key Commands.xml");
-            return new CubaseKeyCommandParser() { filePath = keyLocation };
-        }
-
-        public CubaseKeyCommandCollection Parse()
+        public CubaseKeyCommandCollection Parse(string filePath)
         {
             if (!File.Exists(filePath))
-                throw new FileNotFoundException("Cubase 14 key commands XML file not found.", filePath);
+            {
+                throw new FileNotFoundException($"{filePath} Cubase 14 key commands XML file not found.");
+            }
             var knownCommands = new CubaseKnownCollection();
             var doc = XDocument.Load(filePath);
             var list = new CubaseKeyCommandCollection();

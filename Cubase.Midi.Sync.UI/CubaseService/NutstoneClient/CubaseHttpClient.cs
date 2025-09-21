@@ -101,21 +101,21 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             }
         }
 
-        public async Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer)
+        public async Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer, Page page)
         {
             var response = await this.PostAsJsonAsync("api/mixer", mixer);
             if (response.IsSuccessStatusCode) 
             {
-                var cmc = await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
-                return cmc ?? [];
+                return await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
             }
             else
             {
-                return [];
+                await page.DisplayAlert("Error - SetMixer", await response.Content.ReadAsStringAsync(), "OK");
+                return null;
             }
         }
 
-        public async Task<CubaseMixerCollection> GetMixer()
+        public async Task<CubaseMixerCollection> GetMixer(Page page)
         {
             var response = await GetAsync("api/mixer");
 
@@ -123,6 +123,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             {
                 // log status code + error body
                 var errorBody = await response.Content.ReadAsStringAsync();
+                await page.DisplayAlert("Error CubaseHttpClient GetMixer ", $"Error getting mixer details. {Environment.NewLine} {errorBody}", "OK");  
             }
 
             // success → deserialize

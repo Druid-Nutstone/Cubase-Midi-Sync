@@ -7,6 +7,6 @@ namespace Cubase.Midi.Sync.Server.Services.Cache
     {
         void Initialise();
 
-        CubaseMixerCollection CubaseMixer { get; set; }
+        CubaseMixerCollection CubaseMixer { get; }
     }
 }

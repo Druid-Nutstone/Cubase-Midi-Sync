@@ -20,7 +20,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             InitializeComponent();
             searchButton.Click += SearchButton_Click;
             this.Dock = DockStyle.Fill;
-            this.commands = CubaseKeyCommandParser.Create().Parse();
+            this.commands = new CubaseKeyCommandParser().Parse(CubaseConfigurationConstants.KeyCommandsFileLocation);
 
             this.ListViewPanel.Controls.Clear();
             var keysTreeView = new KeysTreeView();

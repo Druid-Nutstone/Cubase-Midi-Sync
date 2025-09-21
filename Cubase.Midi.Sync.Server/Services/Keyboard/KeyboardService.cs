@@ -29,7 +29,11 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
         public bool SendKey(string keyText, Action<string> errHandler)
         {
-            if (!this.MakeCubasePrimaryWindow()) return false;
+            if (!this.MakeCubasePrimaryWindow())
+            {
+                errHandler($"Cubase is not running OR the execuatble (cubase) cannot be found OR it cannot be made the primary focused window");
+                return false;
+            }
             
             // Split keyText into parts (modifiers + main key)
             var parts = keyText.ToUpper().Split('+');
@@ -81,21 +85,29 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
         {
             const int maxCount = 10;
             int currentCount = 0;
-            var cubase = GetCubase(); 
-            while (GetForegroundWindow() != cubase.MainWindowHandle)
+            var cubase = GetCubase();
+            if (cubase != null)
             {
-                this.logger.LogWarning($"Cubase is not the foregournd window Count:{currentCount}");
-                if (currentCount < maxCount)
+                while (GetForegroundWindow() != cubase.MainWindowHandle)
                 {
-                    SetForegroundWindow(cubase.MainWindowHandle);
-                    Thread.Sleep(500);
-                    cubase = GetCubase();   
-                    currentCount++;
+                    this.logger.LogWarning($"Cubase is not the foregournd window Count:{currentCount}");
+                    if (currentCount < maxCount)
+                    {
+                        SetForegroundWindow(cubase.MainWindowHandle);
+                        Thread.Sleep(500);
+                        cubase = GetCubase();
+                        currentCount++;
+                    }
+                    else
+                    {
+                        return false; // failed to bring Cubase to foreground
+                    }
                 }
-                else
-                {
-                    return false; // failed to bring Cubase to foreground
-                }
+            }
+            else
+            {
+                this.logger.LogError($"Cubase is NOT running !");
+                return false;
             }
             return true;
         }

@@ -8,9 +8,9 @@ namespace Cubase.Midi.Sync.Common.Keys
 {
     public class RequiredKeyMappingCollection : List<RequiredKey>
     {
-        public RequiredKeyMappingCollection()
+        public RequiredKeyMappingCollection(Action<string>? msgHandler, string keyCommandsFilePath)
         {
-            var commands = CubaseKeyCommandParser.Create().Parse();
+            var commands = new CubaseKeyCommandParser().Parse(keyCommandsFilePath);
             this.Add(new RequiredKey() { Id = RequiredKeyId.Mixer_Hide_All, Category = "Mixer", Name = "Hide: Hide All" });
             this.Add(new RequiredKey() { Id = RequiredKeyId.Mixer_Show_All, Category = "Mixer", Name = "Hide: Reveal All" });
             var hideAll = this.GetById(RequiredKeyId.Mixer_Hide_All);
@@ -39,9 +39,9 @@ namespace Cubase.Midi.Sync.Common.Keys
             return this.GetById(id).Key;
         }
 
-        public static RequiredKeyMappingCollection Create()
+        public static RequiredKeyMappingCollection Create(Action<string>? msgHandler, string keyCommandFileLocation)
         {
-            return new RequiredKeyMappingCollection();
+            return new RequiredKeyMappingCollection(msgHandler, keyCommandFileLocation);
         }
     }
 

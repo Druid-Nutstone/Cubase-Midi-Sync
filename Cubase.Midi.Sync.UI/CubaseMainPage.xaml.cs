@@ -32,7 +32,7 @@ public partial class CubaseMainPage : ContentPage
         this.serverAvailable = this.client.CanConnectToServer();
         if (!this.serverAvailable)
         {
-            DisplayAlert("Error", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
+            DisplayAlert("Error CubaseMainPage CTOR", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
         }
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         var label = new Label
@@ -69,19 +69,19 @@ public partial class CubaseMainPage : ContentPage
                 // todo show acrtionsin a non-blocking ui section
             }, async (exception) =>
             {
-                await DisplayAlert("Error", exception, "OK");
+                await DisplayAlert("Error CubaseMainPage LoadCommands", exception, "OK");
             });
 
             var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
                 try
                 {
-                    await this.mixerPage.Initialise(collections);
                     await Navigation.PushAsync(this.mixerPage);
+                    await this.mixerPage.Initialise(collections);
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error", ex.Message, "OK");
+                    await DisplayAlert("Error CubaseMainPage LoadCommands - Initialise Mixer", ex.Message, "OK");
                 }
             });
             CollectionsLayout.Children.Add(mixerButton.Button);
@@ -103,7 +103,7 @@ public partial class CubaseMainPage : ContentPage
                         }
                         catch (Exception ex)
                         {
-                            await DisplayAlert("Error", ex.Message, "OK");
+                            await DisplayAlert("Error CubaseMainPage LoadCommands", ex.Message, "OK");
                         }
                     });
                     CollectionsLayout.Children.Add(button.Button);
@@ -113,7 +113,7 @@ public partial class CubaseMainPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlert("Error CubaseMainPage LoadCommands", ex.Message, "OK");
         }
     }
 

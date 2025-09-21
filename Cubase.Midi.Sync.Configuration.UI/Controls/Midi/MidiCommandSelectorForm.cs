@@ -26,7 +26,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Midi
         public MidiCommandSelectorForm(Action<CubaseMidiCommand> keyHandler)
         {
             InitializeComponent();
-            var midiCommands = new CubaseMidiCommandCollection();
+            var midiCommands = new CubaseMidiCommandCollection(CubaseConfigurationConstants.KeyCommandsFileLocation);
             this.midiCommandListView.Populate(midiCommands, (key)=> 
             {
                 keyHandler(key);

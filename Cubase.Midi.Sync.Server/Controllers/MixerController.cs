@@ -10,21 +10,34 @@ namespace Cubase.Midi.Sync.Server.Controllers
         
         private readonly IMixerService mixerService;
 
-        public MixerController(IMixerService mixerService)
+        private readonly ILogger<MixerController> logger;   
+
+        public MixerController(IMixerService mixerService, ILogger<MixerController> logger)
         {
            this.mixerService = mixerService;    
+           this.logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> SetCubaseMixer([FromBody] CubaseMixer cubaseMixer)
         {
+            this.logger.LogInformation($"Setting Mixer command {cubaseMixer.Command.ToString()} {cubaseMixer.ButtonText} from controller");
             var result = await mixerService.MixerCommand(cubaseMixer);
-            return Ok(result);
+            if (result.Count > 0)
+            { 
+               return Ok(result);
+            }
+            else
+            {
+                this.logger.LogError($"The mixer command return 0 results");
+                return BadRequest("The mixer command returned no results!");
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCubaseMixer()
         {
+            this.logger.LogInformation("Loading Mixer from controller");
             var result = await mixerService.GetMixer();
             return Ok(result);
         }

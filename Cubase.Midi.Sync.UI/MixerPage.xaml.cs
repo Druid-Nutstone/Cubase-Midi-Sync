@@ -71,7 +71,7 @@ namespace Cubase.Midi.Sync.UI
                     }
                     catch (Exception ex)
                     {
-                        await DisplayAlert("Error", ex.Message, "OK");
+                        await DisplayAlert("Error MixerPage InitialiseCustomCommands", ex.Message, "OK");
                     }
                 });
                 CustomCommands.Children.Add(button.Button);
@@ -90,7 +90,7 @@ namespace Cubase.Midi.Sync.UI
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error", ex.Message, "OK");
+                    await DisplayAlert("Error InitialisePages", ex.Message, "OK");
                 }
             });
             Pages.Children.Add(homeButton.Button);
@@ -108,7 +108,7 @@ namespace Cubase.Midi.Sync.UI
                         }
                         catch (Exception ex)
                         {
-                            await DisplayAlert("Error", ex.Message, "OK");
+                            await DisplayAlert("Error InitialisePages", ex.Message, "OK");
                         }
                     });
                     Pages.Children.Add(button.Button);
@@ -116,11 +116,10 @@ namespace Cubase.Midi.Sync.UI
             }
         }
 
-        private async Task InitialiseMixer()
+        private void InitialiseMixer()
         {
             this.StaticButtons.Children.Clear();
             this.staticCommands = new List<CubaseCommand>();
-
             foreach (var midiToggleCommand in this.mixerCollection.Where(x => x.Visible))
             {
                 this.staticCommands.Add(CubaseCommand.CreateToggleButton(midiToggleCommand.ButtonText, midiToggleCommand.Command.ToString(), midiToggleCommand.ButtonTextToggled)
@@ -133,7 +132,7 @@ namespace Cubase.Midi.Sync.UI
             {
                 var btn = RaisedButtonFactory.Create(command.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
                 {
-                    this.mixerCollection = await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(Enum.Parse<KnownCubaseMidiCommands>(command.Action), string.Empty, string.Empty));
+                    this.mixerCollection = await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(Enum.Parse<KnownCubaseMidiCommands>(command.Action), string.Empty, string.Empty), this);
                     foreach (var mixer in mixerCollection)
                     {
                         // command.IsToggled = mixer.Toggled;
@@ -159,7 +158,7 @@ namespace Cubase.Midi.Sync.UI
 
         private async Task<CubaseMixerCollection> OpenCloseMixer()
         {
-            return await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, string.Empty, string.Empty));
+            return await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, string.Empty, string.Empty), this);
         }
 
         public async Task Initialise(List<CubaseCommandCollection>? mainCommands = null)
@@ -167,20 +166,30 @@ namespace Cubase.Midi.Sync.UI
             this.basePage = this.serviceProvider.GetService<BasePage>();
             this.basePage.AddToolbars(this);
 
-            this.mixerCollection = await this.cubaseHttpClient.GetMixer();
-            if (!this.mixerCollection.Success)
+            try
             {
-                await DisplayAlert("ERROR", $"Cannot load the mixer {this.mixerCollection.ErrorMessage}", "OK");
-            }
-            else
-            {
-                await this.OpenCloseMixer();
-                await this.InitialiseMixer();
-                if (mainCommands != null)
+                this.mixerCollection = await this.OpenCloseMixer();
+                if (this.mixerCollection.Count > 0)
                 {
-                    await this.InitialisePages(mainCommands);
-                    await this.InitialiseCustomCommands(mainCommands);
+                    this.InitialiseMixer();
+                    if (mainCommands != null)
+                    {
+                        await this.InitialisePages(mainCommands);
+                        await this.InitialiseCustomCommands(mainCommands);
+                    }
+                    else
+                    {
+                        await DisplayAlert("ERROR from GetMixer", "The mixer collection contains zero records", "OK");
+                    }
                 }
+                else
+                {
+                    await DisplayAlert("ERROR from getmixer", $"The mixer collection has {this.mixerCollection.Count.ToString()} records in it", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error MixerPage GetMixer", $"Error getting mixer {ex.Message}", "OK");
             }
         }
 
@@ -205,11 +214,11 @@ namespace Cubase.Midi.Sync.UI
             var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (ex) =>
             {
                 errMsg = ex.Message;
-                await DisplayAlert("Error", ex.Message, "OK");
+                await DisplayAlert("Error SetMomentaryOrToggleButton", ex.Message, "OK");
             });
             if (!response.Success)
             {
-                await DisplayAlert("Error", errMsg ?? "Is cubase up?", "OK");
+                await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
                 command.IsToggled = !command.IsToggled;
             }
             VisualStateManager.GoToState(button, "Normal");
@@ -268,7 +277,7 @@ namespace Cubase.Midi.Sync.UI
             this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
             var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionStrings), async (ex) =>
             {
-                await DisplayAlert("Error", ex.Message, "OK");
+                await DisplayAlert("Error SetMacroButton", ex.Message, "OK");
             });
             if (response.Success)
             {

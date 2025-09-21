@@ -13,29 +13,33 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private readonly IMidiService midiService;
         
-        private readonly IServiceProvider services;   
+        private readonly IServiceProvider services;  
+        
+        private readonly ILogger<MixerService> logger;
 
         private ICategoryService categoryService;   
 
-        public MixerService(ICacheService cacheService, IMidiService midiService, IServiceProvider services)
+        public MixerService(ILogger<MixerService> logger,ICacheService cacheService, IMidiService midiService, IServiceProvider services)
         {
            this.cacheService = cacheService;    
            this.midiService = midiService;
+            this.logger = logger;   
            this.services = services;
            this.categoryService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
         }
 
         public async Task<CubaseMixerCollection> GetMixer()
         {
+            this.logger.LogInformation($"MixerService - Loading CubaseMixer Collection. The current Success flag is {this.cacheService.CubaseMixer.Success} with an error message of {this.cacheService.CubaseMixer.ErrorMessage}");
             await Task.Delay(1);
-            this.cacheService.CubaseMixer = CubaseMixerCollection.Create();
             return this.cacheService.CubaseMixer;
         }
-
+        
         public async Task<CubaseMixerCollection> MixerCommand(CubaseMixer cubaseMixer)
         {
             if (!string.IsNullOrEmpty(cubaseMixer.KeyAction))
             {
+                this.logger.LogInformation($"Executing mixer Key command {cubaseMixer.KeyAction}");
                 this.categoryService.ProcessAction(CubaseActionRequest.Create(cubaseMixer.KeyAction));
             }
             else

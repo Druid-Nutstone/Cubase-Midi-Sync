@@ -1,6 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using System.Text;
 using System.Text.Json;
@@ -45,7 +46,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.logger.LogInformation("Initialising Nutstone Midi ..");
             this.midiDriver = new NutstoneDriver("Nutstone");
             this.midiDriver.MidiMessageReceived += MidiDriver_MidiMessageReceived;
-            this.cubaseMidiCommands = new CubaseMidiCommandCollection();
+            this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
 
         }
 
@@ -55,6 +56,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             {
                 if (cubaseMidiCommand.Channel > -1)
                 {
+                    this.logger.LogInformation($"Sending Midi Name:{cubaseMidiCommand.Name} Command:{cubaseMidiCommand.Command} Channel:{cubaseMidiCommand.Channel} Note:{cubaseMidiCommand.Note} ");
                     this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
                     return true;
                 }

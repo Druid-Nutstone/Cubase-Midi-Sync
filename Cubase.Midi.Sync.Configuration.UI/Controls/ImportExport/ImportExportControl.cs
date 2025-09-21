@@ -107,7 +107,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.ImportExport
             ExportButton.Visible = false;
             ImportButton.Enabled = true;
             ImportButton.Visible = true;    
-            this.cubaseKeyCommands = CubaseKeyCommandParser.Create().Parse();
+            this.cubaseKeyCommands = new CubaseKeyCommandParser().Parse(CubaseConfigurationConstants.KeyCommandsFileLocation);
             this.importExportListView.ItemCheckSelected = (command, selected) => 
             {
                 if (selected)

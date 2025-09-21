@@ -21,9 +21,9 @@ namespace Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient
 
         Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel);  
 
-        Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer);
+        Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer, Page page);
 
-        Task<CubaseMixerCollection> GetMixer();
+        Task<CubaseMixerCollection> GetMixer(Page page);
 
         bool CanConnectToServer();
 

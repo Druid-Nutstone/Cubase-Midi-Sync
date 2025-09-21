@@ -72,7 +72,7 @@ public partial class CubaseAction : ContentPage
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error", ex.Message, "OK");
+                    await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
                 }
             }, toggleMode: true);
             this.SetButtonState(button.Button, command);
@@ -87,11 +87,11 @@ public partial class CubaseAction : ContentPage
         var response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (ex) =>
         {
             errMsg = ex.Message;
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlert("Error CubaseAction SetMomentaryOrToggleButton", ex.Message, "OK");
         });
         if (!response.Success)
         {
-            await DisplayAlert("Error", errMsg ?? "Is cubase up?", "OK");
+            await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
             command.IsToggled = !command.IsToggled;
         }
         VisualStateManager.GoToState(button, "Normal");
@@ -155,7 +155,7 @@ public partial class CubaseAction : ContentPage
         this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
         var response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionStrings), async (ex) =>
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            await DisplayAlert("Error CubaseAction SetMacroButton", ex.Message, "OK");
         });
         if (response.Success)
         {

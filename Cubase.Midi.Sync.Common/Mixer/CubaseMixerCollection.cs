@@ -10,10 +10,15 @@ namespace Cubase.Midi.Sync.Common.Mixer
 {
     public class CubaseMixerCollection : List<CubaseMixer>
     {
-        private CubaseMidiCommandCollection cubaseMidiCommands = new CubaseMidiCommandCollection();
+        private CubaseMidiCommandCollection cubaseMidiCommands;
         
         private bool areTracksHidden = false;   
 
+
+        public CubaseMixerCollection(string keyCommandFileLocation)
+        {
+            this.cubaseMidiCommands = new CubaseMidiCommandCollection(keyCommandFileLocation);
+        }
 
         public CubaseMixerCollection()
         {
@@ -218,11 +223,11 @@ namespace Cubase.Midi.Sync.Common.Mixer
             return commands;
         }
 
-        public static CubaseMixerCollection Create()
+        public static CubaseMixerCollection Create(Action<string> msgHandler, string keyCommandFileLocation)
         {
             // get key commands 
-            var requiredKeys = RequiredKeyMappingCollection.Create();
-            return new CubaseMixerCollection()
+            var requiredKeys = RequiredKeyMappingCollection.Create(msgHandler, keyCommandFileLocation);
+            return new CubaseMixerCollection(keyCommandFileLocation)
             {
               CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, "Open Mixer", "Close Mixer", false, false),
               CubaseMixer.Create(KnownCubaseMidiCommands.Hide_Groups, "Show Groups", "Hide Groups"),

@@ -2,6 +2,7 @@
 using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
+using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
@@ -34,7 +35,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             this.keyService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
             this.midiService = midiService;
             this.cacheService = cacheService;
-            this.commandCollection = new CubaseMidiCommandCollection(); 
+            this.commandCollection = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation); 
         } 
         
         public CubaseActionResponse ProcessAction(CubaseActionRequest request)

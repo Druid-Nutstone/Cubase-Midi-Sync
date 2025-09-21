@@ -11,7 +11,7 @@ namespace Cubase.Midi.Sync.Configuration.UI
             this.DataPanel.Controls.Clear();
             this.DataPanel.Controls.Add(new MainTabControl());
             var customMenuStrip = new CustomMenuStrip(this.menuStrip, this);
-            var areKeysSet = RequiredKeyMappingCollection.Create();
+            var areKeysSet = RequiredKeyMappingCollection.Create(null, CubaseConfigurationConstants.KeyCommandsFileLocation);
             if (!areKeysSet.AreAllKeysDefined())
             {
                 var keysNotDefined = string.Join(Environment.NewLine, areKeysSet.GetUndefinedKeys().Select(x => x.Category + " " + x.Name));

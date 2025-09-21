@@ -8,14 +8,26 @@ namespace Cubase.Midi.Sync.UI;
 
 public static class RaisedButtonFactory
 {
+
+
     public record RaisedButton(Button Button);
 
     public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, bool toggleMode = false, string? id = null)
     {
+        var displayInfo = DeviceDisplay.MainDisplayInfo;
+        var screenWidth = displayInfo.Width / displayInfo.Density;   // in DIPs
+        var screenHeight = displayInfo.Height / displayInfo.Density; // in DIPs
+
+        // Example: make button 1/10 of screen width and scale font accordingly
+        var buttonWidth = screenWidth / 2.5;   // wider
+        var buttonHeight = screenHeight / 8;   // taller
+        var shortestSide = Math.Min(screenWidth, screenHeight);
+        // var fontSize = shortestSide / 20;
+
         var button = new Button
         {
             Text = text,
-            HeightRequest = 60,
+            HeightRequest = buttonHeight,
             WidthRequest = double.NaN,
             HorizontalOptions = LayoutOptions.Start,
             BackgroundColor = backgroundColour.ToMauiColour(),
@@ -26,7 +38,9 @@ public static class RaisedButtonFactory
             BorderWidth = 1, // remove platform border
             LineBreakMode = LineBreakMode.WordWrap, // allows wrapping
             TextTransform = TextTransform.None,     // preserves your arrow character
-            AutomationId = id
+            AutomationId = id,
+            Visual = VisualMarker.Default, // makes no difference?
+            FontAutoScalingEnabled = false // makes no difference? 
         };
 
         // Visual states
@@ -93,9 +107,22 @@ public static class RaisedButtonFactory
 
         button.SizeChanged += (s, e) =>
         {
-            if (button.Height > 0)
-                button.FontSize = Math.Min(button.Height * 0.5, 18);
+            SetButtonSize();
         };
+
+        button.Loaded += (s, e) =>
+        {
+            SetButtonSize();
+        };
+
+        void SetButtonSize()
+        {
+            var displayInfo = DeviceDisplay.MainDisplayInfo;
+            var shortestSide = Math.Min(displayInfo.Width / displayInfo.Density,
+                                        displayInfo.Height / displayInfo.Density);
+
+            button.FontSize = shortestSide / 25;
+        } 
 
         return new RaisedButton(button);
     }

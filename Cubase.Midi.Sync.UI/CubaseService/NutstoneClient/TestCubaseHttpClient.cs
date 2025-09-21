@@ -86,12 +86,22 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             throw new NotImplementedException();
         }
 
+        public Task<CubaseMixerCollection> GetMixer(Page page)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<MidiChannelCollection> GetTracks()
         {
             throw new NotImplementedException();
         }
 
         public Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CubaseMixerCollection> SetMixer(CubaseMixer mixer, Page page)
         {
             throw new NotImplementedException();
         }

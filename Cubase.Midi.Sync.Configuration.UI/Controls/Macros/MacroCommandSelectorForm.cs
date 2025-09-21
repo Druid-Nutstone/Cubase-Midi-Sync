@@ -32,7 +32,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
             this.searchFilter.KeyPress += SearchFilter_KeyPress;
             this.searchFilter.TextChanged += SearchFilter_TextChanged;
             this.keyHandkler = keyHandler;
-            this.cubaseKeyCommands = CubaseKeyCommandParser.Create().Parse();
+            this.cubaseKeyCommands = new CubaseKeyCommandParser().Parse(CubaseConfigurationConstants.KeyCommandsFileLocation);
             this.commandSelectorListView.Populate(this.cubaseKeyCommands.GetAllocated(), (key) => 
             {
                 keyHandkler(key);

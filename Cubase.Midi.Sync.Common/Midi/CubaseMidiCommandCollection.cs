@@ -10,9 +10,9 @@ namespace Cubase.Midi.Sync.Common.Midi
 {
     public class CubaseMidiCommandCollection : List<CubaseMidiCommand>
     {
-        public CubaseMidiCommandCollection() 
+        public CubaseMidiCommandCollection(string keyCommandFileLocation) 
         {
-            var requiredKeys = RequiredKeyMappingCollection.Create();
+            var requiredKeys = RequiredKeyMappingCollection.Create(null, keyCommandFileLocation);
             this.Add(CubaseMidiCommand.Create("Rewind To Start", 0, 1, "Transport", "Return to Zero", 127));
             this.Add(CubaseMidiCommand.Create("Start", 0, 2, "Transport", "Start", 127));
             this.Add(CubaseMidiCommand.Create("Stop", 0, 3, "Transport", "Stop", 127));

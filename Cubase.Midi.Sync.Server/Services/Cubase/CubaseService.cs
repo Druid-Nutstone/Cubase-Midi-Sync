@@ -5,6 +5,7 @@ using Cubase.Midi.Sync.Server.Extensions;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Server.Constants;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -23,7 +24,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             this.serviceProvider = serviceProvider; 
             this.midiService = midiService;
             this.logger = logger;   
-            this.cubaseMidiCommands = new CubaseMidiCommandCollection();
+            this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
         }
 
         public async Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request)

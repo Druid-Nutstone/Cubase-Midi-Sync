@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Areas.RenameForm;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Commands;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.Items.Add(new VisibleCommandMenu(commands, cubaseServerSettings, listView));
             this.Items.Add(new HideCommandMenu(commands, cubaseServerSettings, listView));
             this.Items.Add(new DeleteCommandMenu(commands, cubaseServerSettings, listView));
+            this.Items.Add(new RenameMenu(commands, cubaseServerSettings, listView));
             this.Items.Add(new CategoryMenu(commands, cubaseServerSettings, listView));
         }
     }
@@ -89,6 +91,34 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.commands.SaveToFile(this.cubaseServerSettings.FilePath);
             listView.RefreshCommands();
         }   
+    }
+
+
+    public class RenameMenu : ToolStripMenuItem
+    {
+        public CubaseCommandsCollection commands;
+
+        public CubaseServerSettings cubaseServerSettings;
+
+        public AreaListView listView;
+
+        public RenameMenu(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings, AreaListView listView)
+        {
+            this.commands = commands;
+            this.cubaseServerSettings = cubaseServerSettings;
+            this.listView = listView;
+            this.Text = "Rename";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            var cubase = (AreaListViewItem)this.listView.SelectedItems[0];
+            var renameForm = new RenameCommandForm(this.commands, cubaseServerSettings, cubase.Command);
+            if (renameForm.ShowDialog() == DialogResult.OK)
+            {
+                listView.RefreshCommands();
+            }
+        }
     }
 
     public class MoveCommandUpMenu : ToolStripMenuItem

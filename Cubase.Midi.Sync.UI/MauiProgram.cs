@@ -71,6 +71,7 @@ namespace Cubase.Midi.Sync.UI
             builder.Services.AddSingleton(appSettings)
                             .AddTransient<BasePage>()
                             .AddTransient<MixerPage>()
+                            .AddTransient<CubaseOptions>()
                             .AddTransient<CubaseMainPage>();
 
 

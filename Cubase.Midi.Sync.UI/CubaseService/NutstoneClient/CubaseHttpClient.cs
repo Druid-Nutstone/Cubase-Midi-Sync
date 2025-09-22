@@ -16,8 +16,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
 {
     public class CubaseHttpClient : HttpClient, ICubaseHttpClient
     {
+        private readonly AppSettings appSettings;
+        
         public CubaseHttpClient(AppSettings appSettings)
         {
+            this.appSettings = appSettings;
             this.BaseAddress = new Uri(appSettings.CubaseConnection.BaseUrl);
         }
 
@@ -129,5 +132,6 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             // success → deserialize
             return await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
         }
+
     }
 }

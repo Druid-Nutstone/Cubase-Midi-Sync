@@ -57,9 +57,7 @@ namespace Cubase.Midi.Sync.UI
                         var button = (Button)s;
 
                         command.IsToggled = !command.IsToggled;
-                        this.SetButtonState(button, command);
                         CubaseActionResponse response = null;
-
                         if (command.IsMacro)
                         {
                             await this.SetMacroButton(button, command, collections);
@@ -68,12 +66,14 @@ namespace Cubase.Midi.Sync.UI
                         {
                             await this.SetMomentaryOrToggleButton(button, command);
                         }
+                        this.SetButtonState(button, command);
                     }
                     catch (Exception ex)
                     {
                         await DisplayAlert("Error MixerPage InitialiseCustomCommands", ex.Message, "OK");
                     }
-                });
+                }, command.IsToggleButton);
+                this.SetButtonState(button.Button, command);
                 CustomCommands.Children.Add(button.Button);
             }
         }
@@ -146,7 +146,7 @@ namespace Cubase.Midi.Sync.UI
                             this.SetButtonState(showHideBtn, mixerCommand);
                         }
                     }
-                    // this.SetButtonState((Button)s, command);
+                    this.SetButtonState((Button)s, command);
                 }, command.IsToggleButton, command.Action);
                 StaticButtons.Children.Add(btn.Button);
                 if (!command.IsInitiallyVisible)
@@ -273,7 +273,7 @@ namespace Cubase.Midi.Sync.UI
                     }
                 }
             }
-            VisualStateManager.GoToState(button, "Pressed");
+            //VisualStateManager.GoToState(button, "Pressed");
             this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
             var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionStrings), async (ex) =>
             {

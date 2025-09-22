@@ -57,7 +57,13 @@ public partial class CubaseMainPage : ContentPage
         SetSpinner(false);
     }
 
- 
+    public async Task Reload()
+    {
+        SetSpinner(true);
+        await LoadCommands();
+        loaded = true;
+        SetSpinner(false);
+    } 
 
     private async Task LoadCommands()
     {

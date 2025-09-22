@@ -1,14 +1,20 @@
+using System.Runtime.InteropServices.Marshalling;
+using System.Threading.Tasks;
+
 namespace Cubase.Midi.Sync.UI;
 
 public class BasePage
 {
     private ContentPage contentPage;
    
-    private MixerPage mixerPage;    
+    private MixerPage mixerPage;
 
-    public BasePage(MixerPage mixerPage)
+    private CubaseOptions optionsPage;
+
+    public BasePage(MixerPage mixerPage, CubaseOptions cubaseOptions)
 	{
         this.mixerPage = mixerPage; 
+        this.optionsPage = cubaseOptions;   
     }
 
     public void AddToolbars(ContentPage contentPage)
@@ -27,9 +33,16 @@ public class BasePage
         });
         contentPage.ToolbarItems.Add(new ToolbarItem
         {
-            Text = "Home",
+            Text = "Options",
             Order = ToolbarItemOrder.Primary, // must be Primary
             Priority = 1, // appears after Mixer
+            Command = new Command(OnOptionsClicked)
+        });
+        contentPage.ToolbarItems.Add(new ToolbarItem
+        {
+            Text = "Home",
+            Order = ToolbarItemOrder.Primary, // must be Primary
+            Priority = 2, // appears after Mixer
             Command = new Command(OnHomeClicked)
         });
     }
@@ -39,6 +52,11 @@ public class BasePage
         await this.contentPage.Navigation.PushAsync(this.mixerPage);
         await this.mixerPage.Initialise(); 
     }
+
+    protected async virtual void OnOptionsClicked()
+    {
+        await this.contentPage.Navigation.PushAsync(this.optionsPage);
+    }   
 
     protected virtual void OnHomeClicked()
     {

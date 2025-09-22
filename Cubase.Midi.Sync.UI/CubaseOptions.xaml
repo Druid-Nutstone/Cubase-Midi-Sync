@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Cubase.Midi.Sync.UI.CubaseOptions"
+             Title="CubaseOptions">
+    <VerticalStackLayout Padding="20" Spacing="10">
+
+        <Label 
+            Text="Target Cubase server IP address" 
+            FontSize="18"
+            TextColor="White"
+            HorizontalOptions="Start" />
+
+        <Entry 
+            x:Name="TargetIPAddress"
+            Placeholder="192.168.x.x"
+            BackgroundColor="White"
+            TextColor="Black"
+            HorizontalOptions="Fill"
+            />
+        <Label 
+            x:Name="FullHost"
+            Text="" 
+            FontSize="18"
+            TextColor="AntiqueWhite"
+            HorizontalOptions="Start" />
+        <Button 
+            x:Name="SaveButton"
+            BackgroundColor="White"
+            TextColor="Black"
+            FontSize="18"
+            Text="Save"
+            />
+    </VerticalStackLayout>
+</ContentPage>

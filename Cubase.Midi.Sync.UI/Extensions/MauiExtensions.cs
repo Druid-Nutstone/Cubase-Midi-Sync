@@ -18,7 +18,12 @@ namespace Cubase.Midi.Sync.UI.Extensions
 
         public static Microsoft.Maui.Graphics.Color ToMauiColour(this SerializableColour colour)
         {
-            return Microsoft.Maui.Graphics.Color.FromRgba(colour.R, colour.G, colour.B, colour.A);  
+            return Microsoft.Maui.Graphics.Color.FromRgba(
+                colour.R / 255.0f,
+                colour.G / 255.0f,
+                colour.B / 255.0f,
+                colour.A / 255.0f
+            );
         }
 
     }

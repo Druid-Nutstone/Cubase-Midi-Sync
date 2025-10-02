@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
+using Cubase.Midi.Sync.Configuration.UI.Controls.MidiAndKeys;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -50,40 +51,85 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void ToggleOffAddButton_Click(object? sender, EventArgs e)
         {
-            MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
-            macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            var parentForm = this.GetParentForm(this);
+            MidiAndKeysForm form;
+            form = new MidiAndKeysForm((key) =>
             {
-                this.ToggleOffCommands.PopulateSingle(selectedCubaseCommand.Name);
-                macroCommandSelectorForm.Close();
+                this.ToggleOffCommands.PopulateSingle(key.Action);
             });
-
-            macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
+            form.StartPosition = FormStartPosition.Manual;
+            form.CloseAfterSelect = true;
+            parentForm.Move += (sender, e) =>
+            {
+                form.Location = new Point(
+                    parentForm.Bounds.Right,   // right edge in screen coordinates
+                    parentForm.Bounds.Top      // top edge in screen coordinates
+               );
+            };
 
             // Align left side of child to right side of parent
-            macroCommandSelectorForm.Location = new Point(
-                 this.parent.Bounds.Right,   // right edge in screen coordinates
-                 this.parent.Bounds.Top      // top edge in screen coordinates
+            form.Location = new Point(
+                 parentForm.Bounds.Right,   // right edge in screen coordinates
+                 parentForm.Bounds.Top      // top edge in screen coordinates
             );
-            macroCommandSelectorForm.Show();
+            form.Show();
+            //MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
+            //macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            //{
+            //    this.ToggleOffCommands.PopulateSingle(selectedCubaseCommand.Name);
+            //    macroCommandSelectorForm.Close();
+            //});
+
+            //macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
+
+            //// Align left side of child to right side of parent
+            //macroCommandSelectorForm.Location = new Point(
+            //     this.parent.Bounds.Right,   // right edge in screen coordinates
+            //     this.parent.Bounds.Top      // top edge in screen coordinates
+            //);
+            //macroCommandSelectorForm.Show();
         }
 
         private void ToogleOnAddButton_Click(object? sender, EventArgs e)
         {
-            MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
-            macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            var parentForm = this.GetParentForm(this);
+            MidiAndKeysForm form;
+            form = new MidiAndKeysForm((key) =>
             {
-                this.ToggleOnCommands.PopulateSingle(selectedCubaseCommand.Name);
-                macroCommandSelectorForm.Close();
+                this.ToggleOnCommands.PopulateSingle(key.Action);
             });
-
-            macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
+            form.StartPosition = FormStartPosition.Manual;
+            form.CloseAfterSelect = true;
+            parentForm.Move += (sender, e) =>
+            {
+                form.Location = new Point(
+                    parentForm.Bounds.Right,   // right edge in screen coordinates
+                    parentForm.Bounds.Top      // top edge in screen coordinates
+               );
+            };
 
             // Align left side of child to right side of parent
-            macroCommandSelectorForm.Location = new Point(
-                 this.parent.Bounds.Right,   // right edge in screen coordinates
-                 this.parent.Bounds.Top      // top edge in screen coordinates
+            form.Location = new Point(
+                 parentForm.Bounds.Right,   // right edge in screen coordinates
+                 parentForm.Bounds.Top      // top edge in screen coordinates
             );
-            macroCommandSelectorForm.Show(); 
+            form.Show();
+
+            //MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
+            //macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
+            //{
+            //    this.ToggleOnCommands.PopulateSingle(selectedCubaseCommand.Name);
+            //    macroCommandSelectorForm.Close();
+            //});
+
+            //macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
+
+            //// Align left side of child to right side of parent
+            //macroCommandSelectorForm.Location = new Point(
+            //     this.parent.Bounds.Right,   // right edge in screen coordinates
+            //     this.parent.Bounds.Top      // top edge in screen coordinates
+            //);
+            //macroCommandSelectorForm.Show(); 
         }
 
         public void SetToogleOnCommands(List<string> commands)
@@ -104,6 +150,23 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         public List<string> GetToggleOffCommands()
         {
             return ToggleOffCommands.GetList(); 
+        }
+
+        private Control GetParentForm(Control control)
+        {
+            var cntrl = control;
+            while (cntrl.GetType() != typeof(AddKeyToCommandsForm))
+            {
+                if (cntrl.Parent != null)
+                {
+                    cntrl = cntrl.Parent;
+                }
+                else
+                {
+                    return cntrl;
+                }
+            }
+            return cntrl;
         }
     }
 }

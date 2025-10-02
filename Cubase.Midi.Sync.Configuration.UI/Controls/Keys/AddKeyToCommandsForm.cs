@@ -347,7 +347,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
                     cubaseCommand.NameToggle = string.IsNullOrEmpty(buttonNameToggled.Text) ? buttonName.Text : buttonNameToggled.Text; 
 
-                    cubaseCommand.WithCategory(commandCollection.Category);
+                    cubaseCommand.WithCategory(cubaseKeyCommand.Category);
 
                     commandCollection.WithNewCubaseCommand(cubaseCommand);
                     

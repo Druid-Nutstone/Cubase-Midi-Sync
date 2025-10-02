@@ -21,6 +21,7 @@ namespace Cubase.Midi.Sync.Common
     {
         Keys,
         Midi,
-        MidiMacro
+        MidiMacro,
+        KeyMacro
     }
 }

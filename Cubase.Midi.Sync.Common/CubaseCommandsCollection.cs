@@ -259,6 +259,10 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseCommand WithCategory(string category)
         {
+            if (string.IsNullOrEmpty(category))
+            {
+                category = CubaseServiceConstants.MidiService;
+            }
             this.Category = category;
             return this;
         }

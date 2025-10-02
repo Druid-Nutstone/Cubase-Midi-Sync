@@ -55,6 +55,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
                              response = CubaseActionResponse.CreateError($"Could not execute Midi command request. {key} {request.Category}");
                              break;
                         }
+                        Thread.Sleep(50);
                     }
                 }
                 else

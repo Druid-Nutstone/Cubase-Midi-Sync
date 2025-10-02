@@ -3,6 +3,7 @@ using Cubase.Midi.Sync.Common.Keys;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Midi;
+using Cubase.Midi.Sync.Configuration.UI.Controls.MidiAndKeys;
 using Cubase.Midi.Sync.Configuration.UI.Controls.MidiMacros.Forms;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,42 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.AddKeyCommandButton.Click += AddKeyCommandButton_Click;
             this.AddNewButton.Click += AddNewButton_Click;
             this.AddMidiCommandButton.Click += AddMidiCommandButton_Click;
+            this.AddCommandButton.Click += AddCommandButton_Click;
+        }
+
+        private void AddCommandButton_Click(object? sender, EventArgs e)
+        {
+            var parentForm = this.GetParentForm(this);
+            MidiAndKeysForm form;
+            form = new MidiAndKeysForm((key) =>
+            {
+                var cubaseKeyCommand = new CubaseKeyCommand()
+                {
+                    Name = key.Name,
+                    Category = key.KeyType.ToString(),
+                    Action = key.Action,
+                    Key = key.Action
+                };
+                var keyCommandForm = new AddKeyToCommandsForm(cubaseKeyCommand, commands, cubaseServerSettings);
+                keyCommandForm.ShowDialog();
+                this.Populate();
+            });
+            form.StartPosition = FormStartPosition.Manual;
+            form.CloseAfterSelect = true;
+            parentForm.Move += (sender, e) =>
+            {
+                form.Location = new Point(
+                    parentForm.Bounds.Right,   // right edge in screen coordinates
+                    parentForm.Bounds.Top      // top edge in screen coordinates
+               );
+            };
+
+            // Align left side of child to right side of parent
+            form.Location = new Point(
+                 parentForm.Bounds.Right,   // right edge in screen coordinates
+                 parentForm.Bounds.Top      // top edge in screen coordinates
+            );
+            form.Show();
         }
 
         private void AddMidiCommandButton_Click(object? sender, EventArgs e)

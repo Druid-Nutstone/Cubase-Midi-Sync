@@ -40,8 +40,15 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Mixer Show All", 0, 25, "Mixer", "Hide: Reveal All", 127));
             this.Add(CubaseMidiCommand.Create("Next Track", 0, 26, "Project", "Select Track: Next", 127));
             this.Add(CubaseMidiCommand.Create("Previous Track", 0, 27, "Project", "Select Track: Prev", 127));
+            this.Add(CubaseMidiCommand.Create("Zoom Out", 1, 1, "Zoom", "Zoom Out", 127));
+            this.Add(CubaseMidiCommand.Create("Zoom In", 1, 2, "Zoom", "Zoom In", 127));
+            this.Add(CubaseMidiCommand.Create("Enlarge Selected Track", 1, 3, "Edit", "Enlarge Selected Track", 127));
             this.Add(CubaseMidiCommand.Create("Key Hide All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All),127));
             this.Add(CubaseMidiCommand.Create("Key Show All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Show_All), 127));
+            this.Add(CubaseMidiCommand.Create("Zoom To Selection", 1, 4, "Zoom", "Zoom to Selection", 127));
+            this.Add(CubaseMidiCommand.Create("Go to Left Locator Position", 1, 5, "Transport", "To Left Locator", 127));
+            this.Add(CubaseMidiCommand.Create("Go to Right Locator Position", 1, 6, "Transport", "To Right Locator", 127));
+            this.Add(CubaseMidiCommand.Create("Re-Record on/off", 1, 7, "Transport", "Re-Record on/off", 127));
         }
 
         public CubaseMidiCommand GetCommandByCommand(string command)

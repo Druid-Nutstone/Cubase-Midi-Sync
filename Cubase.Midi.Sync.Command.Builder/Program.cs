@@ -1,24 +1,24 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 
-using Cubase.Midi.Sync.Common;
-using Cubase.Midi.Sync.Common.Colours;
-using Cubase.Midi.Sync.Common.Keys;
+//using Cubase.Midi.Sync.Common;
+//using Cubase.Midi.Sync.Common.Colours;
+//using Cubase.Midi.Sync.Common.Keys;
 
 
-var collection = new CubaseCommandsCollection();
-collection.WithNewCubaseCommand("Transport", CubaseServiceConstants.KeyService)
-    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Play", "Space"));
-    /*
-    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Go To Start", CubaseActionName.TransportGoToStartStart))
-    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("⮝ Punch In", CubaseActionName.TransportPunchIn))
-    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Punch Out", CubaseActionName.TransportPunchOut))
-    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Left Locator", CubaseActionName.TransportLeftLocator))
-    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Right Locator", CubaseActionName.TransportRightLocator))
-    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Record", CubaseActionName.TransportRecord).WithToggleBackGroundColour(ColourConstants.ButtonRecordBackground).WithToggleForeColour(ColourConstants.ButtonRecordText));
-*/
-var targetFile = Path.Combine("C:\\Dev\\Cubase-Midi-Sync\\Cubase.Midi.Sync.Server\\", "CubaseCommands.json");
-collection.SaveToFile(targetFile);
+//var collection = new CubaseCommandsCollection();
+//collection.WithNewCubaseCommand("Transport", CubaseServiceConstants.KeyService)
+//    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Play", "Space"));
+//    /*
+//    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Go To Start", CubaseActionName.TransportGoToStartStart))
+//    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("⮝ Punch In", CubaseActionName.TransportPunchIn))
+//    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Punch Out", CubaseActionName.TransportPunchOut))
+//    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Left Locator", CubaseActionName.TransportLeftLocator))
+//    .WithNewCubaseCommand(CubaseCommand.CreateStandardButton("Right Locator", CubaseActionName.TransportRightLocator))
+//    .WithNewCubaseCommand(CubaseCommand.CreateToggleButton("Record", CubaseActionName.TransportRecord).WithToggleBackGroundColour(ColourConstants.ButtonRecordBackground).WithToggleForeColour(ColourConstants.ButtonRecordText));
+//*/
+//var targetFile = Path.Combine("C:\\Dev\\Cubase-Midi-Sync\\Cubase.Midi.Sync.Server\\", "CubaseCommands.json");
+//collection.SaveToFile(targetFile);
 
 /*
 var keys = CubaseMappingCollection.Create().AddMapping("Space", CubaseActionName.TransportPlay);

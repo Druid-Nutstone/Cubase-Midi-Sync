@@ -156,11 +156,11 @@ namespace Cubase.Midi.Sync.Common
         
         public string ParentCollectionName { get; set; }
 
-        public string Action { get; set; }
+        public ActionEvent Action { get; set; }
 
-        public List<string> ActionGroup { get; set; } = new List<string>();
+        public List<ActionEvent>? ActionGroup { get; set; } = new List<ActionEvent>();
 
-        public List<string> ActionGroupToggleOff { get; set; } = new List<string>();  
+        public List<ActionEvent>? ActionGroupToggleOff { get; set; } = new List<ActionEvent>();  
 
         public string Category { get; set; }
 
@@ -273,19 +273,19 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
-        public CubaseCommand WithAction(string action)
+        public CubaseCommand WithAction(ActionEvent action)
         {
             this.Action = action;
             return this;
         }
 
-        public CubaseCommand WithActionGroup(List<string> actionGroups)
+        public CubaseCommand WithActionGroup(List<ActionEvent> actionGroups)
         {
             this.ActionGroup = actionGroups;
             return this;
         }
 
-        public CubaseCommand WithActionGroupToggleOff(List<string> actionGroupsOff)
+        public CubaseCommand WithActionGroupToggleOff(List<ActionEvent> actionGroupsOff)
         {
             this.ActionGroupToggleOff = actionGroupsOff;
             return this;
@@ -310,7 +310,7 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateMacroToggleButton(string name, IEnumerable<string> actions, IEnumerable<string> actionsToggleOff)
+        public static CubaseCommand CreateMacroToggleButton(string name, IEnumerable<ActionEvent> actions, IEnumerable<ActionEvent> actionsToggleOff)
         {
             return new CubaseCommand()
             {
@@ -325,7 +325,7 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand Create(string name, string action)
+        public static CubaseCommand Create(string name, ActionEvent action)
         {
             return new CubaseCommand()
             {
@@ -339,7 +339,7 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateStandardButton(string name, string action)
+        public static CubaseCommand CreateStandardButton(string name, ActionEvent action)
         {
             return new CubaseCommand()
             {
@@ -353,7 +353,7 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateMacroButton(string name, List<string> actions)
+        public static CubaseCommand CreateMacroButton(string name, List<ActionEvent> actions)
         {
             return new CubaseCommand()
             {
@@ -369,12 +369,12 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateToggleButton(string name, IEnumerable<string> actions, string toggleName)
+        public static CubaseCommand CreateToggleButton(string name, IEnumerable<ActionEvent> actions, string toggleName)
         {
             return CreateToggleButton(name, actions).WithNameToggle(toggleName);
         }
 
-        public static CubaseCommand CreateToggleButton(string name, IEnumerable<string> actions)
+        public static CubaseCommand CreateToggleButton(string name, IEnumerable<ActionEvent> actions)
         {
             return new CubaseCommand()
             {
@@ -392,10 +392,10 @@ namespace Cubase.Midi.Sync.Common
 
         public static CubaseCommand CreateToggleButtonByName(string name, string toggleName)
         {
-            return CreateToggleButton(name, string.Empty,toggleName);
+            return CreateToggleButton(name, new List<ActionEvent>() ,toggleName);
         }
 
-        public static CubaseCommand CreateToggleButton(string name, string action)
+        public static CubaseCommand CreateToggleButton(string name, ActionEvent action)
         {
             return new CubaseCommand()
             {
@@ -411,11 +411,23 @@ namespace Cubase.Midi.Sync.Common
             };
         }
 
-        public static CubaseCommand CreateToggleButton(string name, string action, string toggleName)
+        public static CubaseCommand CreateToggleButton(string name, ActionEvent action, string toggleName)
         {
             return CreateToggleButton(name, action).WithNameToggle(toggleName);
         }
 
+    }
+
+    public class ActionEvent
+    {
+        public CubaseAreaTypes CommandType { get; set; }
+    
+        public string Action {  get; set; } 
+
+        public static ActionEvent Create(CubaseAreaTypes commandType, string Action)
+        {
+            return new ActionEvent() { CommandType = commandType, Action = Action };    
+        } 
     }
 
     public enum CubaseButtonType

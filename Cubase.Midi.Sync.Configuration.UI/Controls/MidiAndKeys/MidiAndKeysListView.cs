@@ -1,4 +1,5 @@
 ﻿
+using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Midi;
 using System;
 using System.Collections;

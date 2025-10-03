@@ -8,11 +8,9 @@ namespace Cubase.Midi.Sync.Common.Requests
 {
     public class CubaseActionRequest
     {
-        public string Action { get; set; }
+        public ActionEvent Action { get; set; }
 
-        public List<string> ActionGroup { get; set; }
-
-        public string Category { get; set; }
+        public List<ActionEvent> ActionGroup { get; set; }
 
         public CubaseButtonType ButtonType { get; set; }
 
@@ -21,22 +19,13 @@ namespace Cubase.Midi.Sync.Common.Requests
             return ButtonType == CubaseButtonType.Macro || ButtonType == CubaseButtonType.MacroToggle;
         }
 
-        public static CubaseActionRequest CreateSingleMidiCommand(string action)
+        public static CubaseActionRequest CreateSingleMidiCommand(MidiAndKey midiAndKey)
         {
-            return new CubaseActionRequest() { Action = action, ButtonType = CubaseButtonType.Momentory, Category = CubaseServiceConstants.MidiService };
+            return new CubaseActionRequest() { Action = ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action), ButtonType = CubaseButtonType.Momentory };
         }
 
-        public static CubaseActionRequest Create(string action)
-        {
-            return new CubaseActionRequest() { Action = action };
-        }
 
-        public static CubaseActionRequest CreateMidiActionGroup(string[] actions)
-        {
-            return new CubaseActionRequest() { ActionGroup = actions.ToList(), ButtonType = CubaseButtonType.Macro, Category = CubaseServiceConstants.MidiService };
-        }
-
-        public static CubaseActionRequest CreateFromCommand(CubaseCommand command, List<string>? actionGroup = null)
+        public static CubaseActionRequest CreateFromCommand(CubaseCommand command, List<ActionEvent>? actionGroup = null)
         {
             switch (command.ButtonType)
             {
@@ -45,14 +34,12 @@ namespace Cubase.Midi.Sync.Common.Requests
                     return new CubaseActionRequest()
                     {
                         ActionGroup = actionGroup != null ? actionGroup : (command.IsToggled ? command.ActionGroup : command.ActionGroupToggleOff),
-                        Category = command.Category,
                         ButtonType = command.ButtonType,
                     };
                 default:
                     return new CubaseActionRequest()
                     {
                         Action = command.Action,
-                        Category = command.Category,
                         ButtonType = command.ButtonType,
                     };
             }

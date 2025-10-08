@@ -10,7 +10,7 @@ namespace Cubase.Midi.Sync.Common.Midi
 {
     public class CubaseMidiCommandCollection : List<CubaseMidiCommand>
     {
-        public CubaseMidiCommandCollection(string keyCommandFileLocation) 
+        public CubaseMidiCommandCollection(string keyCommandFileLocation)
         {
             var requiredKeys = RequiredKeyMappingCollection.Create(null, keyCommandFileLocation);
             this.Add(CubaseMidiCommand.Create("Rewind To Start", 0, 1, "Transport", "Return to Zero", 127));
@@ -43,14 +43,19 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Zoom Out", 1, 1, "Zoom", "Zoom Out", 127));
             this.Add(CubaseMidiCommand.Create("Zoom In", 1, 2, "Zoom", "Zoom In", 127));
             this.Add(CubaseMidiCommand.Create("Enlarge Selected Track", 1, 3, "Edit", "Enlarge Selected Track", 127));
-            this.Add(CubaseMidiCommand.Create("Key Hide All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All),127));
+            this.Add(CubaseMidiCommand.Create("Key Hide All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All), 127));
             this.Add(CubaseMidiCommand.Create("Key Show All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Show_All), 127));
             this.Add(CubaseMidiCommand.Create("Zoom To Selection", 1, 4, "Zoom", "Zoom to Selection", 127));
             this.Add(CubaseMidiCommand.Create("Go to Left Locator Position", 1, 5, "Transport", "To Left Locator", 127));
             this.Add(CubaseMidiCommand.Create("Go to Right Locator Position", 1, 6, "Transport", "To Right Locator", 127));
             this.Add(CubaseMidiCommand.Create("Re-Record on/off", 1, 7, "Transport", "Re-Record on/off", 127));
             this.Add(CubaseMidiCommand.Create("Edit Undo", 1, 8, "Edit", "Undo", 127));
+            this.Add(CubaseMidiCommand.Create("New Track Version", 1, 9, "TrackVersions", "New Version", 127));
+            this.Add(CubaseMidiCommand.Create("Select Tracks With Selected Event", 1, 10, "Channel & Track Visibility", "ShowMarked", 127));
+            this.Add(CubaseMidiCommand.Create("Hide Muted Tracks", 1, 11, "Channel & Track Visibility", "HideMuted", 127));
+            this.Add(CubaseMidiCommand.Create("MetroNone On/Off", 1, 12, "Transport", "Metronome On", 127));
         }
+        
 
         public CubaseMidiCommand GetCommandByCommand(string command)
         {

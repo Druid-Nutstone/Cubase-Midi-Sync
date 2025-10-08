@@ -89,13 +89,13 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.ImportExport
             switch (this.Command.ButtonType)
             {
                 case CubaseButtonType.Macro:
-                    action = $"Macro";
+                    action = ActionEvent.Create(CubaseAreaTypes.Midi,$"Macro");
                     break;
                 case CubaseButtonType.MacroToggle:
-                    action = $"MacroToggle";
+                    action = ActionEvent.Create(CubaseAreaTypes.Midi, $"MacroToggle")   ;
                     break;
             }
-            this.SubItems.Add(action);
+            this.SubItems.Add(action.Action);
             this.SubItems.Add(this.Command.CubaseCommandDefinition?.CommandDescription);
         }
     }

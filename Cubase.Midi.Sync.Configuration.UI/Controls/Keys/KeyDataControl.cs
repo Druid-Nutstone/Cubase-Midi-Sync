@@ -15,8 +15,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
     {
         private CubaseKeyCommandCollection commands;
 
-        private string category;
-
         public KeyDataControl()
         {
             InitializeComponent();
@@ -26,22 +24,13 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void CbAllocatedOnly_CheckedChanged(object? sender, EventArgs e)
         {
-            this.Populate(this.commands, this.category);    
+            this.Populate(this.commands);    
         }
 
-        public void Populate(CubaseKeyCommandCollection commands, string category)
+        public void Populate(CubaseKeyCommandCollection commands)
         {
-            this.categoryLabel.Text = category;
-            List<CubaseKeyCommand> list = commands.GetByCategory(category); 
-
-            this.commands = commands;   
-            this.category = category;   
-            if (cbAllocatedOnly.Checked)
-            {
-                list = list.Where(x => !string.IsNullOrEmpty(x.Key)).ToList();
-            }
-            
-            this.keysListView.Populate(list);
+           
+            this.keysListView.Populate(commands);
         }
     }
 }

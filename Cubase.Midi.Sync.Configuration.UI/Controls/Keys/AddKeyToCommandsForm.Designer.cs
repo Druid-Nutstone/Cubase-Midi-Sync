@@ -38,11 +38,10 @@
             AreaBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             AreaButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             groupBox1 = new GroupBox();
-            areaTypeComboBox = new ComboBox();
-            label1 = new Label();
             VisibleCheckBox = new CheckBox();
             AreaButtonTest = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ButtonExampleControl();
             groupBox2 = new GroupBox();
+            availableToMixer = new CheckBox();
             ButtonDataPanel = new GroupBox();
             buttonNameToggled = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.TextBoxLabel();
             buttonName = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.TextBoxLabel();
@@ -53,7 +52,6 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
-            availableToMixer = new CheckBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -139,8 +137,6 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.WhiteSmoke;
-            groupBox1.Controls.Add(areaTypeComboBox);
-            groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(VisibleCheckBox);
             groupBox1.Controls.Add(AreaButtonTest);
             groupBox1.Controls.Add(label5);
@@ -156,24 +152,6 @@
             groupBox1.TabIndex = 27;
             groupBox1.TabStop = false;
             groupBox1.Text = "Area";
-            // 
-            // areaTypeComboBox
-            // 
-            areaTypeComboBox.FormattingEnabled = true;
-            areaTypeComboBox.Location = new Point(464, 41);
-            areaTypeComboBox.Name = "areaTypeComboBox";
-            areaTypeComboBox.Size = new Size(134, 25);
-            areaTypeComboBox.TabIndex = 30;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
-            label1.Location = new Point(464, 21);
-            label1.Name = "label1";
-            label1.Size = new Size(69, 17);
-            label1.TabIndex = 29;
-            label1.Text = "Area Type";
             // 
             // VisibleCheckBox
             // 
@@ -215,6 +193,16 @@
             groupBox2.TabIndex = 28;
             groupBox2.TabStop = false;
             groupBox2.Text = "Button";
+            // 
+            // availableToMixer
+            // 
+            availableToMixer.AutoSize = true;
+            availableToMixer.Location = new Point(28, 200);
+            availableToMixer.Name = "availableToMixer";
+            availableToMixer.Size = new Size(230, 21);
+            availableToMixer.TabIndex = 39;
+            availableToMixer.Text = "Command is available to the Mixer";
+            availableToMixer.UseVisualStyleBackColor = true;
             // 
             // ButtonDataPanel
             // 
@@ -297,16 +285,6 @@
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
             // 
-            // availableToMixer
-            // 
-            availableToMixer.AutoSize = true;
-            availableToMixer.Location = new Point(28, 200);
-            availableToMixer.Name = "availableToMixer";
-            availableToMixer.Size = new Size(230, 21);
-            availableToMixer.TabIndex = 39;
-            availableToMixer.Text = "Command is available to the Mixer";
-            availableToMixer.UseVisualStyleBackColor = true;
-            // 
             // AddKeyToCommandsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -351,8 +329,6 @@
         private Custom.TextBoxLabel buttonNameToggled;
         private GroupBox ButtonDataPanel;
         private CheckBox VisibleCheckBox;
-        private Label label1;
-        private ComboBox areaTypeComboBox;
         private CheckBox availableToMixer;
     }
 }

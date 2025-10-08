@@ -6,6 +6,7 @@ using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Server.Constants;
+using Cubase.Midi.Sync.Common;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -39,19 +40,24 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                 this.logger.LogError("Cubase is not running so can't execute {request}", request);
                 return respone;
             }
-            // locate the service processor 
-            var catgeoryService = this.serviceProvider.GetKeyedService<ICategoryService>(request.Category);
             
-            if (catgeoryService == null)
+            if (request.IsMacro())
             {
-                return new CubaseActionResponse
+                foreach (var cmd in request.ActionGroup)
                 {
-                    Success = false,
-                    Message = $"No service found for area {request.Category}"
-                };
+                    var result = ProcessAction(cmd);
+                    if (!result.Success)
+                    {
+                        return result;
+                    }
+                    await Task.Delay(50);
+                }
+                return CubaseActionResponse.CreateSuccess();
             }
-            // not async because neither midi or key commands are async operations
-            return catgeoryService.ProcessAction(request);    
+            else
+            {
+                return ProcessAction(request.Action);
+            }
         }
 
         public async Task<MidiChannelCollection> GetTracks()
@@ -98,6 +104,20 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                 var cubase = CubaseExtensions.GetCubaseService();
                 return cubase != null;
             });
+        }
+
+        private CubaseActionResponse ProcessAction(ActionEvent actionEvent)
+        {
+            var processor = this.serviceProvider.GetRequiredKeyedService<ICategoryService>(actionEvent.CommandType.ToString());
+            if (processor == null)
+            {
+                return new CubaseActionResponse
+                {
+                    Success = false,
+                    Message = $"No service found for area {actionEvent.CommandType.ToString()}"
+                };
+            }
+            return processor.ProcessAction(actionEvent);
         }
     }
 }

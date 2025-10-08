@@ -53,7 +53,7 @@ namespace Cubase.Midi.Sync.Server.Controllers
 
         [HttpPost]
         [Route("execute")]
-        public async Task<IActionResult> ExecureCubaseCommand([FromBody] CubaseActionRequest cubaseActionRequest)
+        public async Task<IActionResult> ExecuteCubaseCommand([FromBody] CubaseActionRequest cubaseActionRequest)
         {
             var response = await cubaseService.ExecuteAction(cubaseActionRequest);
             return Ok(response);

@@ -24,6 +24,10 @@ namespace Cubase.Midi.Sync.Common.Requests
             return new CubaseActionRequest() { Action = ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action), ButtonType = CubaseButtonType.Momentory };
         }
 
+        public static CubaseActionRequest Create(ActionEvent actionEvent)
+        {
+            return new CubaseActionRequest() { Action = actionEvent };
+        }
 
         public static CubaseActionRequest CreateFromCommand(CubaseCommand command, List<ActionEvent>? actionGroup = null)
         {

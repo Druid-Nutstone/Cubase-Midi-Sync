@@ -42,9 +42,9 @@ namespace Cubase.Midi.Sync.Common
             return JsonSerializer.Deserialize<CubaseCommandsCollection>(File.ReadAllText(fileName));
         }
 
-        public CubaseCommandCollection WithNewCubaseCommand(string name, string category)
+        public CubaseCommandCollection WithNewCubaseCommand(string name)
         {
-            var collection = new CubaseCommandCollection() { Name = name, Category = category };
+            var collection = new CubaseCommandCollection() { Name = name };
             this.Add(collection);
             return collection;
         }
@@ -112,8 +112,6 @@ namespace Cubase.Midi.Sync.Common
     {
         public string Name { get; set; }    
     
-        public string Category { get; set; }
-
         public bool Visible { get; set; } = true;
 
         public SerializableColour BackgroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
@@ -140,11 +138,7 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
-        public CubaseCommandCollection WithCategory(string category)
-        {
-            this.Category = category;
-            return this;
-        }
+
     }
 
     public class CubaseCommand
@@ -254,16 +248,6 @@ namespace Cubase.Midi.Sync.Common
         public CubaseCommand WithParentCollectionName(string name)
         {
             this.ParentCollectionName = name;
-            return this;
-        }
-
-        public CubaseCommand WithCategory(string category)
-        {
-            if (string.IsNullOrEmpty(category))
-            {
-                category = CubaseServiceConstants.MidiService;
-            }
-            this.Category = category;
             return this;
         }
 
@@ -428,6 +412,11 @@ namespace Cubase.Midi.Sync.Common
         {
             return new ActionEvent() { CommandType = commandType, Action = Action };    
         } 
+
+        public static ActionEvent CreateFromMidiAndKey(MidiAndKey midiAndKey)
+        {
+            return ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action);
+        }
     }
 
     public enum CubaseButtonType

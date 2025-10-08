@@ -76,7 +76,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.Text = this.Command.Name;
             this.SubItems.Add(this.Command.Visible ? "Yes" : "No");
             this.SubItems.Add(this.Command.Commands.Count.ToString()); 
-            this.SubItems.Add(this.Command.Category);   
+            // this.SubItems.Add(this.Command.Category);   
         }
     }
 }

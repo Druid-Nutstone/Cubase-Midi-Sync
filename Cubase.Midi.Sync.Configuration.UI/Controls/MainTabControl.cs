@@ -20,7 +20,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls
             this.TabPages.Add(new CommandsTabControl());
             this.TabPages.Add(new MappingTabControl());
             this.TabPages.Add(new AreaTabControl());
-            this.TabPages.Add(new KeysTabControl());
         }
 
         protected override void OnSelected(TabControlEventArgs e)

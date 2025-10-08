@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cubase.Midi.Sync.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
 {
     public class StringListControl : ListBox
     {
-        public StringListControl() : base() { }
+        public StringListControl() : base() 
+        {
+            this.DisplayMember = nameof(ActionEvent.Action);
+        }
 
-        public void Popsulate(List<string> list)
+        public void Populate(List<ActionEvent> list)
         {
             if (list.Count > 0)
             {
@@ -23,9 +27,19 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Custom
             return this.Items.Cast<string>().ToList();
         }
 
-        public void PopulateSingle(string text)
+        public void PopulateSingle(ActionEvent action)
         {
-            this.Items.Add(text);
+            this.Items.Add(action);
+        }
+
+        public List<ActionEvent> GetCommands()
+        {
+            var result = new List<ActionEvent>();
+            foreach (var item in this.Items)
+            {
+                result.Add((ActionEvent)item);
+            }
+            return result;
         }
 
         public void Remove()

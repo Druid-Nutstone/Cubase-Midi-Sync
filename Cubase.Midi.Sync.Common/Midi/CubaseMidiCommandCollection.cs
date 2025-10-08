@@ -49,6 +49,7 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Go to Left Locator Position", 1, 5, "Transport", "To Left Locator", 127));
             this.Add(CubaseMidiCommand.Create("Go to Right Locator Position", 1, 6, "Transport", "To Right Locator", 127));
             this.Add(CubaseMidiCommand.Create("Re-Record on/off", 1, 7, "Transport", "Re-Record on/off", 127));
+            this.Add(CubaseMidiCommand.Create("Edit Undo", 1, 8, "Edit", "Undo", 127));
         }
 
         public CubaseMidiCommand GetCommandByCommand(string command)

@@ -138,10 +138,15 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.Command = cmd;
             this.Category = category;   
             this.SubItems.Add(cmd.Name);
-            this.SubItems.Add(string.IsNullOrEmpty(cmd.Action) ? "MACRO" : cmd.Action);
+            this.SubItems.Add(GetActionType());
             this.SubItems.Add(cmd.IsToggleButton ? "Yes" : "No");
             this.SetColours();
         }
+
+        private string GetActionType()
+        {
+            return this.Command.ButtonType.ToString();
+        } 
 
         private void SetColours()
         {

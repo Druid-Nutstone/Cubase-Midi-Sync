@@ -33,9 +33,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.Dock = DockStyle.Fill;
             this.FilterBox.SelectedIndexChanged += FilterBox_SelectedIndexChanged;
             this.ClearFilter.Click += ClearFilter_Click;
-            this.AddKeyCommandButton.Click += AddKeyCommandButton_Click;
             this.AddNewButton.Click += AddNewButton_Click;
-            this.AddMidiCommandButton.Click += AddMidiCommandButton_Click;
             this.AddCommandButton.Click += AddCommandButton_Click;
         }
 
@@ -45,48 +43,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             MidiAndKeysForm form;
             form = new MidiAndKeysForm((key) =>
             {
-                var cubaseKeyCommand = new CubaseKeyCommand()
-                {
-                    Name = key.Name,
-                    Category = key.KeyType.ToString(),
-                    Action = key.Action,
-                    Key = key.Action
-                };
-                var keyCommandForm = new AddKeyToCommandsForm(cubaseKeyCommand, commands, cubaseServerSettings);
-                keyCommandForm.ShowDialog();
-                this.Populate();
-            });
-            form.StartPosition = FormStartPosition.Manual;
-            form.CloseAfterSelect = true;
-            parentForm.Move += (sender, e) =>
-            {
-                form.Location = new Point(
-                    parentForm.Bounds.Right,   // right edge in screen coordinates
-                    parentForm.Bounds.Top      // top edge in screen coordinates
-               );
-            };
-
-            // Align left side of child to right side of parent
-            form.Location = new Point(
-                 parentForm.Bounds.Right,   // right edge in screen coordinates
-                 parentForm.Bounds.Top      // top edge in screen coordinates
-            );
-            form.Show();
-        }
-
-        private void AddMidiCommandButton_Click(object? sender, EventArgs e)
-        {
-            var parentForm = this.GetParentForm(this);
-            MidiCommandSelectorForm form;
-            form = new MidiCommandSelectorForm((key) =>
-            {
-                var cubaseKeyCommand = new CubaseKeyCommand()
-                {
-                    Name = key.Name,
-                    Category = key.Category,
-                    Action = key.Command,
-                    Key = key.Command 
-                };
+                var cubaseKeyCommand = CubaseKeyCommand.CreateFromMidiAndKey(key);
                 var keyCommandForm = new AddKeyToCommandsForm(cubaseKeyCommand, commands, cubaseServerSettings);
                 keyCommandForm.ShowDialog();
                 this.Populate();
@@ -114,34 +71,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             var keyCommandForm = new AddKeyToCommandsForm(CubaseKeyCommand.Create(), commands, cubaseServerSettings);
             keyCommandForm.ShowDialog();
             this.Populate();
-        }
-
-        private void AddKeyCommandButton_Click(object? sender, EventArgs e)
-        {
-            var parentForm = this.GetParentForm(this);
-            MacroCommandSelectorForm form;
-            form = new MacroCommandSelectorForm((key) => 
-            {
-                var keyCommandForm = new AddKeyToCommandsForm(key, commands, cubaseServerSettings);
-                keyCommandForm.ShowDialog();
-                this.Populate();
-            });
-            form.StartPosition = FormStartPosition.Manual;
-            form.CloseAfterSelect = true;
-            parentForm.Move += (sender, e) => 
-            {
-                form.Location = new Point(
-                    parentForm.Bounds.Right,   // right edge in screen coordinates
-                    parentForm.Bounds.Top      // top edge in screen coordinates
-               );
-            };
-
-            // Align left side of child to right side of parent
-            form.Location = new Point(
-                 parentForm.Bounds.Right,   // right edge in screen coordinates
-                 parentForm.Bounds.Top      // top edge in screen coordinates
-            );
-            form.Show();
         }
 
         private Control GetParentForm(Control control)

@@ -94,7 +94,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.ImportExport
                     }
                     else
                     {
-                        var collection = newCubaseCommands.WithNewCubaseCommand(command.ParentCollectionName, command.Category);
+                        var collection = newCubaseCommands.WithNewCubaseCommand(command.ParentCollectionName);
                         collection.Commands.Add(command);
                     }
                 }
@@ -126,13 +126,13 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.ImportExport
                     }
                     else // create new collection 
                     {
-                        commandCollection = this.cubaseCommands.WithNewCubaseCommand(command.ParentCollectionName, command.Category);
+                        commandCollection = this.cubaseCommands.WithNewCubaseCommand(command.ParentCollectionName);
                     }
                     if (command.ButtonType == CubaseButtonType.Momentory || command.ButtonType == CubaseButtonType.Toggle)
                         // ensure the command exists in cubase 
-                        if (!this.cubaseKeyCommands.IsInCubase(command.CubaseCommandDefinition, command.Action))
+                        if (!this.cubaseKeyCommands.IsInCubase(command.CubaseCommandDefinition, command.Action.Action))
                         {
-                            var copyForm = new AllowCopyCubaseKeyCommandForm(command.CubaseCommandDefinition.CommandDescription, command.Action);
+                            var copyForm = new AllowCopyCubaseKeyCommandForm(command.CubaseCommandDefinition.CommandDescription, command.Action.Action);
                             copyForm.ShowDialog();
                             // MessageBox.Show($"You need to add this command to cubase. Find {command.CubaseCommandDefinition.CommandDescription} and assign it to {command.Action}. Then press OK to continue");
                         }

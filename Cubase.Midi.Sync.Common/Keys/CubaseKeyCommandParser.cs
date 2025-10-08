@@ -53,10 +53,18 @@ namespace Cubase.Midi.Sync.Common.Keys
                             Category = categoryName,
                             Name = name,
                             Key = key,
-                            Action = action,
+                            Action = ActionEvent.Create(GetAreaName(categoryName), key),
                             CubaseCommand = knownCommands.GetCommandByName(name)
                         });
                     }
+                }
+
+                CubaseAreaTypes GetAreaName(string categoryName)
+                {
+                    if (!Enum.TryParse<CubaseAreaTypes>(categoryName, out var areaType)) {
+                        return CubaseAreaTypes.Keys;
+                    }
+                    return areaType;
                 }
             }
 

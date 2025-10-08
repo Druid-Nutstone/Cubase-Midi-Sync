@@ -62,7 +62,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         protected override void OnClick(EventArgs e)
         {
             var cubase = (AreaListViewItem)this.listView.SelectedItems[0];
-            cubase.Command.Category = CubaseAreaTypes.Keys.ToString();  
+            // cubase.Command.Category = CubaseAreaTypes.Keys.ToString();  
             this.commands.SaveToFile(this.cubaseServerSettings.FilePath);
             listView.RefreshCommands();
         }
@@ -87,7 +87,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         protected override void OnClick(EventArgs e)
         {
             var cubase = (AreaListViewItem)this.listView.SelectedItems[0];
-            cubase.Command.Category = CubaseAreaTypes.Midi.ToString();
+            // cubase.Command.Category = CubaseAreaTypes.Midi.ToString();
             this.commands.SaveToFile(this.cubaseServerSettings.FilePath);
             listView.RefreshCommands();
         }   

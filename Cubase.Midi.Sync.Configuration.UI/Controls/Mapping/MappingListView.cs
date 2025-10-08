@@ -57,7 +57,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
         {
             this.Text = cubaseCommand.Category;
             this.SubItems.Add(cubaseCommand.Name);
-            this.SubItems.Add(cubaseCommand.Action);
+            this.SubItems.Add(cubaseCommand.Action.Action);
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Cubase.Midi.Sync.Common
         Keys,
         Midi,
         MidiMacro,
-        KeyMacro
+        KeyMacro,
+        Preferences
     }
 }

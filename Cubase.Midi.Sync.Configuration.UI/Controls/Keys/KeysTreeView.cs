@@ -25,7 +25,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                 this.dataPanel.Controls.Clear();
                 var keysListView = new KeyDataControl();
                 this.dataPanel.Controls.Add(keysListView);
-                keysListView.Populate(cubaseKeyCommands, categoryNode.Category);
+                keysListView.Populate(cubaseKeyCommands);
                 //var commands = cubaseKeyCommands.GetCommandsByCategory(categoryNode.Category);
                 //OnCategorySelected?.Invoke(this, new CategorySelectedEventArgs(categoryNode.Category, commands));
             }
@@ -53,12 +53,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         public CategoryTreeViewNode(CubaseKeyCommandCollection cubaseKeyCommands) : base()
         {
             this.Text = "Categories";
-            var categories = cubaseKeyCommands.GetCategories();
-            foreach (var category in categories)
-            {
-                var categoryNode = new CategoryNode(category);
-                this.Nodes.Add(categoryNode);
-            }
+            //var categories = cubaseKeyCommands.GetCategories();
+            //foreach (var category in categories)
+            //{
+            //    var categoryNode = new CategoryNode(category);
+            //    this.Nodes.Add(categoryNode);
+            //}
             this.Expand();
         }
     }

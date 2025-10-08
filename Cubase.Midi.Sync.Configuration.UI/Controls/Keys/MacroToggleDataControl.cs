@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.InternalCommands;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using Cubase.Midi.Sync.Configuration.UI.Controls.MidiAndKeys;
 using System;
@@ -16,7 +17,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
     public partial class MacroToggleDataControl : UserControl
     {
         private Control parent;
-        
+
         public MacroToggleDataControl(Control parent = null)
         {
             InitializeComponent();
@@ -31,12 +32,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
         private void AddInternalCommand(InternalCommand command)
         {
-            this.ToggleOnCommands.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
+            this.ToggleOnCommands.PopulateSingle(ActionEvent.Create(CubaseAreaTypes.Midi,InternalCommandsCollection.SerialiseCommand(command)));
         }
 
         private void AddInternalOffCommand(InternalCommand command)
         {
-            this.ToggleOffCommands.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
+            this.ToggleOffCommands.PopulateSingle(ActionEvent.Create(CubaseAreaTypes.Midi,InternalCommandsCollection.SerialiseCommand(command))) ;
         }
 
         private void RemoveToggleOffButton_Click(object? sender, EventArgs e)
@@ -55,7 +56,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             MidiAndKeysForm form;
             form = new MidiAndKeysForm((key) =>
             {
-                this.ToggleOffCommands.PopulateSingle(key.Action);
+                this.ToggleOffCommands.PopulateSingle(ActionEvent.CreateFromMidiAndKey(key));
             });
             form.StartPosition = FormStartPosition.Manual;
             form.CloseAfterSelect = true;
@@ -73,21 +74,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                  parentForm.Bounds.Top      // top edge in screen coordinates
             );
             form.Show();
-            //MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
-            //macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
-            //{
-            //    this.ToggleOffCommands.PopulateSingle(selectedCubaseCommand.Name);
-            //    macroCommandSelectorForm.Close();
-            //});
-
-            //macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
-
-            //// Align left side of child to right side of parent
-            //macroCommandSelectorForm.Location = new Point(
-            //     this.parent.Bounds.Right,   // right edge in screen coordinates
-            //     this.parent.Bounds.Top      // top edge in screen coordinates
-            //);
-            //macroCommandSelectorForm.Show();
         }
 
         private void ToogleOnAddButton_Click(object? sender, EventArgs e)
@@ -96,7 +82,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             MidiAndKeysForm form;
             form = new MidiAndKeysForm((key) =>
             {
-                this.ToggleOnCommands.PopulateSingle(key.Action);
+                this.ToggleOnCommands.PopulateSingle(ActionEvent.CreateFromMidiAndKey(key));
             });
             form.StartPosition = FormStartPosition.Manual;
             form.CloseAfterSelect = true;
@@ -114,42 +100,26 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                  parentForm.Bounds.Top      // top edge in screen coordinates
             );
             form.Show();
-
-            //MacroCommandInternalSelectorlForm macroCommandSelectorForm = null;
-            //macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
-            //{
-            //    this.ToggleOnCommands.PopulateSingle(selectedCubaseCommand.Name);
-            //    macroCommandSelectorForm.Close();
-            //});
-
-            //macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;
-
-            //// Align left side of child to right side of parent
-            //macroCommandSelectorForm.Location = new Point(
-            //     this.parent.Bounds.Right,   // right edge in screen coordinates
-            //     this.parent.Bounds.Top      // top edge in screen coordinates
-            //);
-            //macroCommandSelectorForm.Show(); 
         }
 
-        public void SetToogleOnCommands(List<string> commands)
+        public void SetToogleOnCommands(List<ActionEvent> commands)
         {
-            this.ToggleOnCommands.Popsulate(commands);
+            this.ToggleOnCommands.Populate(commands);
         }
 
-        public void SetToggleOffCommands(List<string> commands)
+        public void SetToggleOffCommands(List<ActionEvent> commands)
         {
-            this.ToggleOffCommands.Popsulate(commands); 
+            this.ToggleOffCommands.Populate(commands); 
         } 
         
-        public List<string> GetToggleOnCommands()
+        public List<ActionEvent> GetToggleOnCommands()
         {
-            return ToggleOnCommands.GetList();
+            return this.ToggleOnCommands.GetCommands();
         }
 
-        public List<string> GetToggleOffCommands()
+        public List<ActionEvent> GetToggleOffCommands()
         {
-            return ToggleOffCommands.GetList(); 
+            return this.ToggleOffCommands.GetCommands(); 
         }
 
         private Control GetParentForm(Control control)

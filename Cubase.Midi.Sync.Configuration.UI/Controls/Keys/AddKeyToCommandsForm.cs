@@ -47,8 +47,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         {
             InitializeComponent();
             VisibleCheckBox.Checked = true;
-            this.cubaseKeyCommand = cubaseKeyCommand;   
-            this.cubaseCommand = CubaseCommand.Create();
+            this.cubaseKeyCommand = cubaseKeyCommand;
+            this.cubaseCommand = CubaseCommand.Create()
+                                              .WithAction(cubaseKeyCommand?.Action);
             this.cubaseCommandCollections = cubaseCommandCollections;
             this.cbButtonType.SelectedIndex = -1;
             this.InitialiseControls(cubaseKeyCommand, cubaseCommandCollections, cubaseServerSettings);
@@ -70,8 +71,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             var areaIndex = cubaseCommandCollections.FindIndex(x => x.Name == category);
             this.cbAreaName.SelectedIndex = areaIndex;
             this.cbAreaName.Enabled = false;
-            this.areaTypeComboBox.SelectedIndex = Enum.GetNames<CubaseAreaTypes>().ToList().IndexOf(cubaseCommandCollections[areaIndex].Category);  
-            this.areaTypeComboBox.Enabled = false;  
             AreaButtonTest.TestButtonText = existingCommand.ParentCollectionName;
             ButtonTextColour.SetColour(existingCommand.TextColor);
             ButtonToggleBackgroundColour.SetColour(existingCommand.ToggleBackGroundColour);
@@ -109,7 +108,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.availableToMixer.Checked = this.cubaseCommand.IsAvailableToTheMixer;
 
             this.cbAreaName.SelectedIndexChanged += CbAreaName_SelectedIndexChanged;
-            this.areaTypeComboBox.SelectedIndexChanged += AreaTypeComboBox_SelectedIndexChanged;
             this.newAreaName.Enabled = false;
             this.newAreaName.KeyPress += NewAreaName_KeyPress;
             this.newAreaName.LostFocus += NewAreaName_LostFocus;
@@ -128,18 +126,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
         private void ButtonNameToggled_TextChanged(object? sender, EventArgs e)
         {
             ToggleButtonTest.TestButtonText = this.buttonNameToggled.Text;  
-        }
-
-        private void AreaTypeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            var areaCollection = this.GetSelectAreaCollection(); 
-            if (areaCollection != null)
-            {
-                if (areaTypeComboBox.SelectedIndex > -1)
-                {
-                    areaCollection.WithCategory(areaTypeComboBox.SelectedItem.ToString());
-                }
-            }
         }
 
         private void ButtonName_TextChanged(object? sender, EventArgs e)
@@ -171,7 +157,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                 case CubaseButtonType.Toggle:
                 case CubaseButtonType.Momentory:
                     this.momentaryDataControl = new MomentaryDataControl();
-                    this.momentaryDataControl.Text = cubaseKeyCommand?.Key ?? cubaseCommand.Action;
+                    this.momentaryDataControl.Action = cubaseCommand.Action;
                     this.AddDataControl(this.momentaryDataControl);
                     break;
                 case CubaseButtonType.Macro:
@@ -235,7 +221,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             var index = (this.cbAreaName.Items.Count - 1);
             this.cbAreaName.Items.Insert(index, this.newAreaName.Text);
             AreaButtonTest.TestButtonText = this.newAreaName.Text;
-            this.cubaseCommandCollections.WithNewCubaseCommand(this.newAreaName.Text, CubaseServiceConstants.KeyService);
+            this.cubaseCommandCollections.WithNewCubaseCommand(this.newAreaName.Text);
             this.newAreaName.Text = "";
             this.newAreaName.Enabled = false;
             this.cbAreaName.SelectedIndex = index;
@@ -252,7 +238,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             {
                 AreaBackgroundColour.SetColour(this.GetSelectAreaCollection().BackgroundColour);
                 AreaButtonTextColour.SetColour(this.GetSelectAreaCollection().TextColour);
-                areaTypeComboBox.SelectedIndex = Enum.GetNames<CubaseAreaTypes>().ToList().IndexOf(this.GetSelectAreaCollection().Category);
                 VisibleCheckBox.Checked = this.GetSelectAreaCollection().Visible;
             }
         }
@@ -262,23 +247,21 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.cbAreaName.Items.Clear();
             this.cbAreaName.Items.AddRange(this.cubaseCommandCollections.GetNames().ToArray());
             this.cbAreaName.Items.Add("New ..");
-            this.areaTypeComboBox.Items.Clear();
-            this.areaTypeComboBox.Items.AddRange(Enum.GetNames(typeof(CubaseAreaTypes)));
         }
 
         private void ButtonAdd_Click(object? sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(buttonName.Text) && this.cbAreaName.SelectedIndex > -1)
             {
-                var singleAction = string.Empty;
+                ActionEvent singleAction = null;
                 if (this.buttonAdd.Text != "Update")
                 {
                     switch (this.GetSelectedButtonType())
                     {
                         case CubaseButtonType.Toggle:
                         case CubaseButtonType.Momentory:
-                            singleAction = this.momentaryDataControl.Text; 
-                            if (string.IsNullOrEmpty(singleAction))
+                            singleAction = this.momentaryDataControl.Action; 
+                            if (singleAction == null)
                             {
                                 MessageBox.Show("You must select or enter a button action");
                                 return;
@@ -286,11 +269,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                             break;
                     }
 
-                    if (this.areaTypeComboBox.SelectedIndex < 0)
-                    {
-                        MessageBox.Show($"You must select an Area Type");
-                        return; 
-                    }
 
                     // does area exist
                     var areaName = cbAreaName.SelectedItem as string;
@@ -301,7 +279,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     }
                     if (commandCollection == null)
                     {
-                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName, this.areaTypeComboBox.SelectedItem.ToString());
+                        commandCollection = cubaseCommandCollections.WithNewCubaseCommand(areaName);
                     }
 
                     if (commandCollection.Commands.Any(c => c.Name == buttonName.Text))
@@ -347,8 +325,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
 
                     cubaseCommand.NameToggle = string.IsNullOrEmpty(buttonNameToggled.Text) ? buttonName.Text : buttonNameToggled.Text; 
 
-                    cubaseCommand.WithCategory(cubaseKeyCommand.Category);
-
                     commandCollection.WithNewCubaseCommand(cubaseCommand);
                     
                     cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);
@@ -382,10 +358,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             switch (this.GetSelectedButtonType())
             {
                 case CubaseButtonType.Momentory:
-                    cubaseCommand.Action = this.momentaryDataControl.Text;
+                    cubaseCommand.Action = this.momentaryDataControl.Action;
                     break;
                 case CubaseButtonType.Toggle:
-                    cubaseCommand.Action = this.momentaryDataControl.Text;
+                    cubaseCommand.Action = this.momentaryDataControl.Action;
                     break;
                 case CubaseButtonType.Macro:
                     cubaseCommand.ActionGroup = this.macroDataControl.GetCommands();

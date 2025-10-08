@@ -38,34 +38,17 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             this.commandCollection = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation); 
         } 
         
-        public CubaseActionResponse ProcessAction(CubaseActionRequest request)
+        public CubaseActionResponse ProcessAction(ActionEvent request)
         {
             try
             {
                 CubaseActionResponse response = CubaseActionResponse.CreateSuccess();
 
-                if (request.IsMacro())
+                var result = this.ExecuteMidiCommand(request.Action);
+                if (!result)
                 {
-                    foreach (var key in request.ActionGroup)
-                    {
-                        this.logger.LogInformation("Executing Midi command {key} for macro {request}", key, request.ButtonType);
-                        var result = this.ExecuteMidiCommand(key);
-                        if (!result)
-                        {
-                             response = CubaseActionResponse.CreateError($"Could not execute Midi command request. {key} {request.Category}");
-                             break;
-                        }
-                        Thread.Sleep(50);
-                    }
-                }
-                else
-                {
-                    var result = this.ExecuteMidiCommand(request.Action);
-                    if (!result)
-                    {
-                        response = CubaseActionResponse.CreateError($"Could not execute Midi command {request.Action}");
-                    }; 
-                }
+                     response = CubaseActionResponse.CreateError($"Could not execute Midi command {request.Action}");
+                }; 
                 return response;
             }
             catch (Exception ex)
@@ -83,7 +66,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             }
             else
             {
-                return this.keyService.ProcessAction(CubaseActionRequest.Create(midiCommand)).Success; 
+                return false;
             }
         }
     }

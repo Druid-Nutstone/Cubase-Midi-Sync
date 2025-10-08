@@ -14,7 +14,7 @@ namespace Cubase.Midi.Sync.Common
 
         public string Action { get; set; }
 
-        public string Category { get; set; }
+        public string Category { get; set; }    
 
         public static MidiAndKey AddKey(string name, string action, string category)
         {

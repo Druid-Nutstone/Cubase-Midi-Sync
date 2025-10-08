@@ -17,7 +17,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
             this.View = View.Details;
             this.MultiSelect = false;
             this.DoubleBuffered = true;
-            this.AddHeader("Category");
             this.AddHeader("Name");
             this.AddHeader("Key");
             this.AddHeader("Cubase Description");
@@ -78,8 +77,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Macros
         public CommandSelectorListVieItem(CubaseKeyCommand cubaseKeyCommand)
         {
             this.Command = cubaseKeyCommand;
-            this.Text = cubaseKeyCommand.Category;
-            this.SubItems.Add(cubaseKeyCommand.Name);
+            this.Text = cubaseKeyCommand.Name;
             this.SubItems.Add(cubaseKeyCommand.Key);
             this.SubItems.Add(cubaseKeyCommand.CubaseCommand?.CommandDescription);
         }

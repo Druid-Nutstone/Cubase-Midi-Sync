@@ -63,7 +63,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             foreach (var command in this.currentCommand.Commands)
             {
                 this.mappingListView.PopulateCubaseCommand(command);
-                this.AreaTypeComboBox.SelectedIndex = this.AreaTypeComboBox.Items.IndexOf(this.currentCommand.Category);
+                // this.AreaTypeComboBox.SelectedIndex = this.AreaTypeComboBox.Items.IndexOf(this.currentCommand.Category);
             }
 
         }
@@ -85,7 +85,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
                     var newCommand = CubaseCommand.Create()
                                                   .WithButtonType(command.ButtonType)
                                                   .WithName(command.Name)
-                                                  .WithCategory(command.Category)
+                                                  //.WithCategory(command.Category)
                                                   .WithAction(command.Action)  
                                                   .WithNameToggle(command.NameToggle)
                                                   .WithParentCollectionName(this.currentCommand.Name)   
@@ -130,7 +130,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
             {
                 if (!this.commands.HaveName(this.NewAreaName.Text))
                 {
-                    this.currentCommand = this.commands.WithNewCubaseCommand(this.NewAreaName.Text, CubaseServiceConstants.KeyService);
+                    this.currentCommand = this.commands.WithNewCubaseCommand(this.NewAreaName.Text);
                     this.AreaBackgroundColour.SetColour(this.currentCommand.BackgroundColour);
                     this.AreaTextColour.SetColour(this.currentCommand.TextColour);
                     this.buttonExampleControl.TestButtonText = this.currentCommand.Name;
@@ -163,8 +163,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
         private void PopulateCommandsListView()
         {
             this.commandsListView.Populate(this.commands, cubaseServerSettings);
-            this.AreaTypeComboBox.Items.Clear();
-            this.AreaTypeComboBox.Items.AddRange(Enum.GetNames(typeof(CubaseAreaTypes)));
             Resize();
         }
 

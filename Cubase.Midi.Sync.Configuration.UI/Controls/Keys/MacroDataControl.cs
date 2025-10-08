@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.InternalCommands;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Macros;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
     public partial class MacroDataControl : UserControl
     {
         private Control parent;
-        
+
+        private List<ActionEvent> actionEvents;
+
         public MacroDataControl(Control parent = null)
         {
             InitializeComponent();
@@ -30,26 +33,27 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             this.stringListControl.Remove();
         }
 
-        public List<string> GetCommands()
+        public List<ActionEvent> GetCommands()
         {
-            return this.stringListControl.GetList();
+            return this.actionEvents;
         }
 
-        public void SetCommands(List<string> commands)
+        public void SetCommands(List<ActionEvent> commands)
         {
-            this.stringListControl.Popsulate(commands);
+            this.actionEvents = commands;
+            this.stringListControl.Populate(commands);
         }
 
         public void AddInternalCommand(InternalCommand command)
         {
-            this.stringListControl.PopulateSingle(InternalCommandsCollection.SerialiseCommand(command));
+            this.stringListControl.PopulateSingle(ActionEvent.Create(CubaseAreaTypes.Midi, InternalCommandsCollection.SerialiseCommand(command)));
         }
 
         private void ButtonAddCommand_Click(object? sender, EventArgs e)
         {
             var macroCommandSelectorForm = new MacroCommandInternalSelectorlForm((selectedCubaseCommand) =>
             {
-                this.stringListControl.PopulateSingle(selectedCubaseCommand.Name);
+                this.stringListControl.PopulateSingle(ActionEvent.Create(CubaseAreaTypes.Midi, selectedCubaseCommand.Name));
             });
             
             macroCommandSelectorForm.StartPosition = FormStartPosition.Manual;

@@ -122,8 +122,7 @@ namespace Cubase.Midi.Sync.UI
             this.staticCommands = new List<CubaseCommand>();
             foreach (var midiToggleCommand in this.mixerCollection.Where(x => x.Visible))
             {
-                this.staticCommands.Add(CubaseCommand.CreateToggleButton(midiToggleCommand.ButtonText, midiToggleCommand.Command.ToString(), midiToggleCommand.ButtonTextToggled)
-                                                     .WithCategory(CubaseServiceConstants.MidiService)
+                this.staticCommands.Add(CubaseCommand.CreateToggleButton(midiToggleCommand.ButtonText, ActionEvent.Create(CubaseAreaTypes.Midi, midiToggleCommand.Command.ToString()), midiToggleCommand.ButtonTextToggled)
                                                      .WithIsInitiallyVisible(midiToggleCommand.IsInitiallyVisible));
 
             }
@@ -132,7 +131,7 @@ namespace Cubase.Midi.Sync.UI
             {
                 var btn = RaisedButtonFactory.Create(command.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
                 {
-                    this.mixerCollection = await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(Enum.Parse<KnownCubaseMidiCommands>(command.Action), string.Empty, string.Empty), this);
+                    this.mixerCollection = await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(Enum.Parse<KnownCubaseMidiCommands>(command.Action.Action), string.Empty, string.Empty), this);
                     foreach (var mixer in mixerCollection)
                     {
                         // command.IsToggled = mixer.Toggled;
@@ -147,7 +146,7 @@ namespace Cubase.Midi.Sync.UI
                         }
                     }
                     this.SetButtonState((Button)s, command);
-                }, command.IsToggleButton, command.Action);
+                }, command.IsToggleButton, command.Action.Action);
                 StaticButtons.Children.Add(btn.Button);
                 if (!command.IsInitiallyVisible)
                 {
@@ -227,8 +226,8 @@ namespace Cubase.Midi.Sync.UI
 
         private async Task SetMacroButton(Button button, CubaseCommand command, List<CubaseCommandCollection> commandsCollection)
         {
-            var actionStrings = new List<string>();
-            var tmpCommands = new List<CubaseCommand>();
+            //var actionStrings = new List<string>();
+            //var tmpCommands = new List<CubaseCommand>();
             // locate all the actions for this macro 
             var actionGroup = command.ActionGroup;
 
@@ -238,44 +237,44 @@ namespace Cubase.Midi.Sync.UI
                 actionGroup = command.IsToggled ? command.ActionGroup : command.ActionGroupToggleOff;
             }
 
-            foreach (var cmd in actionGroup)
-            {
-                if (!InternalCommandsCollection.IsInternalCommand(cmd))
-                {
-                    // find cubase command 
-                    var cubaseCommands = commandsCollection.SelectMany(x => x.Commands)
-                                                               .Where(x => x.Name == cmd);
-                    tmpCommands.AddRange(cubaseCommands);
-                    tmpCommands.ForEach(x => x.IsToggled = command.IsToggled);
-                    var firstCommand = cubaseCommands.First();
-                    // if it's a macro - then we have to add all the commands 
-                    if (firstCommand.IsMacro)
-                    {
-                        if (firstCommand.ButtonType == CubaseButtonType.Macro)
-                        {
-                            actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup, commandsCollection)); ;
-                        }
-                        else
-                        {
-                            if (command.IsToggled)
-                            {
-                                actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup, commandsCollection));
-                            }
-                            else
-                            {
-                                actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroupToggleOff, commandsCollection));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        actionStrings.Add(firstCommand.Action);
-                    }
-                }
-            }
+            //foreach (var cmd in actionGroup)
+            //{
+            //    //if (!InternalCommandsCollection.IsInternalCommand(cmd))
+            //    //{
+            //    //    // find cubase command 
+            //    //    var cubaseCommands = commandsCollection.SelectMany(x => x.Commands)
+            //    //                                               .Where(x => x.Name == cmd);
+            //    //    tmpCommands.AddRange(cubaseCommands);
+            //    //    tmpCommands.ForEach(x => x.IsToggled = command.IsToggled);
+            //    //    var firstCommand = cubaseCommands.First();
+            //    //    // if it's a macro - then we have to add all the commands 
+            //    //    if (firstCommand.IsMacro)
+            //    //    {
+            //    //        if (firstCommand.ButtonType == CubaseButtonType.Macro)
+            //    //        {
+            //    //            actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup, commandsCollection)); ;
+            //    //        }
+            //    //        else
+            //    //        {
+            //    //            if (command.IsToggled)
+            //    //            {
+            //    //                actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroup, commandsCollection));
+            //    //            }
+            //    //            else
+            //    //            {
+            //    //                actionStrings.AddRange(this.GetKeyCommandFromKeyName(firstCommand.ActionGroupToggleOff, commandsCollection));
+            //    //            }
+            //    //        }
+            //    //    }
+            //    //    else
+            //    //    {
+            //    //        actionStrings.Add(firstCommand.Action);
+            //    //    }
+            //    //}
+            //}
             //VisualStateManager.GoToState(button, "Pressed");
-            this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
-            var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionStrings), async (ex) =>
+            // this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
+            var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionGroup), async (ex) =>
             {
                 await DisplayAlert("Error SetMacroButton", ex.Message, "OK");
             });
@@ -298,13 +297,13 @@ namespace Cubase.Midi.Sync.UI
             }
         }
 
-        private List<string> GetKeyCommandFromKeyName(List<string> keyNames, List<CubaseCommandCollection> commandsCollection)
-        {
-            return commandsCollection.SelectMany(x => x.Commands)
-                                          .Where(x => keyNames.Contains(x.Name))
-                                          .Select(x => x.Action)
-                                          .Distinct()
-                                          .ToList();
-        }
+        //private List<string> GetKeyCommandFromKeyName(List<string> keyNames, List<CubaseCommandCollection> commandsCollection)
+        //{
+        //    return commandsCollection.SelectMany(x => x.Commands)
+        //                                  .Where(x => keyNames.Contains(x.Name))
+        //                                  .Select(x => x.Action)
+        //                                  .Distinct()
+        //                                  .ToList();
+        //}
     }
 }

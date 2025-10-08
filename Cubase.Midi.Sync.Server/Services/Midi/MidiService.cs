@@ -62,7 +62,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 }
                 else
                 {
-                    var keyResult = this.keyService.ProcessAction(CubaseActionRequest.Create(cubaseMidiCommand.Command));
+                    var keyResult = this.keyService.ProcessAction(ActionEvent.Create(CubaseAreaTypes.Keys, cubaseMidiCommand.Command));
                     return keyResult.Success;
                 }
             }

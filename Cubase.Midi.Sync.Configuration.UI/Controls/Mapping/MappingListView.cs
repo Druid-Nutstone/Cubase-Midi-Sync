@@ -15,7 +15,6 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
         { 
             this.FullRowSelect = true;
             this.View = View.Details;
-            this.AddHeader("Area");
             this.AddHeader("Name");
             this.AddHeader("Action");
             this.Dock = DockStyle.Fill;
@@ -53,11 +52,25 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Mapping
 
     public class MappingListViewItem : ListViewItem
     {
+        public CubaseCommand CubaseCommand {  get; set; }    
+        
         public MappingListViewItem(CubaseCommand cubaseCommand)
         {
-            this.Text = cubaseCommand.Category;
-            this.SubItems.Add(cubaseCommand.Name);
-            this.SubItems.Add(cubaseCommand.Action.Action);
+            this.CubaseCommand = cubaseCommand; 
+            this.Text = cubaseCommand.Name;
+            this.SubItems.Add(GetAction());
+        }
+
+        private string GetAction()
+        {
+            if (this.CubaseCommand.Action == null)
+            {
+                return string.Join(';',this.CubaseCommand.ActionGroup.Select(x => x.Action).ToArray());
+            }
+            else
+            {
+                return this.CubaseCommand.Action.Action;
+            }
         }
     }
 }

@@ -96,6 +96,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             throw new NotImplementedException();
         }
 
+        public Task<CubaseActionResponse> InitialiseDriver()
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetBaseUrl()
         {
             throw new NotImplementedException();

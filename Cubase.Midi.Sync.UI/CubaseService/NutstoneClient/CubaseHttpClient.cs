@@ -12,6 +12,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
 {
     public class CubaseHttpClient : HttpClient, ICubaseHttpClient
@@ -132,6 +133,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
             // success → deserialize
             return await response.Content.ReadFromJsonAsync<CubaseMixerCollection>();
         }
+
 
     }
 }

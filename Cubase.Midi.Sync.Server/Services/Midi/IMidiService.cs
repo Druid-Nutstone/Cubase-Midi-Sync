@@ -12,6 +12,12 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public void SendSysExMessage<T>(MidiCommand command, T request);
 
-        public MidiChannelCollection GetChannels(); 
+        public MidiChannelCollection GetChannels();
+
+        public void VerifyDriver();
+
+        void Dispose();
+
+        bool ReadyReceived { get; set; }
     }
 }

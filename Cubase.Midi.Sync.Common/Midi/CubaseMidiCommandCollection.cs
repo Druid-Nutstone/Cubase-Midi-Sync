@@ -54,8 +54,10 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Select Tracks With Selected Event", 1, 10, "Channel & Track Visibility", "ShowMarked", 127));
             this.Add(CubaseMidiCommand.Create("Hide Muted Tracks", 1, 11, "Channel & Track Visibility", "HideMuted", 127));
             this.Add(CubaseMidiCommand.Create("MetroNone On/Off", 1, 12, "Transport", "Metronome On", 127));
+            this.Add(CubaseMidiCommand.Create("Set Left Locator", 1, 13, "Transport", "Set Left Locator", 127));
+            this.Add(CubaseMidiCommand.Create("Set Right Locator", 1, 14, "Transport", "Set Right Locator", 127));
         }
-        
+
 
         public CubaseMidiCommand GetCommandByCommand(string command)
         {

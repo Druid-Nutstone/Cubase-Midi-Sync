@@ -296,7 +296,7 @@
             Controls.Add(buttonAdd);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "AddKeyToCommandsForm";
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Add Key For Cubase MIDI";
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();

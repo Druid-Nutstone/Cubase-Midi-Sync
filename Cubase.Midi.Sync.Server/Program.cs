@@ -71,6 +71,15 @@ var midi = app.Services.GetRequiredService<IMidiService>();
 midi.Initialise();
 var cache = app.Services.GetRequiredService<ICacheService>();
 cache.Initialise();
+
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStopping.Register(() =>
+{
+    var midi = app.Services.GetRequiredService<IMidiService>();
+    midi.Dispose();
+});
+
+
 app.Run();
 
 public partial class Program { } 

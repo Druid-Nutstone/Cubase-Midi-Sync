@@ -19,13 +19,13 @@ public partial class CubaseMainPage : ContentPage
 
     private BasePage basePage;
 
-    private MixerPage mixerPage;    
+    private MixerPage mixerPage;
 
     public CubaseMainPage(ICubaseHttpClient client, BasePage basePage, MixerPage mixerPage)
     {
         InitializeComponent();
-        this.mixerPage = mixerPage; 
-        this.basePage = basePage;   
+        this.mixerPage = mixerPage;
+        this.basePage = basePage;
         basePage.AddToolbars(this);
         this.client = client;
         CollectionsLayout.Clear();
@@ -63,12 +63,14 @@ public partial class CubaseMainPage : ContentPage
         await LoadCommands();
         loaded = true;
         SetSpinner(false);
-    } 
+    }
 
     private async Task LoadCommands()
     {
         try
         {
+
+
             // CollectionsLayout.Children.Clear();
             collections = await this.client.GetCommands(async (msg) =>
             {
@@ -115,7 +117,7 @@ public partial class CubaseMainPage : ContentPage
                     CollectionsLayout.Children.Add(button.Button);
                 }
             }
-            CollectionsLayout.Children.RemoveAt(0); // remove loading button    
+            CollectionsLayout.Children.RemoveAt(0); // remove loading button
         }
         catch (Exception ex)
         {

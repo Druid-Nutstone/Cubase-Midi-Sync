@@ -65,6 +65,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             return await Task.Run(this.midiService.GetChannels);
         }
 
+
         public async Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel)
         {
 

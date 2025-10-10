@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Cubase.Midi.Sync.Server.Services.Midi
 {
-    public class MidiService : IMidiService
+    public class MidiService : IMidiService, IDisposable
     {
         private NutstoneDriver midiDriver;
 
@@ -18,6 +18,10 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private readonly ILogger<MidiService> logger;
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
+
+        public bool ReadyReceived { get; set; } = false;
+
+        private bool disposed;
 
         public MidiChannelCollection MidiChannels { get; set; } = new MidiChannelCollection();
 
@@ -47,7 +51,6 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.midiDriver = new NutstoneDriver("Nutstone");
             this.midiDriver.MidiMessageReceived += MidiDriver_MidiMessageReceived;
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
-
         }
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand)
@@ -160,8 +163,22 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private void Ready(string emptyString)
         {
+            this.ReadyReceived = true;
             this.logger.LogInformation($"Cubase Midi Sync is ready..");
         }
-            
+
+        public void VerifyDriver()
+        {
+            this.ReadyReceived = false;
+            this.SendSysExMessage(MidiCommand.Ready, "{}");
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+            this.midiDriver.Dispose();
+          
+        }
     }
 }

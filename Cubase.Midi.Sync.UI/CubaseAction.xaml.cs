@@ -1,4 +1,4 @@
-using Cubase.Midi.Sync.Common;
+﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Colours;
 using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Common.Requests;
@@ -7,6 +7,7 @@ using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Layouts;
 
 namespace Cubase.Midi.Sync.UI;
 
@@ -47,38 +48,183 @@ public partial class CubaseAction : ContentPage
 
     private void LoadCommand()
     {
-        CommandsLayout.Children.Clear();
+        CommandsContainer.Children.Clear();
 
-        foreach (var command in commands.Commands)
+        // 🟡 Create a flex layout for uncategorized buttons (no banner)
+        var noCategoryLayout = new FlexLayout
         {
-            var button = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
+            Direction = FlexDirection.Row,
+            Wrap = FlexWrap.Wrap,
+            JustifyContent = FlexJustify.Start,
+            AlignItems = FlexAlignItems.Start,
+            AlignContent = FlexAlignContent.Start,
+            HorizontalOptions = LayoutOptions.Fill,
+            Margin = new Thickness(0)
+        };
+
+        // Add this layout at the top of the container
+        CommandsContainer.Children.Add(noCategoryLayout);
+
+        string currentCategory = string.Empty;
+        FlexLayout currentCategoryLayout = null;
+
+        foreach (var command in commands.GetCommandsByOrderedCategory())
+        {
+            // 🧭 CASE 1 — Command has NO category
+            if (string.IsNullOrEmpty(command.ButtonCategory))
+            {
+                var button = CreateCommandButton(command);
+                noCategoryLayout.Children.Add(button);
+                continue;
+            }
+
+            // 🧭 CASE 2 — New category detected
+            if (!command.ButtonCategory.Equals(currentCategory, StringComparison.OrdinalIgnoreCase))
+            {
+                currentCategory = command.ButtonCategory;
+
+                // 🏷️ Banner for this category
+                var banner = new Border
+                {
+                    BackgroundColor = ColourConstants.CategoryColour.ToMauiColor(),
+                    StrokeThickness = 0,
+                    Margin = new Thickness(0, 10, 0, 5),
+                    Padding = new Thickness(10, 5),
+                    HorizontalOptions = LayoutOptions.Fill,
+                    HeightRequest = 40,
+                    Content = new Label
+                    {
+                        Text = currentCategory,
+                        FontAttributes = FontAttributes.Bold,
+                        HorizontalOptions = LayoutOptions.Fill,
+                        HorizontalTextAlignment = TextAlignment.Start,
+                        VerticalTextAlignment = TextAlignment.Center,
+                        TextColor = Colors.Black,
+                        FontSize = 16
+                    }
+                };
+
+                CommandsContainer.Children.Add(banner);
+
+                // 📐 Create a flex layout for the buttons in this category
+                currentCategoryLayout = new FlexLayout
+                {
+                    Direction = FlexDirection.Row,
+                    Wrap = FlexWrap.Wrap,
+                    JustifyContent = FlexJustify.Start,
+                    AlignItems = FlexAlignItems.Start,
+                    AlignContent = FlexAlignContent.Start,
+                    HorizontalOptions = LayoutOptions.Fill,
+                    Margin = new Thickness(0)
+                };
+
+                CommandsContainer.Children.Add(currentCategoryLayout);
+            }
+
+            // ➕ Add the button to the current category
+            var categoryButton = CreateCommandButton(command);
+            currentCategoryLayout?.Children.Add(categoryButton);
+        }
+    }
+
+    private Button CreateCommandButton(CubaseCommand command)
+    {
+        var buttonWrapper = RaisedButtonFactory.Create(
+            command.Name,
+            command.ButtonBackgroundColour,
+            command.ButtonTextColour,
+            async (s, e) =>
             {
                 try
                 {
-                    var button = (Button)s;
-                    
+                    var btn = (Button)s;
                     command.IsToggled = !command.IsToggled;
-                    this.SetButtonState(button, command);
-                    CubaseActionResponse response = null;
+                    SetButtonState(btn, command);
 
                     if (command.IsMacro)
-                    {
-                        await this.SetMacroButton(button, command);
-                    }
+                        await SetMacroButton(btn, command);
                     else
-                    {
-                        await this.SetMomentaryOrToggleButton(button, command);
-                    }
+                        await SetMomentaryOrToggleButton(btn, command);
                 }
                 catch (Exception ex)
                 {
                     await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
                 }
-            }, toggleMode: true);
-            this.SetButtonState(button.Button, command);
-            CommandsLayout.Children.Add(button.Button);
-        }
+            },
+            toggleMode: true
+        );
+
+        SetButtonState(buttonWrapper.Button, command);
+        return buttonWrapper.Button;
     }
+
+
+    //private void LoadCommand()
+    //{
+    //    CommandsLayout.Children.Clear();
+    //    var currentCategory = string.Empty;
+    //    foreach (var command in commands.GetCommandsByOrderedCategory())
+    //    {
+    //        if (!string.IsNullOrEmpty(command.ButtonCategory))
+    //        {
+    //            if (!command.ButtonCategory.Equals(currentCategory, StringComparison.OrdinalIgnoreCase))
+    //            {
+    //                currentCategory = command.ButtonCategory;
+
+    //                var banner = new Border
+    //                {
+    //                    BackgroundColor = ColourConstants.CategoryColour.ToMauiColor(),
+    //                    StrokeThickness = 0,
+    //                    Margin = new Thickness(0, 10, 0, 5),
+    //                    Padding = new Thickness(10, 5),
+    //                    HorizontalOptions = LayoutOptions.Fill,
+    //                    Content = new Label
+    //                    {
+    //                        Text = currentCategory,
+    //                        FontAttributes = FontAttributes.Bold,
+    //                        HorizontalOptions = LayoutOptions.Fill,
+    //                        HorizontalTextAlignment = TextAlignment.Center,
+    //                        TextColor = Colors.White,
+    //                        FontSize = 16
+    //                    }
+    //                };
+
+    //                // 🔸 Force it to its own row & stretch full width
+    //                FlexLayout..SetWrapBefore(banner, true);
+    //                FlexLayout.SetAlignSelf(banner, FlexAlignSelf.Stretch);
+    //                FlexLayout.SetGrow(banner, 1);
+
+    //                CommandsLayout.Children.Add(banner);
+    //            }
+    //        }
+    //        var button = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
+    //        {
+    //            try
+    //            {
+    //                var button = (Button)s;
+
+    //                command.IsToggled = !command.IsToggled;
+    //                this.SetButtonState(button, command);
+    //                CubaseActionResponse response = null;
+
+    //                if (command.IsMacro)
+    //                {
+    //                    await this.SetMacroButton(button, command);
+    //                }
+    //                else
+    //                {
+    //                    await this.SetMomentaryOrToggleButton(button, command);
+    //                }
+    //            }
+    //            catch (Exception ex)
+    //            {
+    //                await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
+    //            }
+    //        }, toggleMode: true);
+    //        this.SetButtonState(button.Button, command);
+    //        CommandsLayout.Children.Add(button.Button);
+    //    }
+    //}
 
     private async Task SetMomentaryOrToggleButton(Button button, CubaseCommand command)
     {

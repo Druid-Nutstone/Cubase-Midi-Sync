@@ -52,6 +52,8 @@
             ButtonToggleBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonTextColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
             ButtonBackgroundColour = new Cubase.Midi.Sync.Configuration.UI.Controls.Custom.ColourPickerControl();
+            label1 = new Label();
+            cbButtonCategory = new ComboBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -173,6 +175,8 @@
             // groupBox2
             // 
             groupBox2.BackColor = Color.WhiteSmoke;
+            groupBox2.Controls.Add(cbButtonCategory);
+            groupBox2.Controls.Add(label1);
             groupBox2.Controls.Add(availableToMixer);
             groupBox2.Controls.Add(ButtonDataPanel);
             groupBox2.Controls.Add(buttonNameToggled);
@@ -197,7 +201,7 @@
             // availableToMixer
             // 
             availableToMixer.AutoSize = true;
-            availableToMixer.Location = new Point(28, 200);
+            availableToMixer.Location = new Point(276, 237);
             availableToMixer.Name = "availableToMixer";
             availableToMixer.Size = new Size(230, 21);
             availableToMixer.TabIndex = 39;
@@ -216,29 +220,29 @@
             // buttonNameToggled
             // 
             buttonNameToggled.Label = "Button Text (Toggled)";
-            buttonNameToggled.Location = new Point(24, 138);
+            buttonNameToggled.Location = new Point(21, 138);
             buttonNameToggled.Name = "buttonNameToggled";
-            buttonNameToggled.Size = new Size(222, 67);
+            buttonNameToggled.Size = new Size(222, 56);
             buttonNameToggled.TabIndex = 37;
             // 
             // buttonName
             // 
             buttonName.Label = "Button Text";
-            buttonName.Location = new Point(24, 77);
+            buttonName.Location = new Point(21, 77);
             buttonName.Name = "buttonName";
-            buttonName.Size = new Size(222, 55);
+            buttonName.Size = new Size(221, 55);
             buttonName.TabIndex = 36;
             // 
             // ToggleButtonTest
             // 
-            ToggleButtonTest.Location = new Point(607, 345);
+            ToggleButtonTest.Location = new Point(607, 358);
             ToggleButtonTest.Name = "ToggleButtonTest";
             ToggleButtonTest.Size = new Size(113, 47);
             ToggleButtonTest.TabIndex = 31;
             // 
             // NormalButtonTest
             // 
-            NormalButtonTest.Location = new Point(607, 263);
+            NormalButtonTest.Location = new Point(607, 281);
             NormalButtonTest.Name = "NormalButtonTest";
             NormalButtonTest.Size = new Size(113, 47);
             NormalButtonTest.TabIndex = 30;
@@ -246,7 +250,7 @@
             // CopyColourFromArea
             // 
             CopyColourFromArea.AutoSize = true;
-            CopyColourFromArea.Location = new Point(24, 243);
+            CopyColourFromArea.Location = new Point(24, 261);
             CopyColourFromArea.Name = "CopyColourFromArea";
             CopyColourFromArea.Size = new Size(142, 17);
             CopyColourFromArea.TabIndex = 29;
@@ -256,7 +260,7 @@
             // ButtonToggleTextColour
             // 
             ButtonToggleTextColour.Label = "Button Toggle Text Colour";
-            ButtonToggleTextColour.Location = new Point(276, 345);
+            ButtonToggleTextColour.Location = new Point(276, 358);
             ButtonToggleTextColour.Name = "ButtonToggleTextColour";
             ButtonToggleTextColour.Size = new Size(259, 61);
             ButtonToggleTextColour.TabIndex = 28;
@@ -264,7 +268,7 @@
             // ButtonToggleBackgroundColour
             // 
             ButtonToggleBackgroundColour.Label = "Button Toggle Background Colour";
-            ButtonToggleBackgroundColour.Location = new Point(24, 345);
+            ButtonToggleBackgroundColour.Location = new Point(24, 358);
             ButtonToggleBackgroundColour.Name = "ButtonToggleBackgroundColour";
             ButtonToggleBackgroundColour.Size = new Size(246, 61);
             ButtonToggleBackgroundColour.TabIndex = 27;
@@ -272,7 +276,7 @@
             // ButtonTextColour
             // 
             ButtonTextColour.Label = "Button Text Colour";
-            ButtonTextColour.Location = new Point(276, 263);
+            ButtonTextColour.Location = new Point(276, 281);
             ButtonTextColour.Name = "ButtonTextColour";
             ButtonTextColour.Size = new Size(259, 61);
             ButtonTextColour.TabIndex = 26;
@@ -280,10 +284,28 @@
             // ButtonBackgroundColour
             // 
             ButtonBackgroundColour.Label = "Button Background Colour";
-            ButtonBackgroundColour.Location = new Point(21, 263);
+            ButtonBackgroundColour.Location = new Point(21, 281);
             ButtonBackgroundColour.Name = "ButtonBackgroundColour";
             ButtonBackgroundColour.Size = new Size(259, 61);
             ButtonBackgroundColour.TabIndex = 25;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 8.830189F, FontStyle.Bold);
+            label1.Location = new Point(25, 198);
+            label1.Name = "label1";
+            label1.Size = new Size(110, 17);
+            label1.TabIndex = 40;
+            label1.Text = "Button Category";
+            // 
+            // cbButtonCategory
+            // 
+            cbButtonCategory.FormattingEnabled = true;
+            cbButtonCategory.Location = new Point(25, 218);
+            cbButtonCategory.Name = "cbButtonCategory";
+            cbButtonCategory.Size = new Size(179, 25);
+            cbButtonCategory.TabIndex = 41;
             // 
             // AddKeyToCommandsForm
             // 
@@ -330,5 +352,7 @@
         private GroupBox ButtonDataPanel;
         private CheckBox VisibleCheckBox;
         private CheckBox availableToMixer;
+        private Label label1;
+        private ComboBox cbButtonCategory;
     }
 }

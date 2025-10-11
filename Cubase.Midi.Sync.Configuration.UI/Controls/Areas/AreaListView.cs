@@ -12,6 +12,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         private CubaseCommandsCollection cubaseCommands;
         private CubaseServerSettings cubaseServerSettings;
 
+        private Action<CubaseCommandCollection> selectionHandler;
+
         public AreaListView() : base() 
         {
             this.View = View.Details;
@@ -28,6 +30,18 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         public void AddHeader(string header)
         {
             this.Columns.Add(header);
+        }
+
+        protected override void OnSelectedIndexChanged(EventArgs e)
+        {
+            if (this.selectionHandler != null && this.SelectedItems.Count > 0)
+            {
+                var selectedItem = this.SelectedItems[0] as AreaListViewItem;
+                if (selectedItem != null)
+                {
+                    this.selectionHandler(selectedItem.Command);
+                }
+            }   
         }
 
         private void AutoFit()
@@ -47,8 +61,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             }
         }
 
-        public void Populate(CubaseCommandsCollection cubaseCommands, CubaseServerSettings cubaseServerSettings)
+        public void Populate(CubaseCommandsCollection cubaseCommands, CubaseServerSettings cubaseServerSettings, Action<CubaseCommandCollection>? selectionHandler = null)
         {
+            if (selectionHandler != null)
+            {
+                this.selectionHandler = selectionHandler;
+            }
             this.cubaseCommands = cubaseCommands;
             this.cubaseServerSettings = cubaseServerSettings;   
             this.ContextMenuStrip = new AreaContextMenuStrip(cubaseCommands, cubaseServerSettings, this);
@@ -70,9 +88,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
     {
         public CubaseCommandCollection Command { get; set; }
 
-        public AreaListViewItem(CubaseCommandCollection cubaseCoomandCollection) : base()
+        public AreaListViewItem(CubaseCommandCollection cubaseCommandCollection) : base()
         {
-            this.Command = cubaseCoomandCollection;
+            this.Command = cubaseCommandCollection;
             this.Text = this.Command.Name;
             this.SubItems.Add(this.Command.Visible ? "Yes" : "No");
             this.SubItems.Add(this.Command.Commands.Count.ToString()); 

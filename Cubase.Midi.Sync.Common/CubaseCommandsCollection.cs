@@ -73,7 +73,7 @@ namespace Cubase.Midi.Sync.Common
         {
             foreach (var commandColl in this)
             {
-                for (int i=0; i < commandColl.Commands.Count; i++)
+                for (int i = 0; i < commandColl.Commands.Count; i++)
                 {
                     if (commandColl.Commands[i].Name == command.Name)
                     {
@@ -89,14 +89,14 @@ namespace Cubase.Midi.Sync.Common
                             }
                         }
                     }
-                }  
+                }
             }
             // clean up any empty collections 
-            for (int i=0; i < this.Count; i++)
+            for (int i = 0; i < this.Count; i++)
             {
                 if (this[i].Commands.Count == 0)
                 {
-                    this.RemoveAt(i);   
+                    this.RemoveAt(i);
                 }
             }
             return true;
@@ -110,15 +110,24 @@ namespace Cubase.Midi.Sync.Common
 
     public class CubaseCommandCollection
     {
-        public string Name { get; set; }    
-    
+        public string Name { get; set; }
+
         public bool Visible { get; set; } = true;
 
+        public List<string> ButtonCategories { get; set; } = new List<string>();    
+
         public SerializableColour BackgroundColour { get; set; } = ColourConstants.ButtonBackground.ToSerializableColour();
-        
-        public SerializableColour TextColour { get; set; }  = ColourConstants.ButtonText.ToSerializableColour();    
+
+        public SerializableColour TextColour { get; set; } = ColourConstants.ButtonText.ToSerializableColour();
 
         public List<CubaseCommand> Commands { get; set; } = new List<CubaseCommand>();
+
+        public List<CubaseCommand> GetCommandsByOrderedCategory()
+        {
+            return this.Commands
+                .OrderBy(c => c.ButtonCategory)
+                .ToList();
+        }
 
         public CubaseCommandCollection WithNewCubaseCommand(CubaseCommand cubaseCommand)
         {
@@ -126,8 +135,8 @@ namespace Cubase.Midi.Sync.Common
             return this;
         }
 
-        public CubaseCommandCollection WithBackgroundColour(SerializableColour backgroundColour) 
-        { 
+        public CubaseCommandCollection WithBackgroundColour(SerializableColour backgroundColour)
+        {
             this.BackgroundColour = backgroundColour;
             return this;
         }
@@ -147,14 +156,16 @@ namespace Cubase.Midi.Sync.Common
 
         // button text when toggled
         public string NameToggle { get; set; }
-        
+
+        public string ButtonCategory { get; set; }  
+
         public string ParentCollectionName { get; set; }
 
         public ActionEvent Action { get; set; }
 
         public List<ActionEvent>? ActionGroup { get; set; } = new List<ActionEvent>();
 
-        public List<ActionEvent>? ActionGroupToggleOff { get; set; } = new List<ActionEvent>();  
+        public List<ActionEvent>? ActionGroupToggleOff { get; set; } = new List<ActionEvent>();
 
         public string Category { get; set; }
 
@@ -169,14 +180,14 @@ namespace Cubase.Midi.Sync.Common
 
         public bool IsInitiallyVisible { get; set; } = true;
 
-        public DateTime? Created { get; set; }   
-        
-        public bool IsMacro 
-        { 
+        public DateTime? Created { get; set; }
+
+        public bool IsMacro
+        {
             get
             {
                 return this.ButtonType == CubaseButtonType.Macro || this.ButtonType == CubaseButtonType.MacroToggle;
-            } 
+            }
         }
 
         public bool IsToggleButton
@@ -185,7 +196,7 @@ namespace Cubase.Midi.Sync.Common
             {
                 return this.ButtonType == CubaseButtonType.Toggle || this.ButtonType == CubaseButtonType.MacroToggle;
             }
-        } 
+        }
 
         public bool IsToggled { get; set; }
 
@@ -200,14 +211,14 @@ namespace Cubase.Midi.Sync.Common
         public SerializableColour TextColor => (IsToggleButton && IsToggled)
             ? this.ToggleForeColour
             : ButtonTextColour;
-    
 
-        
+
+
         public CubaseCommand WithButtonType(CubaseButtonType buttonType)
         {
             this.ButtonType = buttonType;
             return this;
-        }   
+        }
 
         public CubaseCommand WithFlipToggle()
         {
@@ -235,13 +246,13 @@ namespace Cubase.Midi.Sync.Common
 
         public CubaseCommand WithNameToggle(string nameToggle)
         {
-            this.NameToggle = nameToggle;   
+            this.NameToggle = nameToggle;
             return this;
         }
 
         public CubaseCommand WithButtonTextColour(Color color)
         {
-            this.ButtonTextColour = color.ToSerializableColour();   
+            this.ButtonTextColour = color.ToSerializableColour();
             return this;
         }
 
@@ -300,12 +311,12 @@ namespace Cubase.Midi.Sync.Common
             {
                 Name = name,
                 ActionGroup = actions.ToList(),
-                ActionGroupToggleOff= actionsToggleOff.ToList(),
+                ActionGroupToggleOff = actionsToggleOff.ToList(),
                 ButtonType = CubaseButtonType.MacroToggle,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 Created = DateTime.Now,
-                IsInitiallyVisible= true,
+                IsInitiallyVisible = true,
             };
         }
 
@@ -319,7 +330,7 @@ namespace Cubase.Midi.Sync.Common
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 Created = DateTime.Now,
-                IsInitiallyVisible= true,
+                IsInitiallyVisible = true,
             };
         }
 
@@ -343,7 +354,7 @@ namespace Cubase.Midi.Sync.Common
             {
                 Name = name,
                 ActionGroup = actions,
-                ButtonType = CubaseButtonType.Macro, 
+                ButtonType = CubaseButtonType.Macro,
                 ButtonBackgroundColour = ColourConstants.ButtonBackground.ToSerializableColour(),
                 ButtonTextColour = ColourConstants.ButtonText.ToSerializableColour(),
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
@@ -370,13 +381,13 @@ namespace Cubase.Midi.Sync.Common
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
                 ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
                 Created = DateTime.Now,
-                IsInitiallyVisible= true
+                IsInitiallyVisible = true
             };
         }
 
         public static CubaseCommand CreateToggleButtonByName(string name, string toggleName)
         {
-            return CreateToggleButton(name, new List<ActionEvent>() ,toggleName);
+            return CreateToggleButton(name, new List<ActionEvent>(), toggleName);
         }
 
         public static CubaseCommand CreateToggleButton(string name, ActionEvent action)
@@ -391,7 +402,7 @@ namespace Cubase.Midi.Sync.Common
                 ToggleBackGroundColour = ColourConstants.ButtonToggledBackground.ToSerializableColour(),
                 ToggleForeColour = ColourConstants.ButtonToggledText.ToSerializableColour(),
                 Created = DateTime.Now,
-                IsInitiallyVisible= true
+                IsInitiallyVisible = true
             };
         }
 
@@ -405,13 +416,13 @@ namespace Cubase.Midi.Sync.Common
     public class ActionEvent
     {
         public CubaseAreaTypes CommandType { get; set; }
-    
-        public string Action {  get; set; } 
+
+        public string Action { get; set; }
 
         public static ActionEvent Create(CubaseAreaTypes commandType, string Action)
         {
-            return new ActionEvent() { CommandType = commandType, Action = Action };    
-        } 
+            return new ActionEvent() { CommandType = commandType, Action = Action };
+        }
 
         public static ActionEvent CreateFromMidiAndKey(MidiAndKey midiAndKey)
         {

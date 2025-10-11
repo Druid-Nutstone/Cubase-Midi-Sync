@@ -16,6 +16,7 @@ namespace Cubase.Midi.Sync.Common.Colours
         public static readonly System.Drawing.Color ButtonToggledText = Color.White;
         public static readonly System.Drawing.Color ButtonRecordBackground = Color.Red;
         public static readonly System.Drawing.Color ButtonRecordText = Color.White;
+        public static readonly System.Drawing.Color CategoryColour = ColorTranslator.FromHtml("#bdc3c9");
 
     }
 }

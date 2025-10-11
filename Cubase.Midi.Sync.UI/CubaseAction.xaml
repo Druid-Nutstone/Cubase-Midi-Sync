@@ -5,6 +5,11 @@
              Title="{Binding Name}">
 
     <ScrollView Orientation="Vertical">
+        <VerticalStackLayout x:Name="CommandsContainer"
+                         Margin="10"
+                         Padding="5"/>
+    </ScrollView>
+    <!--<ScrollView Orientation="Vertical">
         <FlexLayout x:Name="CommandsLayout"
                 Direction="Row"
                 Wrap="Wrap"
@@ -13,5 +18,5 @@
                 AlignContent="Start"
                 Margin="10"
                 Padding="5"/>
-    </ScrollView>
+    </ScrollView>-->
 </ContentPage>

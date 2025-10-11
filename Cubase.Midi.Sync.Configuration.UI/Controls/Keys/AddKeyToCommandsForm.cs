@@ -75,7 +75,9 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             ButtonTextColour.SetColour(existingCommand.TextColor);
             ButtonToggleBackgroundColour.SetColour(existingCommand.ToggleBackGroundColour);
             ButtonBackgroundColour.SetColour(existingCommand.ButtonBackgroundColour);
-            ButtonToggleTextColour.SetColour(existingCommand.ToggleForeColour);  
+            ButtonToggleTextColour.SetColour(existingCommand.ToggleForeColour);
+            this.PopulateButtonCategories();
+            this.cbButtonCategory.SelectedItem = existingCommand.ButtonCategory;    
             this.buttonAdd.Text = "Update";
             VisibleCheckBox.Checked = cubaseCommandCollections.GetCommandCollectionByName(this.cubaseCommand.ParentCollectionName).Visible;
         }
@@ -240,6 +242,14 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                 AreaButtonTextColour.SetColour(this.GetSelectAreaCollection().TextColour);
                 VisibleCheckBox.Checked = this.GetSelectAreaCollection().Visible;
             }
+            this.PopulateButtonCategories();
+        }
+
+        private void PopulateButtonCategories()
+        {
+            var commandCollection = this.GetSelectAreaCollection(); 
+            this.cbButtonCategory.Items.Clear();
+            this.cbButtonCategory.Items.AddRange(commandCollection?.ButtonCategories?.ToArray() ?? Array.Empty<string>());
         }
 
         private void InitialiseAreaName()
@@ -314,6 +324,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                             break;
                     }
  
+                    if (this.cbButtonCategory.SelectedIndex > -1)
+                    {
+                        cubaseCommand.ButtonCategory = this.cbButtonCategory.SelectedItem.ToString();
+                    }
+
                     cubaseCommand.ButtonBackgroundColour = ButtonBackgroundColour.JsonColour;
                     cubaseCommand.ButtonTextColour = ButtonTextColour.JsonColour;
                     cubaseCommand.ToggleBackGroundColour = ButtonToggleBackgroundColour.JsonColour;
@@ -371,6 +386,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
                     cubaseCommand.ActionGroupToggleOff = this.macroToggleDataControl.GetToggleOffCommands();
                     break;
             }
+            cubaseCommand.ButtonCategory = this.cbButtonCategory.SelectedItem?.ToString() ?? string.Empty;  
             cubaseCommand.Name = buttonName.Text;
             cubaseCommand.NameToggle = buttonNameToggled.Text ?? buttonName.Text;
             this.cubaseCommandCollections.SaveToFile(this.cubaseServerSettings.FilePath);

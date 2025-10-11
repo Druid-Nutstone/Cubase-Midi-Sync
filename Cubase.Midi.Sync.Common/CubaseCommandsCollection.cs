@@ -124,9 +124,25 @@ namespace Cubase.Midi.Sync.Common
 
         public List<CubaseCommand> GetCommandsByOrderedCategory()
         {
-            return this.Commands
-                .OrderBy(c => c.ButtonCategory)
-                .ToList();
+            var result = new List<CubaseCommand>();
+
+            // 1) Commands with no category (null/empty/whitespace) first
+            result.AddRange(this.Commands.Where(c => string.IsNullOrWhiteSpace(c?.ButtonCategory)));
+
+            // 2) Add commands for each category in the exact order from ButtonCategories
+            foreach (var category in this.ButtonCategories.Where(bc => !string.IsNullOrWhiteSpace(bc)))
+            {
+                result.AddRange(this.Commands.Where(c =>
+                    string.Equals(c?.ButtonCategory, category, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // 3) Finally add commands whose category wasn't in ButtonCategories (keep original order)
+            result.AddRange(this.Commands.Where(c =>
+                !string.IsNullOrWhiteSpace(c?.ButtonCategory) &&
+                !this.ButtonCategories.Any(bc => string.Equals(bc, c.ButtonCategory, StringComparison.OrdinalIgnoreCase))
+            ));
+
+            return result;
         }
 
         public CubaseCommandCollection WithNewCubaseCommand(CubaseCommand cubaseCommand)

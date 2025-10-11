@@ -20,7 +20,7 @@ public static class RaisedButtonFactory
 
         // Example: make button 1/10 of screen width and scale font accordingly
         var buttonWidth = screenWidth / 2.5;   // wider
-        var buttonHeight = screenHeight / 8;   // taller
+        var buttonHeight = screenHeight / 9;   // taller
         var shortestSide = Math.Min(screenWidth, screenHeight);
         // var fontSize = shortestSide / 20;
 

@@ -57,6 +57,7 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Set Left Locator", 1, 13, "Transport", "Set Left Locator", 127));
             this.Add(CubaseMidiCommand.Create("Set Right Locator", 1, 14, "Transport", "Set Right Locator", 127));
             this.Add(CubaseMidiCommand.Create("Loop Selection", 1, 15, "Transport", "Loop Selection", 127));
+            this.Add(CubaseMidiCommand.Create("Loop", 1, 16, "Transport", "Cycle", 127));
         }
 
 

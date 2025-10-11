@@ -103,7 +103,11 @@ public static class RaisedButtonFactory
        }
 
         if (onClicked != null)
-            button.Clicked += onClicked;
+        {
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += onClicked.Invoke;
+            button.GestureRecognizers.Add(tapGesture);
+        }
 
         button.SizeChanged += (s, e) =>
         {

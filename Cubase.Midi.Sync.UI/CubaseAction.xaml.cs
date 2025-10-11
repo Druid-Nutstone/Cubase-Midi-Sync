@@ -267,6 +267,12 @@ public partial class CubaseAction : ContentPage
                 dupItem.IsToggled = command.IsToggled;
             }
         }
+        else
+        {
+            await DisplayAlert("Error Executing Command", response.Message, "OK");
+            command.IsToggled = !command.IsToggled; 
+            SetButtonState(button, command);    
+        }
     }
 
     private void ProcessInternalNavigate(InternalCommand command)

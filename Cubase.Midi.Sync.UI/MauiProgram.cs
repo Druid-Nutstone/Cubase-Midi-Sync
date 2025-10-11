@@ -16,6 +16,7 @@ namespace Cubase.Midi.Sync.UI
     {
         public static MauiApp CreateMauiApp()
         {
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()

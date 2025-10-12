@@ -27,7 +27,10 @@ public partial class CubaseAction : ContentPage
 
     private Dictionary<InternalCommandType, Action<InternalCommand>> internalCommands;
     
-    private BasePage basePage;  
+    private BasePage basePage;
+
+    private FlexLayout maximizedLayout = null;
+    private VisualElement maximizedBanner = null;
 
     public CubaseAction(CubaseCommandCollection commands, List<CubaseCommandCollection> commandsCollection, ICubaseHttpClient client, BasePage basePage)
     {
@@ -46,23 +49,13 @@ public partial class CubaseAction : ContentPage
         LoadCommand();
     }
 
+
     private void LoadCommand()
     {
         CommandsContainer.Children.Clear();
 
-        // 🟡 Create a flex layout for uncategorized buttons (no banner)
-        var noCategoryLayout = new FlexLayout
-        {
-            Direction = FlexDirection.Row,
-            Wrap = FlexWrap.Wrap,
-            JustifyContent = FlexJustify.Start,
-            AlignItems = FlexAlignItems.Start,
-            AlignContent = FlexAlignContent.Start,
-            HorizontalOptions = LayoutOptions.Fill,
-            Margin = new Thickness(0)
-        };
-
-        // Add this layout at the top of the container
+        // 🟡 Layout for uncategorized commands (no banner)
+        var noCategoryLayout = CreateFlexLayout();
         CommandsContainer.Children.Add(noCategoryLayout);
 
         string currentCategory = string.Empty;
@@ -70,7 +63,7 @@ public partial class CubaseAction : ContentPage
 
         foreach (var command in commands.GetCommandsByOrderedCategory())
         {
-            // 🧭 CASE 1 — Command has NO category
+            // CASE 1: Command has no category
             if (string.IsNullOrEmpty(command.ButtonCategory))
             {
                 var button = CreateCommandButton(command);
@@ -78,54 +71,158 @@ public partial class CubaseAction : ContentPage
                 continue;
             }
 
-            // 🧭 CASE 2 — New category detected
+            // CASE 2: New category detected
             if (!command.ButtonCategory.Equals(currentCategory, StringComparison.OrdinalIgnoreCase))
             {
                 currentCategory = command.ButtonCategory;
+                currentCategoryLayout = CreateFlexLayout();
 
-                // 🏷️ Banner for this category
-                var banner = new Border
-                {
-                    BackgroundColor = ColourConstants.CategoryColour.ToMauiColor(),
-                    StrokeThickness = 0,
-                    Margin = new Thickness(0, 10, 0, 5),
-                    Padding = new Thickness(10, 5),
-                    HorizontalOptions = LayoutOptions.Fill,
-                    HeightRequest = 40,
-                    Content = new Label
-                    {
-                        Text = currentCategory,
-                        FontAttributes = FontAttributes.Bold,
-                        HorizontalOptions = LayoutOptions.Fill,
-                        HorizontalTextAlignment = TextAlignment.Start,
-                        VerticalTextAlignment = TextAlignment.Center,
-                        TextColor = Colors.Black,
-                        FontSize = 16
-                    }
-                };
+                // 🏷️ Create the banner + toggle button
+                var banner = CreateBanner(currentCategory, currentCategoryLayout);
 
                 CommandsContainer.Children.Add(banner);
-
-                // 📐 Create a flex layout for the buttons in this category
-                currentCategoryLayout = new FlexLayout
-                {
-                    Direction = FlexDirection.Row,
-                    Wrap = FlexWrap.Wrap,
-                    JustifyContent = FlexJustify.Start,
-                    AlignItems = FlexAlignItems.Start,
-                    AlignContent = FlexAlignContent.Start,
-                    HorizontalOptions = LayoutOptions.Fill,
-                    Margin = new Thickness(0)
-                };
-
                 CommandsContainer.Children.Add(currentCategoryLayout);
             }
 
-            // ➕ Add the button to the current category
+            // ➕ Add button to the current category layout
             var categoryButton = CreateCommandButton(command);
             currentCategoryLayout?.Children.Add(categoryButton);
         }
     }
+
+    private FlexLayout CreateFlexLayout()
+    {
+        return new FlexLayout
+        {
+            Direction = FlexDirection.Row,
+            Wrap = FlexWrap.Wrap,
+            JustifyContent = FlexJustify.Start,
+            AlignItems = FlexAlignItems.Start,
+            AlignContent = FlexAlignContent.Start,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill,
+            Margin = new Thickness(0)
+        };
+    }
+
+    private View CreateBanner(string categoryName, FlexLayout categoryLayout)
+    {
+        var label = new Label
+        {
+            Text = categoryName,
+            FontAttributes = FontAttributes.Bold,
+            HorizontalOptions = LayoutOptions.StartAndExpand,
+            VerticalTextAlignment = TextAlignment.Center,
+            TextColor = Colors.Black,
+            FontSize = 16
+        };
+
+        var toggleButton = new Button
+        {
+            Text = "Max",
+            FontSize = 14,
+            Padding = new Thickness(0),
+            Margin = new Thickness(0),
+            FontAttributes = FontAttributes.Bold,
+            WidthRequest = 50,
+            HeightRequest = 40, // match banner height
+            BackgroundColor = Colors.Transparent,
+            TextColor = Colors.Black,
+            BorderWidth = 0,
+            CornerRadius = 0,
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.Center
+        };
+        
+        toggleButton.Clicked += (s, e) =>
+        {
+            var clickedBanner = ((Button)s).Parent?.Parent as VisualElement;
+
+            // 🟡 Case 1 — No layout currently maximized
+            if (maximizedLayout == null)
+            {
+                Maximize(clickedBanner, categoryLayout, toggleButton);
+                return;
+            }
+
+            // 🟡 Case 2 — Same banner clicked again → restore
+            if (maximizedLayout == categoryLayout)
+            {
+                RestoreAll();
+                return;
+            }
+
+            // 🟡 Case 3 — Another banner clicked → switch
+            RestoreAll();
+            Maximize(clickedBanner, categoryLayout, toggleButton);
+        };
+
+        var bannerGrid = new Grid
+        {
+            ColumnDefinitions =
+        {
+            new ColumnDefinition { Width = GridLength.Star },
+            new ColumnDefinition { Width = GridLength.Auto }
+        },
+            Padding = new Thickness(10, 5)
+        };
+        bannerGrid.Add(label, 0, 0);
+        bannerGrid.Add(toggleButton, 1, 0);
+
+        return new Border
+        {
+            BackgroundColor = ColourConstants.CategoryColour.ToMauiColor(),
+            StrokeThickness = 0,
+            Margin = new Thickness(0, 10, 0, 5),
+            HorizontalOptions = LayoutOptions.Fill,
+            HeightRequest = 40,
+            Content = bannerGrid
+        };
+    }
+
+    private void Maximize(VisualElement banner, FlexLayout layout, Button toggleButton)
+    {
+        maximizedLayout = layout;
+        maximizedBanner = banner;
+
+        foreach (var child in CommandsContainer.Children)
+        {
+            if (child is VisualElement ve)
+            {
+                if (child != maximizedLayout && child != maximizedBanner)
+                    ve.IsVisible = false;
+            }
+        }
+
+        layout.VerticalOptions = LayoutOptions.FillAndExpand;
+        toggleButton.Text = "Min"; // Minimize icon
+    }
+
+    private void RestoreAll()
+    {
+        maximizedLayout = null;
+        maximizedBanner = null;
+
+        foreach (var child in CommandsContainer.Children)
+        {
+            if (child is VisualElement ve)
+                ve.IsVisible = true;
+        }
+
+        // Reset all toggle button icons
+        foreach (var child in CommandsContainer.Children)
+        {
+            if (child is Border border && border.Content is Grid grid)
+            {
+                foreach (var element in grid.Children)
+                {
+                    if (element is Button btn)
+                        btn.Text = "Max";
+                }
+            }
+        }
+    }
+
 
     private Button CreateCommandButton(CubaseCommand command)
     {
@@ -158,73 +255,6 @@ public partial class CubaseAction : ContentPage
         return buttonWrapper.Button;
     }
 
-
-    //private void LoadCommand()
-    //{
-    //    CommandsLayout.Children.Clear();
-    //    var currentCategory = string.Empty;
-    //    foreach (var command in commands.GetCommandsByOrderedCategory())
-    //    {
-    //        if (!string.IsNullOrEmpty(command.ButtonCategory))
-    //        {
-    //            if (!command.ButtonCategory.Equals(currentCategory, StringComparison.OrdinalIgnoreCase))
-    //            {
-    //                currentCategory = command.ButtonCategory;
-
-    //                var banner = new Border
-    //                {
-    //                    BackgroundColor = ColourConstants.CategoryColour.ToMauiColor(),
-    //                    StrokeThickness = 0,
-    //                    Margin = new Thickness(0, 10, 0, 5),
-    //                    Padding = new Thickness(10, 5),
-    //                    HorizontalOptions = LayoutOptions.Fill,
-    //                    Content = new Label
-    //                    {
-    //                        Text = currentCategory,
-    //                        FontAttributes = FontAttributes.Bold,
-    //                        HorizontalOptions = LayoutOptions.Fill,
-    //                        HorizontalTextAlignment = TextAlignment.Center,
-    //                        TextColor = Colors.White,
-    //                        FontSize = 16
-    //                    }
-    //                };
-
-    //                // 🔸 Force it to its own row & stretch full width
-    //                FlexLayout..SetWrapBefore(banner, true);
-    //                FlexLayout.SetAlignSelf(banner, FlexAlignSelf.Stretch);
-    //                FlexLayout.SetGrow(banner, 1);
-
-    //                CommandsLayout.Children.Add(banner);
-    //            }
-    //        }
-    //        var button = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
-    //        {
-    //            try
-    //            {
-    //                var button = (Button)s;
-
-    //                command.IsToggled = !command.IsToggled;
-    //                this.SetButtonState(button, command);
-    //                CubaseActionResponse response = null;
-
-    //                if (command.IsMacro)
-    //                {
-    //                    await this.SetMacroButton(button, command);
-    //                }
-    //                else
-    //                {
-    //                    await this.SetMomentaryOrToggleButton(button, command);
-    //                }
-    //            }
-    //            catch (Exception ex)
-    //            {
-    //                await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
-    //            }
-    //        }, toggleMode: true);
-    //        this.SetButtonState(button.Button, command);
-    //        CommandsLayout.Children.Add(button.Button);
-    //    }
-    //}
 
     private async Task SetMomentaryOrToggleButton(Button button, CubaseCommand command)
     {

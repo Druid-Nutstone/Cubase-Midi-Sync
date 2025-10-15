@@ -238,10 +238,13 @@ public partial class CubaseAction : ContentPage
                     command.IsToggled = !command.IsToggled;
                     SetButtonState(btn, command);
 
-                    if (command.IsMacro)
-                        await SetMacroButton(btn, command);
-                    else
-                        await SetMomentaryOrToggleButton(btn, command);
+                    await Task.Run(async () =>
+                    {
+                        if (command.IsMacro)
+                            await SetMacroButton(btn, command);
+                        else
+                            await SetMomentaryOrToggleButton(btn, command);
+                    });
                 }
                 catch (Exception ex)
                 {

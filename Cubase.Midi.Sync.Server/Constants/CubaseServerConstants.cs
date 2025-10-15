@@ -4,7 +4,7 @@ namespace Cubase.Midi.Sync.Server.Constants
 {
     public static class CubaseServerConstants
     {
-        public static string CommandsFileLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "CubaseCommands.json");
+        public static string LogFileLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings");
 
         public static string CubaseExeName = "Cubase14";
 

@@ -1,4 +1,5 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
@@ -9,25 +10,34 @@ using Cubase.Midi.Sync.Server.Services.Keyboard;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Server.Services.Mixer;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.EventLog;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-////if (builder.Environment.IsProduction())
-////{
-//    builder.Host.UseWindowsService();
-////}
-
-//builder.Logging.AddEventLog(new EventLogSettings
-//{
-//    SourceName = "CubaseMidiSync",    // will appear in Event Viewer
-//    LogName = "Application",          // default log
-//    MachineName = "."                 // local machine
-//});
-
 
 builder.Logging.AddConsole();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // reduce noise from framework logs
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} (Thread {ThreadId}){NewLine}{Exception}")
+    .WriteTo.File(
+        path: $"{CubaseServerConstants.LogFileLocation}/CubaseMidiSyncServerLog.txt",
+        rollingInterval: RollingInterval.Infinite,
+        retainedFileCountLimit: 1,             
+        fileSizeLimitBytes: 10_000_000,         // 10 MB max per file
+        rollOnFileSizeLimit: false,
+        restrictedToMinimumLevel: LogEventLevel.Information,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj} (Thread {ThreadId}){NewLine}{Exception}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddHttpLogging(logging =>
 {

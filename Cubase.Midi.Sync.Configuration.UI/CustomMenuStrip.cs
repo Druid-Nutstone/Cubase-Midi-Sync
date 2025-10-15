@@ -33,6 +33,22 @@ namespace Cubase.Midi.Sync.Configuration.UI
         }
     }
 
+    public class ShowLogFileItem : ToolStripMenuItem
+    {
+        public ShowLogFileItem()
+        {
+            this.Text = "Show Log File";
+        }
+        protected override void OnClick(EventArgs e)
+        {
+            var logFilePath = new CubaseServerSettings().CubseServerLogPath;
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = true;
+            p.StartInfo.FileName = "notepad.exe";
+            p.StartInfo.Arguments = logFilePath;
+            p.Start();
+        }
+    }
 
     public class ImportMenuStripItem : ToolStripMenuItem
     {
@@ -90,6 +106,7 @@ namespace Cubase.Midi.Sync.Configuration.UI
             this.DropDownItems.Add(new ButtonSetColoursItem());
             this.DropDownItems.Add(new ButtonsShowCubaseCommands());
             this.DropDownItems.Add(new ShowCommandsJsonFile());
+            this.DropDownItems.Add(new ShowLogFileItem());  
         }
     }
 

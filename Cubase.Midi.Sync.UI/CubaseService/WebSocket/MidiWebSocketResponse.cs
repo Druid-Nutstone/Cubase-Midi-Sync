@@ -30,7 +30,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         {
             while (this.commands == null)
             {
-                await Task.Delay(5);
+                await Task.Delay(50);
             }
             return this.commands;
         }

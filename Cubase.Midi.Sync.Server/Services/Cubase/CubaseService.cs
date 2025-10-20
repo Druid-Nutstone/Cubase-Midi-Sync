@@ -7,6 +7,8 @@ using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Server.Services.Commands;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -18,14 +20,31 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private readonly IMidiService midiService;
 
+        private readonly ICommandService commandService;
+
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
-        public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger, IMidiService midiService)
+
+
+        public CubaseService(IServiceProvider serviceProvider, ILogger<CubaseService> logger, IMidiService midiService, ICommandService commandService)
         {
             this.serviceProvider = serviceProvider; 
             this.midiService = midiService;
+            this.commandService = commandService;
             this.logger = logger;   
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
+        }
+
+        public async Task<WebSocketMessage> ExecuteWebSocket(WebSocketMessage request)
+        {
+            switch (request.Command)
+            {
+                case WebSocketCommand.Commands:
+                    var commands = await commandService.GetCommands();
+                    return WebSocketMessage.Create(WebSocketCommand.Commands, commands);
+                default:
+                    return WebSocketMessage.CreateError("Unknown command: " + request.Command.ToString());
+            }
         }
 
         public async Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request)

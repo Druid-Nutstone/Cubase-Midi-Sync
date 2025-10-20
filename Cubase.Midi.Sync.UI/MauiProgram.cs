@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.UI.CubaseService.NutstoneClient;
+using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Extensions.Configuration;
@@ -67,9 +68,10 @@ namespace Cubase.Midi.Sync.UI
             appSettings = new AppSettings();
             config.Bind(appSettings); // This now works because of the using above
 
-            builder.Services.AddSingleton<ICubaseHttpClient, CubaseHttpClient>();
-            // builder.Services.AddSingleton<ICubaseHttpClient, TestCubaseHttpClient>();
-            builder.Services.AddSingleton(appSettings)
+            builder.Services.AddSingleton<ICubaseHttpClient, CubaseHttpClient>()
+                            .AddSingleton<IMidiWebSocketClient, MidiWebSocketClient>() 
+                            .AddSingleton<IMidiWebSocketResponse, MidiWebSocketResponse>()  
+                            .AddSingleton(appSettings)
                             .AddTransient<BasePage>()
                             .AddTransient<MixerPage>()
                             .AddTransient<CubaseOptions>()

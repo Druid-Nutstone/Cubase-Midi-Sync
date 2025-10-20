@@ -1,8 +1,11 @@
 using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Colours;
 using Cubase.Midi.Sync.Common.Extensions;
+using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
+using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 
@@ -11,29 +14,39 @@ namespace Cubase.Midi.Sync.UI;
 public partial class CubaseMainPage : ContentPage
 {
     private readonly ICubaseHttpClient client;
-    private List<CubaseCommandCollection> collections; // store once
+    private readonly IMidiWebSocketClient webSocketClient;
+    private readonly IMidiWebSocketResponse midiWebSocketResponse;
+    private readonly AppSettings appSettings;
+    private CubaseCommandsCollection collections; // store once
 
     private bool loaded = false;
-
-    private bool serverAvailable = false;
 
     private BasePage basePage;
 
     private MixerPage mixerPage;
 
-    public CubaseMainPage(ICubaseHttpClient client, BasePage basePage, MixerPage mixerPage)
+    public CubaseMainPage(AppSettings appSettings, 
+                          ICubaseHttpClient client, 
+                          IMidiWebSocketClient webSocketClient, 
+                          BasePage basePage,
+                          IMidiWebSocketResponse midiWebSocketResponse,
+                          MixerPage mixerPage)
     {
         InitializeComponent();
         this.mixerPage = mixerPage;
         this.basePage = basePage;
+        this.appSettings = appSettings;
+        this.midiWebSocketResponse = midiWebSocketResponse;
+        this.webSocketClient = webSocketClient;
         basePage.AddToolbars(this);
         this.client = client;
         CollectionsLayout.Clear();
-        this.serverAvailable = this.client.CanConnectToServer();
-        if (!this.serverAvailable)
-        {
-            DisplayAlert("Error CubaseMainPage CTOR", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
-        }
+
+        //this.serverAvailable = this.client.CanConnectToServer();
+        //if (!this.serverAvailable)
+        //{
+        //    DisplayAlert("Error CubaseMainPage CTOR", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
+        //}
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         var label = new Label
         {
@@ -50,11 +63,20 @@ public partial class CubaseMainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (loaded || !serverAvailable) return;
+        if (loaded) return;
         SetSpinner(true);
-        await LoadCommands();
-        loaded = true;
-        SetSpinner(false);
+        var webSocketState = await this.webSocketClient.ConnectAsync();
+        if (webSocketState.Command == Common.WebSocket.WebSocketCommand.Connected)
+        {
+            await LoadCommands();
+            loaded = true;
+            SetSpinner(false);
+        }
+        else
+        {
+            await DisplayAlert($"Cannot connect to {this.appSettings.CubaseConnection.Host}:{this.appSettings.CubaseConnection.Port}", webSocketState.Message, "OK");
+            SetSpinner(false);
+        }
     }
 
     public async Task Reload()
@@ -69,8 +91,9 @@ public partial class CubaseMainPage : ContentPage
     {
         try
         {
-
-
+            await this.webSocketClient.SendMidiCommand(WebSocketMessage.Create(WebSocketCommand.Commands));
+            collections = await this.midiWebSocketResponse.GetCommands();
+            /*
             // CollectionsLayout.Children.Clear();
             collections = await this.client.GetCommands(async (msg) =>
             {
@@ -79,6 +102,7 @@ public partial class CubaseMainPage : ContentPage
             {
                 await DisplayAlert("Error CubaseMainPage LoadCommands", exception, "OK");
             });
+            */
 
             var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {

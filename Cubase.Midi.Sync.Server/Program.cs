@@ -9,6 +9,7 @@ using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Server.Services.Mixer;
+using Cubase.Midi.Sync.Server.Services.WebSockets;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -51,19 +52,29 @@ builder.Services
       .AddTransient<IKeyboardService, KeyboardService>()
       .AddSingleton<IMidiService, MidiService>() 
       .AddSingleton<ICacheService, CacheService>()  
-      .AddTransient<IMixerService, MixerService>()  
+      .AddTransient<IMixerService, MixerService>()
+      .AddSingleton<WebSocketServer>() 
       .AddKeyedTransient<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
       .AddKeyedTransient<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
 
 builder.Services.AddControllers();
 
+builder.Services.AddHostedService<MidiWebSocketService>();
+
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(8014); // Listen on all network interfaces
+    serverOptions.ListenAnyIP(8014); // Listen on all network interfaces    
 });
 
 var app = builder.Build();
+
+// Enable WebSockets in Kestrel
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(30)
+});
 
 // Configure the HTTP request pipeline.
 
@@ -90,6 +101,10 @@ lifetime.ApplicationStopping.Register(() =>
 });
 
 
+// Call Configure explicitly on the built app
+var wsServer = app.Services.GetRequiredService<WebSocketServer>();
+wsServer.Configure(app);
+
 app.Run();
 
-public partial class Program { } 
+public partial class Program { }

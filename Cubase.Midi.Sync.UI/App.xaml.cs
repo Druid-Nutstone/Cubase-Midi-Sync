@@ -1,11 +1,17 @@
-﻿namespace Cubase.Midi.Sync.UI
+﻿using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
+
+namespace Cubase.Midi.Sync.UI
 {
     public partial class App : Application
     {
         private readonly IServiceProvider serviceProvider;
-        public App(IServiceProvider serviceProvider)
+        
+        private readonly IMidiWebSocketClient midiWebSocketClient;  
+
+        public App(IServiceProvider serviceProvider, IMidiWebSocketClient midiWebSocketClient)
         {
             this.serviceProvider = serviceProvider;
+            this.midiWebSocketClient = midiWebSocketClient;
             InitializeComponent();
         }
 
@@ -17,7 +23,13 @@
             var navPage = new NavigationPage(mainPage);
 
             // Return a Window that uses the NavigationPage
-            return new Window(navPage);
+            var win =  new Window(navPage);
+            win.Destroying += (s, e) =>
+            {
+                this.midiWebSocketClient.Close();
+            };  
+            return win;
         }
+
     }
 }

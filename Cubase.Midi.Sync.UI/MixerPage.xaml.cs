@@ -6,6 +6,7 @@ using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
+using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Microsoft.Maui.Controls;
@@ -17,6 +18,8 @@ namespace Cubase.Midi.Sync.UI
     {
         private ICubaseHttpClient cubaseHttpClient;
 
+        private IMidiWebSocketClient webSocketClient;
+
         private BasePage basePage;
 
         private IServiceProvider serviceProvider;
@@ -25,13 +28,20 @@ namespace Cubase.Midi.Sync.UI
 
         private List<CubaseCommand> staticCommands;
 
+        private IMidiWebSocketResponse webSocketResponse;
+
         private List<CubaseCommandCollection> commandCollection;
 
-        public MixerPage(ICubaseHttpClient cubaseHttpClient, IServiceProvider serviceProvider)
+        public MixerPage(ICubaseHttpClient cubaseHttpClient, 
+                         IMidiWebSocketClient webSocketClient, 
+                         IMidiWebSocketResponse midiWebSocketResponse,
+                         IServiceProvider serviceProvider)
         {
             InitializeComponent();
             this.cubaseHttpClient = cubaseHttpClient;
             this.serviceProvider = serviceProvider;
+            this.webSocketClient = webSocketClient;
+            this.webSocketResponse = midiWebSocketResponse;
             BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
 
         }
@@ -106,7 +116,7 @@ namespace Cubase.Midi.Sync.UI
                     {
                         try
                         {
-                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.cubaseHttpClient, this.basePage));
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.cubaseHttpClient, this.webSocketClient, this.webSocketResponse, this.basePage));
                         }
                         catch (Exception ex)
                         {

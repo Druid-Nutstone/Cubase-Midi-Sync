@@ -29,6 +29,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private bool tracksReceived = false;
 
+        public Action<MidiChannelCollection>? OnChannelChanged { get; set; } = null;
+
         public MidiService(ILogger<MidiService> logger, IServiceProvider serviceProvider) 
         { 
             this.logger = logger;
@@ -136,12 +138,11 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private void ChannelChange(string channelInfo)
         {
             var channelData = JsonSerializer.Deserialize<MidiChannel>(channelInfo);
-            var newChannel = this.MidiChannels.AddOrUpdateChannel(channelData);
-            //if (!string.IsNullOrEmpty(newChannel?.Name))
-            //{
-
-                this.logger.LogInformation($"Add or updating: Channel:{newChannel.Name} Index:{newChannel.Index} Volume: {newChannel.Volume} RecordEnable:{newChannel.RecordEnable} Mute:{newChannel.Mute} Solo: {newChannel.Solo} Selected: {newChannel.Selected}");
-            //}
+            var channelCollection = this.MidiChannels.AddOrUpdateChannel(channelData);
+            if (OnChannelChanged != null)
+            {
+                OnChannelChanged(channelCollection);
+            }   
         }
 
         private void MessageReceived(string message)

@@ -13,6 +13,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         Task ProcessWebSocket(WebSocketMessage request);
         Task<CubaseCommandsCollection> GetCommands();
 
+        void RegisterForErrors(Func<string, Task> errorHandler);
+
 
     }
 }

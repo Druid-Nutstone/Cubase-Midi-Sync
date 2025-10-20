@@ -42,6 +42,17 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                 case WebSocketCommand.Commands:
                     var commands = await commandService.GetCommands();
                     return WebSocketMessage.Create(WebSocketCommand.Commands, commands);
+                case WebSocketCommand.ExecuteCubaseAction:
+                    var actionRequest = request.GetMessage<CubaseActionRequest>();
+                    var actionResponse = await ExecuteAction(actionRequest);
+                    if (actionResponse.Success)
+                    {
+                        return WebSocketMessage.Create(WebSocketCommand.Success);
+                    }
+                    else
+                    {
+                        return WebSocketMessage.CreateError(actionResponse.Message);
+                    }
                 default:
                     return WebSocketMessage.CreateError("Unknown command: " + request.Command.ToString());
             }

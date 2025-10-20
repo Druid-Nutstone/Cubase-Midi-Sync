@@ -72,18 +72,26 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
             }
         }
 
-        public async Task SendMidiCommand(WebSocketMessage message)
+        public async Task<WebSocketMessage> SendMidiCommand(WebSocketMessage message)
         {
             var commandString = message.Serialise();
 
             if (_ws.State == WebSocketState.Open)
             {
-                var data = Encoding.UTF8.GetBytes(commandString);
-                await _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+                try
+                {
+                    var data = Encoding.UTF8.GetBytes(commandString);
+                    await _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+                    return WebSocketMessage.Create(WebSocketCommand.Success);
+                }
+                catch (Exception ex)
+                {
+                    return WebSocketMessage.CreateError("Send failed: " + ex.Message);
+                }
             }
             else
             {
-                Console.WriteLine("WebSocket not connected!");
+                return WebSocketMessage.CreateError("WebSocket not connected!");
             }
         }
 

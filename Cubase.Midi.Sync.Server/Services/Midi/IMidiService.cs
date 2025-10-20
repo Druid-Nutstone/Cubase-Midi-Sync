@@ -4,6 +4,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 {
     public interface IMidiService
     {
+        Action<MidiChannelCollection>? OnChannelChanged { get; set; }
+
         MidiChannelCollection MidiChannels { get; set; }    
 
         public void Initialise();

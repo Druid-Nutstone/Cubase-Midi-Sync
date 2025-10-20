@@ -80,6 +80,9 @@ namespace Cubase.Midi.Sync.Common.WebSocket
     {
         Connected = 0,
         Error = 1,
-        Commands = 2
+        Commands = 2,
+        Success = 3,
+        ExecuteCubaseAction = 4,
+        Tracks = 5
     }
 }

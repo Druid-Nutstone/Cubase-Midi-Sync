@@ -12,17 +12,20 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
     {
         private CubaseCommandsCollection? commands = null;
 
+        private Func<string, Task>? errorHandler = null;
+
         public async Task ProcessWebSocket(WebSocketMessage request)
         {
-            await Task.Run(() => 
+            switch (request.Command)
             {
-                switch (request.Command)
-                {
-                    case WebSocketCommand.Commands:
-                        this.commands = request.GetMessage<CubaseCommandsCollection>();
-                        break;
-                }
-            }); 
+                case WebSocketCommand.Commands:
+                    this.commands = request.GetMessage<CubaseCommandsCollection>();
+                    break;
+                case WebSocketCommand.Error:
+                    var errorMessage = request.Message ?? "Unknown error";
+                    await this.errorHandler?.Invoke(errorMessage);
+                    break;
+            }
 
         }
 
@@ -33,6 +36,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                 await Task.Delay(50);
             }
             return this.commands;
+        }
+
+        public void RegisterForErrors(Func<string, Task> errorHandler)
+        {
+            this.errorHandler = errorHandler;
         }
     }
 }

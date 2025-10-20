@@ -24,7 +24,7 @@ namespace Cubase.Midi.Sync.Common.Midi
             return this.FirstOrDefault(x => x.Selected.HasValue && x.Selected.Value);
         }
 
-        public MidiChannel AddOrUpdateChannel(MidiChannel midiChannel)
+        public MidiChannelCollection AddOrUpdateChannel(MidiChannel midiChannel)
         {
             var channel = this.FirstOrDefault(x => x.Index == midiChannel.Index);
             if (channel != null)
@@ -59,7 +59,7 @@ namespace Cubase.Midi.Sync.Common.Midi
                 this.Add(midiChannel);
                 channel = midiChannel;
             }
-            return channel;
+            return this;
         }
     }
 

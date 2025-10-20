@@ -131,7 +131,7 @@ public partial class CubaseMainPage : ContentPage
                     {
                         try
                         {
-                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client, this.basePage));
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client, this.webSocketClient, this.midiWebSocketResponse, this.basePage));
                         }
                         catch (Exception ex)
                         {

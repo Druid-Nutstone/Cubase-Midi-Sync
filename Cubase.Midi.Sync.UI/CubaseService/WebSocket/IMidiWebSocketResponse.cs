@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
     {
         Task ProcessWebSocket(WebSocketMessage request);
         Task<CubaseCommandsCollection> GetCommands();
+
+        Task<CubaseMixerCollection> GetMixer();
 
         void RegisterForErrors(Func<string, Task> errorHandler);
 

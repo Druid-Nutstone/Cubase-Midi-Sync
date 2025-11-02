@@ -83,6 +83,7 @@ namespace Cubase.Midi.Sync.Common.WebSocket
         Commands = 2,
         Success = 3,
         ExecuteCubaseAction = 4,
-        Tracks = 5
+        Tracks = 5,
+        Mixer = 6
     }
 }

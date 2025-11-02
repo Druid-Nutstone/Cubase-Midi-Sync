@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
     public class MidiWebSocketResponse : IMidiWebSocketResponse
     {
         private CubaseCommandsCollection? commands = null;
+
+        private CubaseMixerCollection? mixerCollection = null;
 
         private Func<string, Task>? errorHandler = null;
 
@@ -25,6 +28,9 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                     var errorMessage = request.Message ?? "Unknown error";
                     await this.errorHandler?.Invoke(errorMessage);
                     break;
+                case WebSocketCommand.Mixer:
+                    this.mixerCollection = request.GetMessage<CubaseMixerCollection>();
+                    break;
             }
 
         }
@@ -36,6 +42,15 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                 await Task.Delay(50);
             }
             return this.commands;
+        }
+
+        public async Task<CubaseMixerCollection> GetMixer()
+        {
+            while (this.mixerCollection == null)
+            {
+                await Task.Delay(50);
+            }
+            return this.mixerCollection;
         }
 
         public void RegisterForErrors(Func<string, Task> errorHandler)

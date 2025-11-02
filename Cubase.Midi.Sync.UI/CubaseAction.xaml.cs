@@ -282,12 +282,6 @@ public partial class CubaseAction : ContentPage
         var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
         var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
         var response = await this.webSocketClient.SendMidiCommand(socketMessage);
-        //var response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (ex) =>
-        //{
-        //    errMsg = ex.Message;
-        //    await DisplayAlert("Error CubaseAction SetMomentaryOrToggleButton", ex.Message, "OK");
-        //});
-        //if (!response.Success)
         if (response.Command != WebSocketCommand.Success)
         {
             await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
@@ -310,11 +304,6 @@ public partial class CubaseAction : ContentPage
             var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, actionGroup);
             var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
             var response = await this.webSocketClient.SendMidiCommand(socketMessage);
-            //var response = await this.client.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionGroup), async (ex) =>
-            //{
-            //    await DisplayAlert("Error CubaseAction SetMacroButton", ex.Message, "OK");
-            //});
-            //if (response.Success)
             if (response.Command == WebSocketCommand.Success)
             {
                 var duplicateCommands = this.commandsCollection

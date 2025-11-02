@@ -6,6 +6,7 @@ using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
@@ -169,7 +170,10 @@ namespace Cubase.Midi.Sync.UI
 
         private async Task<CubaseMixerCollection> OpenCloseMixer()
         {
-            return await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, string.Empty, string.Empty), this);
+            var cubaseMixer = CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, string.Empty, string.Empty);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.Mixer, cubaseMixer);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            return await this.webSocketResponse.GetMixer();
         }
 
         public async Task Initialise(List<CubaseCommandCollection>? mainCommands = null)
@@ -223,12 +227,10 @@ namespace Cubase.Midi.Sync.UI
         {
             string errMsg = null;
             VisualStateManager.GoToState(button, "Pressed");
-            var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command), async (ex) =>
-            {
-                errMsg = ex.Message;
-                await DisplayAlert("Error SetMomentaryOrToggleButton", ex.Message, "OK");
-            });
-            if (!response.Success)
+            var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            if (response.Command != WebSocketCommand.Success)
             {
                 await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
                 command.IsToggled = !command.IsToggled;
@@ -247,13 +249,11 @@ namespace Cubase.Midi.Sync.UI
                 actionGroup = command.IsToggled ? command.ActionGroup : command.ActionGroupToggleOff;
             }
 
-            VisualStateManager.GoToState(button, "Pressed");
-            // this.SetButtonStateForMacroChildren(tmpCommands, command.IsToggled);
-            var response = await this.cubaseHttpClient.ExecuteCubaseAction(CubaseActionRequest.CreateFromCommand(command, actionGroup), async (ex) =>
-            {
-                await DisplayAlert("Error SetMacroButton", ex.Message, "OK");
-            });
-            if (response.Success)
+            await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
+            var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, actionGroup);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            if (response.Command == WebSocketCommand.Success)
             {
                 if (this.commandCollection != null)
                 {

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cubase.Midi.Sync.Server\Cubase.Midi.Sync.Server.csproj" />
+    <ProjectReference Include="..\Cubase.Midi.Sync.WindowManager\Cubase.Midi.Sync.WindowManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>

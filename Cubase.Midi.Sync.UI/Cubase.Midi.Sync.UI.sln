@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.KeyParser"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.Server.Tests", "..\Cubase.Midi.Sync.Server.Tests\Cubase.Midi.Sync.Server.Tests.csproj", "{3582F4EC-5627-45A3-9B26-3223B56F3702}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubase.Midi.Sync.WindowManager", "..\Cubase.Midi.Sync.WindowManager\Cubase.Midi.Sync.WindowManager.csproj", "{1F5EBD85-BE92-42B9-BB17-969EB0025735}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{3582F4EC-5627-45A3-9B26-3223B56F3702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3582F4EC-5627-45A3-9B26-3223B56F3702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3582F4EC-5627-45A3-9B26-3223B56F3702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F5EBD85-BE92-42B9-BB17-969EB0025735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F5EBD85-BE92-42B9-BB17-969EB0025735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F5EBD85-BE92-42B9-BB17-969EB0025735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F5EBD85-BE92-42B9-BB17-969EB0025735}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

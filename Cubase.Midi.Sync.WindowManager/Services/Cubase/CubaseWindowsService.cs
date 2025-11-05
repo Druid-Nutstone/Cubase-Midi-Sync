@@ -37,18 +37,22 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
             {
                 while (!this.Cancel)
                 {
-                    // get all windows 
-                    var allWindows = WindowManagerService.EnumerateWindows();
-                    this.cubaseWindows.ResetWindowState();
-                    this.GetCubaseWindows();
-                    this.cubaseWindows.ClearPositionsThatHaveClosed();
-                    this.ArrangeWindows(this.cubaseWindows.GetPrimaryWindow(), this.cubaseWindows.GetActiveWindows());
+                    this.SetWindowPositions();
                     await Task.Delay(1000);
                 }
             });
             return runTask;
         }
 
+        public void SetWindowPositions()
+        {
+            var allWindows = WindowManagerService.EnumerateWindows();
+            this.cubaseWindows.ResetWindowState();
+            this.GetCubaseWindows();
+            this.cubaseWindows.ClearPositionsThatHaveClosed();
+            this.ArrangeWindows(this.cubaseWindows.GetPrimaryWindow(), this.cubaseWindows.GetActiveWindows());
+        }
+        
         private void ArrangeWindows(WindowPosition primaryWindow, List<WindowPosition> otherWindows)
         {
             if (!otherWindows.Any(x => x.State == WindowState.Maximized))

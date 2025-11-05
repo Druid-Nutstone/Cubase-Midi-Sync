@@ -29,6 +29,24 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
         }
 
         [TestMethod]
+        public void Can_Set_Window_Positions()
+        {
+            var cubaseWindowCollection = WindowPositionCollection.Create("cubase Windows")
+                                              .WithWindowPosition(WindowPosition.Create("Cubase Version").WithWindowType(WindowType.Primary))
+                                              .WithWindowPosition(WindowPosition.Create("MixConsole").WithWindowType(WindowType.Secondary))
+                                              .WithWindowPosition(WindowPosition.Create("Channel Settings").WithWindowType(WindowType.Transiant));
+            var cubaseWinService = new CubaseWindowsService();
+            cubaseWinService.Initialise(cubaseWindowCollection);
+            cubaseWinService.SetWindowPositions();
+        }
+        
+        [TestMethod]
+        public void Can_get_Monitor_sizes()
+        {
+            var monitorSizes = WindowManagerService.GetAllMonitors();
+        }
+
+        [TestMethod]
         public void Can_Manage_Cubase_windows()
         {
             var cubaseWindowCollection = WindowPositionCollection.Create("cubase Windows")

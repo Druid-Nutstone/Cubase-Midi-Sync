@@ -59,16 +59,28 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
                   uint nSize,
                   IntPtr Arguments);
 
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out Rect pvAttribute, int cbAttribute);
+
+
+
+
+
         private delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData);
 
         [DllImport("user32.dll")]
         private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumDelegate lpfnEnum, IntPtr dwData);
 
+        private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
         private const uint FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
         private static readonly IntPtr HWND_TOP = IntPtr.Zero;
         private const uint SWP_SHOWWINDOW = 0x0040;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_NOACTIVATE = 0x0010;
         private const int SW_RESTORE = 9;
         private const uint MONITOR_DEFAULTTONEAREST = 2;
+
+        private const int border = 7;
 
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -133,6 +145,12 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return result;
         }
 
+        public static Rect GetVisibleBounds(IntPtr hwnd)
+        {
+            DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out Rect rect, Marshal.SizeOf(typeof(Rect)));
+            return rect;
+        }
+
         public static IEnumerable<(IntPtr Handle, string Title)> EnumerateWindows()
         {
             var list = new List<(IntPtr, string)>();
@@ -175,7 +193,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         public static bool SetPosition(IntPtr hWnd, int x, int y, int width, int height)
         {
-            return SetWindowPos(hWnd, HWND_TOP, x, y, width, height, SWP_SHOWWINDOW);
+            return SetWindowPos(hWnd, HWND_TOP, x - border, y, width + (border * 2), height + border, SWP_SHOWWINDOW);
         }
 
         public static void SetWindowToMax(IntPtr hWnd)
@@ -185,13 +203,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         public static bool SetPosition(IntPtr hWnd, Rect position)
         {
-            ShowWindow(hWnd, (int)WindowState.Restore);
-
-            // Ensure width/height are positive
-            int w = Math.Max(1, position.Width);
-            int h = Math.Max(1, position.Height);
-
-            bool ok = SetWindowPos(hWnd, HWND_TOP, position.Left, position.Top, w, h, SWP_SHOWWINDOW);
+            bool ok = SetPosition(hWnd, position.Left, position.Top, position.Width, position.Height);
             if (!ok)
             {
                 int err = Marshal.GetLastWin32Error();

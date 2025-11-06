@@ -90,6 +90,15 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             };
         }
 
+        public static WindowPosition Create(string name, nint hwnd)
+        {
+            return new WindowPosition()
+            {
+                Name = name,
+                Hwnd = hwnd 
+            };
+        }
+
         public static WindowPosition Create(string name, Rect position, Rect originalPosition)
         {
             return new WindowPosition()

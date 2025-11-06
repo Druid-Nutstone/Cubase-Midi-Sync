@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +23,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         private static extern bool IsWindowVisible(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowTextLength(IntPtr hWnd);
@@ -38,6 +40,9 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
         // --- Monitor API ---
         [DllImport("user32.dll")]
@@ -145,6 +150,44 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return result;
         }
 
+        public static IEnumerable<Process> GetChildProcesses(Process parent)
+        {
+            var result = new List<Process>();
+
+            var query = $"SELECT * FROM Win32_Process WHERE ParentProcessId={parent.Id}";
+            using var searcher = new ManagementObjectSearcher(query);
+
+            foreach (ManagementObject mo in searcher.Get())
+            {
+                int pid = Convert.ToInt32(mo["ProcessId"]);
+
+                try
+                {
+                    var child = Process.GetProcessById(pid);
+                    result.Add(child);
+                }
+                catch
+                {
+                    // Process may have exited or is inaccessible
+                }
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<IntPtr> GetWindowsForProcess(int processId)
+        {
+            var windows = new List<IntPtr>();
+            EnumWindows((hWnd, lParam) =>
+            {
+                GetWindowThreadProcessId(hWnd, out uint pid);
+                if (pid == processId && IsWindowVisible(hWnd))
+                    windows.Add(hWnd);
+                return true;
+            }, IntPtr.Zero);
+            return windows;
+        }
+        
         public static Rect GetVisibleBounds(IntPtr hwnd)
         {
             DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out Rect rect, Marshal.SizeOf(typeof(Rect)));

@@ -22,6 +22,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
         public void Initialise(WindowPositionCollection cubaseWindows)
         {
             this.cubaseWindows = cubaseWindows;
+            /*
             this.GetCubaseWindows();
             var activeCubaseWindows = WindowManagerService.EnumerateWindows()
                                                           .GetWindows(this.cubaseWindows.GetWindowNames());
@@ -29,6 +30,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
             {
                 this.cubaseWindows.SetCurrentPosition(cubaseWin.Item1, cubaseWin.Item2);
             }
+            */
         }
 
         public Task WaitForCubaseWindows()
@@ -53,7 +55,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
             this.ArrangeWindows(this.cubaseWindows.GetPrimaryWindow(), this.cubaseWindows.GetActiveWindows());
         }
         
-        private void ArrangeWindows(WindowPosition primaryWindow, List<WindowPosition> otherWindows)
+        public void ArrangeWindows(WindowPosition primaryWindow, List<WindowPosition> otherWindows)
         {
             if (!otherWindows.Any(x => x.State == WindowState.Maximized))
             {

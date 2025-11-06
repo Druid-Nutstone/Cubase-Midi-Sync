@@ -15,6 +15,10 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 {
     public static class WindowManagerService
     {
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+
         // --- Win32 imports ---
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
@@ -130,6 +134,16 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             public int Height => Bottom - Top;
 
             public int TwoThirdsWidth => (Width * 2) / 3;
+        }
+
+        public static void ActivateWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+
+            // Restore if minimized, otherwise SetForegroundWindow may fail
+            ShowWindow(hWnd, SW_RESTORE);
+            SetForegroundWindow(hWnd);
         }
 
         public static IEnumerable<(IntPtr Handle, Rect MonitorRect, Rect WorkRect)> GetAllMonitors()

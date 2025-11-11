@@ -12,6 +12,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand);
 
+        public Task<bool> SendMidiMessageAsync(CubaseMidiCommand midiCommand);
+
         public void SendSysExMessage<T>(MidiCommand command, T request);
 
         public MidiChannelCollection GetChannels();

@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Services.Cubase;
+using Cubase.Midi.Sync.Server.Services.Windows;
 using global::Cubase.Midi.Sync.Server.Services.Midi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -41,16 +42,19 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
         private readonly IServiceProvider _services;
         private readonly ICubaseService cubaseService;
         private readonly IMidiService midiService;
+        private readonly ICubaseWindowMonitor cubaseWindowMonitor;
 
         public WebSocketServer(ILogger<WebSocketServer> logger, 
                                IServiceProvider services, 
-                               ICubaseService cubaseService, 
+                               ICubaseService cubaseService,
+                               ICubaseWindowMonitor cubaseWindowMonitor, 
                                IMidiService midiService)
         {
             _logger = logger;
             _services = services;
             this.midiService = midiService;
             this.cubaseService = cubaseService;
+            this.cubaseWindowMonitor = cubaseWindowMonitor; 
         }
 
         // Call this from Program.cs: wsServer.Configure(app);
@@ -79,10 +83,21 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
                     this.midiService.OnChannelChanged = async (channels) =>
                     {
-                        var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
-                        _logger.LogInformation("Tracks updated..");
-                        await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                        if (ws.State == WebSocketState.Open)
+                        {
+                            var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
+                            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                        }
                     };
+
+                    this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
+                    {
+                        if (ws.State == WebSocketState.Open)
+                        {
+                            var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
+                            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                        }
+                    });
 
                     while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
                     {
@@ -101,7 +116,7 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
                             _logger.LogInformation($"Received WS MIDI command: {sourceMessage.Command}");
 
-                            var responseMessage = await cubaseService.ExecuteWebSocket(sourceMessage);
+                            var responseMessage = await cubaseService.ExecuteWebSocketAsync(sourceMessage);
 
                             // var response = Encoding.UTF8.GetBytes("ACK: " + message);
                             await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(responseMessage.Serialise())), WebSocketMessageType.Text, true, ct);

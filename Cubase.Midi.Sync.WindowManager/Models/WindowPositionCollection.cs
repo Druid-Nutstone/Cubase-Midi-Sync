@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Cubase.Midi.Sync.WindowManager.Models
     {
         public string Name { get; set; }
 
-        
+
         //private void GetWindowPosition(string windowName, WindowTargetLocation windowTargetLocation)
         //{
         //    WindowPosition windowPosition = null;
@@ -34,6 +35,21 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         //    }
         //}
 
+        private string ComputeHash()
+        {
+            var json = JsonSerializer.Serialize(this);
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var hash = sha.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
+        public bool Compare(WindowPositionCollection windowPositions)
+        {
+            var areEqual = this.ComputeHash().Equals(windowPositions.ComputeHash());
+            return areEqual;
+        }
+
         public WindowPositionCollection WithWindowPosition(WindowPosition windowPosition)
         {
             this.Add(windowPosition);
@@ -49,6 +65,11 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         public WindowPosition GetPrimaryWindow()
         {
             return this.First(x => x.Type == WindowType.Primary);   
+        }
+
+        public WindowPosition GetWindowByName(string name)
+        {
+            return this.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public List<WindowPosition> GetActiveWindows()

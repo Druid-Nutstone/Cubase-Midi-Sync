@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cubase.Midi.Sync.Common\Cubase.Midi.Sync.Common.csproj" />
+    <ProjectReference Include="..\Cubase.Midi.Sync.WindowManager\Cubase.Midi.Sync.WindowManager.csproj" />
   </ItemGroup>
 
 </Project>

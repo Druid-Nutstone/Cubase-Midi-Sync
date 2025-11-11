@@ -2,6 +2,7 @@
 using Cubase.Midi.Sync.WindowManager.Services.Win;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,19 +20,29 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
 
         } 
     
-        public void Initialise(WindowPositionCollection cubaseWindows)
+        public WindowPositionCollection GetCubaseWindows(Process cubase)
         {
-            this.cubaseWindows = cubaseWindows;
-            /*
-            this.GetCubaseWindows();
-            var activeCubaseWindows = WindowManagerService.EnumerateWindows()
-                                                          .GetWindows(this.cubaseWindows.GetWindowNames());
-            foreach (var cubaseWin in activeCubaseWindows)
+            var cubaseWindowCollection = WindowPositionCollection.Create("Cubase Windows");
+            var allProcesses = new List<Process> { cubase };
+            allProcesses.AddRange(WindowManagerService.GetChildProcesses(cubase));
+            foreach (var proc in allProcesses)
             {
-                this.cubaseWindows.SetCurrentPosition(cubaseWin.Item1, cubaseWin.Item2);
+                var windows = WindowManagerService.GetWindowsForProcess(proc.Id);
+                foreach (var hwnd in windows)
+                {
+                    var title = new StringBuilder(256);
+                    WindowManagerService.GetWindowText(hwnd, title, title.Capacity);
+                    var windowTitle = title.ToString();
+                    var windowPosition = WindowPosition.Create(windowTitle, hwnd)
+                                                       .WithWindowType(windowTitle.Contains("Cubase Pro Project", StringComparison.OrdinalIgnoreCase) ? WindowType.Primary : WindowType.Transiant);
+
+                    cubaseWindowCollection.WithWindowPosition(windowPosition)
+                                          .SetCurrentPosition(hwnd, windowTitle);
+                }
             }
-            */
+            return cubaseWindowCollection;
         }
+
 
         public Task WaitForCubaseWindows()
         {

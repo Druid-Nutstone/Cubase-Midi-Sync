@@ -1,6 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Common.Window;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
 
         Task<CubaseMixerCollection> GetMixer();
 
+        CubaseMixerCollection? mixerCollection { get; set; }
+
         void RegisterForErrors(Func<string, Task> errorHandler);
 
+        void RegisterCubaseWindowHandler(Action<CubaseActiveWindowCollection> windowHander);
 
     }
 }

@@ -29,12 +29,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
 
         public bool SendKey(string keyText, Action<string> errHandler)
         {
-            if (!this.MakeCubasePrimaryWindow())
-            {
-                errHandler($"Cubase is not running OR the execuatble (cubase) cannot be found OR it cannot be made the primary focused window");
-                return false;
-            }
-            
+           
             // Split keyText into parts (modifiers + main key)
             var parts = keyText.ToUpper().Split('+');
             var modifiers = new List<byte>();
@@ -81,38 +76,7 @@ namespace Cubase.Midi.Sync.Server.Services.Keyboard
             return true;
         }
 
-        private bool MakeCubasePrimaryWindow()
-        {
-            const int maxCount = 10;
-            int currentCount = 0;
-            var cubase = GetCubase();
-            if (cubase != null)
-            {
-                while (GetForegroundWindow() != cubase.MainWindowHandle)
-                {
-                    this.logger.LogWarning($"Cubase is not the foregournd window Count:{currentCount}");
-                    if (currentCount < maxCount)
-                    {
-                        SetForegroundWindow(cubase.MainWindowHandle);
-                        Thread.Sleep(500);
-                        cubase = GetCubase();
-                        currentCount++;
-                    }
-                    else
-                    {
-                        return false; // failed to bring Cubase to foreground
-                    }
-                }
-            }
-            else
-            {
-                this.logger.LogError($"Cubase is NOT running !");
-                return false;
-            }
-            return true;
-        }
-
-        private Process GetCubase()
+          private Process GetCubase()
         {
             var cubase = CubaseExtensions.GetCubaseService();
             if (cubase == null) return null;

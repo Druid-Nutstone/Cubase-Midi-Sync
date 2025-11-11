@@ -21,7 +21,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.MidiAndKeys
             });
             cubaseKeyCommands.ForEach(x => 
             {
-                this.Add(MidiAndKey.AddKey(x.Name, x.Key, x.Key));
+                this.Add(MidiAndKey.AddKey(x.Name, x.Key, x.Category));
             });
 
         }

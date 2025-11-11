@@ -57,7 +57,40 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             }
         }
 
+        public async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
+        {
+            try
+            {
+                CubaseActionResponse response = CubaseActionResponse.CreateSuccess();
+
+                var result = await this.ExecuteMidiCommandAsync(request.Action);
+                if (!result)
+                {
+                    response = CubaseActionResponse.CreateError($"Could not execute Midi command {request.Action}");
+                }
+                ;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                return CubaseActionResponse.CreateError($"Exception sending key: {ex.Message}");
+            }
+        }
+
         private bool ExecuteMidiCommand(string midiCommand)
+        {
+            var currentMidiCommand = this.commandCollection.GetCommandByCommand(midiCommand);
+            if (currentMidiCommand != null)
+            {
+                return this.midiService.SendMidiMessage(currentMidiCommand);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> ExecuteMidiCommandAsync(string midiCommand)
         {
             var currentMidiCommand = this.commandCollection.GetCommandByCommand(midiCommand);
             if (currentMidiCommand != null)

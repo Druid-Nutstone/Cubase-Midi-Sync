@@ -1,9 +1,11 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Common.Window;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,9 +15,11 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
     {
         private CubaseCommandsCollection? commands = null;
 
-        private CubaseMixerCollection? mixerCollection = null;
+        public CubaseMixerCollection? mixerCollection { get; set; } = null; 
 
         private Func<string, Task>? errorHandler = null;
+
+        private List<Action<CubaseActiveWindowCollection>> registeredWindowEventHandlers = new List<Action<CubaseActiveWindowCollection>>();
 
         public async Task ProcessWebSocket(WebSocketMessage request)
         {
@@ -29,7 +33,20 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                     await this.errorHandler?.Invoke(errorMessage);
                     break;
                 case WebSocketCommand.Mixer:
-                    this.mixerCollection = request.GetMessage<CubaseMixerCollection>();
+                    var mixerResponse = request.GetMessage<CubaseMixerResponse>();
+                    switch (mixerResponse.Command)
+                    {
+                        case CubaseMixerCommand.MixerCollection:
+                            this.mixerCollection = mixerResponse.GetData<CubaseMixerCollection>();
+                            break;
+                    }
+                    break;
+                case WebSocketCommand.Windows:
+                    var cubaseWindowCollection = request.GetMessage<CubaseActiveWindowCollection>();
+                    foreach (var windowHandler in this.registeredWindowEventHandlers)
+                    {
+                        windowHandler.Invoke(cubaseWindowCollection);
+                    }
                     break;
             }
 
@@ -56,6 +73,14 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         public void RegisterForErrors(Func<string, Task> errorHandler)
         {
             this.errorHandler = errorHandler;
+        }
+
+        public void RegisterCubaseWindowHandler(Action<CubaseActiveWindowCollection> windowHander)
+        {
+            if (!this.registeredWindowEventHandlers.Contains(windowHander))
+            {
+                this.registeredWindowEventHandlers.Add(windowHander);   
+            }  
         }
     }
 }

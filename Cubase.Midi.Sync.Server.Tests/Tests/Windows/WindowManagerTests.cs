@@ -75,7 +75,7 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
                                               .WithWindowPosition(WindowPosition.Create("MixConsole").WithWindowType(WindowType.Secondary))
                                               .WithWindowPosition(WindowPosition.Create("Channel Settings").WithWindowType(WindowType.Transiant));
             var cubaseWinService = new CubaseWindowsService();
-            cubaseWinService.Initialise(cubaseWindowCollection);
+            // cubaseWinService.Initialise(cubaseWindowCollection);
             cubaseWinService.SetWindowPositions();
         }
         
@@ -93,7 +93,7 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
                                               .WithWindowPosition(WindowPosition.Create("MixConsole").WithWindowType(WindowType.Secondary))
                                               .WithWindowPosition(WindowPosition.Create("Channel Settings").WithWindowType(WindowType.Transiant));
             var cubaseWinService = new CubaseWindowsService();
-            cubaseWinService.Initialise(cubaseWindowCollection);
+            // cubaseWinService.Initialise(cubaseWindowCollection);
             var tsk = cubaseWinService.WaitForCubaseWindows();
             tsk.Wait();
         }

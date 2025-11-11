@@ -45,6 +45,7 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Enlarge Selected Track", 1, 3, "Edit", "Enlarge Selected Track", 127));
             this.Add(CubaseMidiCommand.Create("Key Hide All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Hide_All), 127));
             this.Add(CubaseMidiCommand.Create("Key Show All", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Show_All), 127));
+            this.Add(CubaseMidiCommand.Create("Key Show Selected", -1, 0, "Mixer", requiredKeys.GetKey(RequiredKeyId.Mixer_Show_Selected), 127));
             this.Add(CubaseMidiCommand.Create("Zoom To Selection", 1, 4, "Zoom", "Zoom to Selection", 127));
             this.Add(CubaseMidiCommand.Create("Go to Left Locator Position", 1, 5, "Transport", "To Left Locator", 127));
             this.Add(CubaseMidiCommand.Create("Go to Right Locator Position", 1, 6, "Transport", "To Right Locator", 127));
@@ -58,7 +59,8 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Set Right Locator", 1, 14, "Transport", "Set Right Locator", 127));
             this.Add(CubaseMidiCommand.Create("Loop Selection", 1, 15, "Transport", "Loop Selection", 127));
             this.Add(CubaseMidiCommand.Create("Loop", 1, 16, "Transport", "Cycle", 127));
-            this.Add(CubaseMidiCommand.Create("Loop", 1, 17, "Edit", "Duplicate", 127));
+            this.Add(CubaseMidiCommand.Create("Duplicate", 1, 17, "Edit", "Duplicate", 127));
+            this.Add(CubaseMidiCommand.Create("Undo Visibility Change", 1, 18, "Agents", "channelOrganizerUndo", 127));
         }
 
 
@@ -139,6 +141,8 @@ namespace Cubase.Midi.Sync.Common.Midi
         Previous_Track,
         // this is actually a mapped key command 
         Key_Hide_All,
-        Key_Show_All
+        Key_Show_All,
+        Undo_Visibility_Change,
+        Key_Show_Selected
     }
 }

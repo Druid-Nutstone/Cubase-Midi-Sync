@@ -11,6 +11,9 @@ using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Mixer;
 using Cubase.Midi.Sync.Common.Mixer;
+using Cubase.Midi.Sync.WindowManager.Services.Cubase;
+using Cubase.Midi.Sync.Server.Services.Windows;
+using Cubase.Midi.Sync.WindowManager.Models;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -24,27 +27,29 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private readonly ICommandService commandService;
 
-        private readonly IMixerService mixerService;    
+        private readonly IMixerService mixerService;
+
+        private readonly ICubaseWindowMonitor cubaseWindowMonitor;
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
-
-
 
         public CubaseService(IServiceProvider serviceProvider, 
                              ILogger<CubaseService> logger, 
                              IMidiService midiService, 
                              IMixerService mixerService,
+                             ICubaseWindowMonitor cubaseWindowMonitor,
                              ICommandService commandService)
         {
             this.serviceProvider = serviceProvider; 
             this.midiService = midiService;
             this.commandService = commandService;
+            this.cubaseWindowMonitor = cubaseWindowMonitor;
             this.mixerService = mixerService;   
             this.logger = logger;   
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
         }
 
-        public async Task<WebSocketMessage> ExecuteWebSocket(WebSocketMessage request)
+        public async Task<WebSocketMessage> ExecuteWebSocketAsync(WebSocketMessage request)
         {
             switch (request.Command)
             {
@@ -53,7 +58,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                     return WebSocketMessage.Create(WebSocketCommand.Commands, commands);
                 case WebSocketCommand.ExecuteCubaseAction:
                     var actionRequest = request.GetMessage<CubaseActionRequest>();
-                    var actionResponse = await ExecuteAction(actionRequest);
+                    var actionResponse = await ExecuteActionAsync(actionRequest);
                     if (actionResponse.Success)
                     {
                         return WebSocketMessage.Create(WebSocketCommand.Success);
@@ -63,16 +68,24 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                         return WebSocketMessage.CreateError(actionResponse.Message);
                     }
                 case WebSocketCommand.Mixer:
-                    var mixerCommands = await mixerService.MixerCommand(request.GetMessage<CubaseMixer>());
-                    return WebSocketMessage.Create(WebSocketCommand.Mixer, mixerCommands);
+                    var mixerRequest = request.GetMessage<CubaseMixerRequest>();
+                    var mixerResponse = await mixerService.MixerRequest(mixerRequest);
+                    if (!string.IsNullOrEmpty(mixerResponse.Error))
+                    {
+                        return WebSocketMessage.CreateError(mixerResponse.Error);   
+                    }
+                    return WebSocketMessage.Create(WebSocketCommand.Mixer, mixerResponse);
+                case WebSocketCommand.Windows:
+                    return WebSocketMessage.Create(WebSocketCommand.Windows, cubaseWindowMonitor.CubaseWindows); ;
                 default:
                     return WebSocketMessage.CreateError("Unknown command: " + request.Command.ToString());
             }
         }
 
-        public async Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request)
+        public async Task<CubaseActionResponse> ExecuteActionAsync(CubaseActionRequest request)
         {
-            if (!await EnsureCubaseIsActive())
+            var primaryWindow = EnsureCubaseIsActive();
+            if (primaryWindow == null)
             {
                 var respone = new CubaseActionResponse
                 {
@@ -82,23 +95,22 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                 this.logger.LogError("Cubase is not running so can't execute {request}", request);
                 return respone;
             }
-            
             if (request.IsMacro())
             {
                 foreach (var cmd in request.ActionGroup)
                 {
-                    var result = ProcessAction(cmd);
+                    var result = await ProcessActionAsync(cmd);
                     if (!result.Success)
                     {
                         return result;
                     }
-                    await Task.Delay(50);
+                    await Task.Delay(40);
                 }
                 return CubaseActionResponse.CreateSuccess();
             }
             else
             {
-                return ProcessAction(request.Action);
+                return await ProcessActionAsync(request.Action);
             }
         }
 
@@ -140,16 +152,12 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         }
 
-        private async Task<bool> EnsureCubaseIsActive()
+        private WindowPosition EnsureCubaseIsActive()
         {
-            return await Task.Run(() =>
-            {
-                var cubase = CubaseExtensions.GetCubaseService();
-                return cubase != null;
-            });
+            return this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow();
         }
 
-        private CubaseActionResponse ProcessAction(ActionEvent actionEvent)
+        private async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent actionEvent)
         {
             var processor = this.serviceProvider.GetRequiredKeyedService<ICategoryService>(actionEvent.CommandType.ToString());
             if (processor == null)
@@ -160,7 +168,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                     Message = $"No service found for area {actionEvent.CommandType.ToString()}"
                 };
             }
-            return processor.ProcessAction(actionEvent);
+            return await processor.ProcessActionAsync(actionEvent);
         }
     }
 }

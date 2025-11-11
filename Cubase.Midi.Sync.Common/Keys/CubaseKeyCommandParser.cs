@@ -16,59 +16,103 @@ namespace Cubase.Midi.Sync.Common.Keys
         {
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException($"{filePath} Cubase 14 key commands XML file not found.");
+                throw new FileNotFoundException($"{filePath} Cubase 15 key commands XML file not found.");
             }
             var knownCommands = new CubaseKnownCollection();
             var doc = XDocument.Load(filePath);
             var list = new CubaseKeyCommandCollection();
 
-            foreach (var categoryItem in doc.Descendants("list"))
+            foreach (var element in doc.Root.Elements())
             {
-                if (categoryItem.Attribute("name")?.Value != "Categories")
-                    continue;
-
-                foreach (var cat in categoryItem.Elements("item"))
+                if (element.Attribute("name")?.Value == "Categories")
                 {
-                    string categoryName = cat.Element("string")?.Attribute("value")?.Value ?? "Unknown";
+                    ProcessCatgeories(element, list, knownCommands);
+                }
+            }
+            return list;
+        }
 
-                    var commandsList = cat.Element("list");
-                    if (commandsList == null) continue;
+        private void ProcessCatgeories(XElement catElement, CubaseKeyCommandCollection commands, CubaseKnownCollection knownCommands)
+        {
+            foreach (var element in catElement.Elements())
+            {
+                if (element.Name.LocalName.ToLower() == "item")
+                {
+                    ProcessCatItem(element, commands, knownCommands);
+                }
+            }
+        }
 
-                    foreach (var cmdItem in commandsList.Elements("item"))
+        private void ProcessCatItem(XElement catItemElement, CubaseKeyCommandCollection commands, CubaseKnownCollection knownCommands)
+        {
+            var categoryName = "";
+            foreach (var element in catItemElement.Elements())
+            {
+                if (element.Name.LocalName.ToLower() == "string")
+                {
+                    // category name
+                    categoryName = element.Attribute("value")?.Value ?? "Unknown";
+                }
+                if (element.Name.LocalName.ToLower() == "list")
+                {
+                    // commands list
+                    foreach (var cmdItem in element.Elements("item"))
                     {
-                        string name = cmdItem.Element("string")?.Attribute("value")?.Value ?? "";
-                        string key = "";
-                        string action = "";
-
-                        foreach (var s in cmdItem.Elements("string"))
-                        {
-                            var attr = s.Attribute("name")?.Value;
-                            if (attr == "Name") name = s.Attribute("value")?.Value ?? "";
-                            if (attr == "Key") key = s.Attribute("value")?.Value ?? "";
-                            if (attr == "Action") action = s.Attribute("value")?.Value ?? "";
-                        }
-
-                        list.Add(new CubaseKeyCommand
-                        {
-                            Category = categoryName,
-                            Name = name,
-                            Key = key,
-                            Action = ActionEvent.Create(GetAreaName(categoryName), key),
-                            CubaseCommand = knownCommands.GetCommandByName(name)
-                        });
+                        ProcessCommandItem(cmdItem, categoryName, commands, knownCommands);
                     }
                 }
+            }
+        }
 
-                CubaseAreaTypes GetAreaName(string categoryName)
+        private void ProcessCommandItem(XElement cmdItemElement, string categoryName, CubaseKeyCommandCollection commands, CubaseKnownCollection knownCommands)
+        {
+            string name = "";
+            string key = "";
+            string action = "";
+
+            foreach (var element in cmdItemElement.Elements("string"))
+            {
+                var elName = element.Attribute("name")?.Value?.ToLowerInvariant();
+                switch (elName)
                 {
-                    if (!Enum.TryParse<CubaseAreaTypes>(categoryName, out var areaType)) {
-                        return CubaseAreaTypes.Keys;
-                    }
-                    return areaType;
+                    case "name":
+                        name = element.Attribute("value")?.Value ?? "";
+                        break;
+                    case "key":
+                        key = element.Attribute("value")?.Value ?? "";
+                        break;
                 }
             }
 
-            return list;
+            foreach (var list in cmdItemElement.Elements("list"))
+            {
+                var keys = list.Descendants("item")
+                    .Select(i => i.Attribute("value")?.Value)
+                    .Where(v => !string.IsNullOrEmpty(v))
+                    .ToList();
+                if (keys.Any())
+                    key = string.Join(", ", keys);
+            }
+
+            commands.Add(new CubaseKeyCommand()
+            {
+                Category = categoryName,
+                Name = name,
+                Key = key,
+                Action = ActionEvent.Create(GetAreaName(categoryName), key),
+                CubaseCommand = knownCommands.GetCommandByName(name)
+            });
+
+            CubaseAreaTypes GetAreaName(string categoryName)
+            {
+                if (!Enum.TryParse<CubaseAreaTypes>(categoryName, out var areaType))
+                {
+                    return CubaseAreaTypes.Keys;
+                }
+                return areaType;
+            }
         }
+
     }
 }
+

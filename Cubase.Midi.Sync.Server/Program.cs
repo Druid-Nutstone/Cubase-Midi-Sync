@@ -10,15 +10,23 @@ using Cubase.Midi.Sync.Server.Services.Keyboard;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Server.Services.Mixer;
 using Cubase.Midi.Sync.Server.Services.WebSockets;
+using Cubase.Midi.Sync.Server.Services.Windows;
+using Cubase.Midi.Sync.WindowManager.Services.Cubase;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.EventLog;
 using Serilog;
 using Serilog.Events;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+#if DEBUG
+  RestartTeVirtualMidi();
+#endif
 
 builder.Logging.AddConsole();
 
@@ -47,20 +55,22 @@ builder.Services.AddHttpLogging(logging =>
 });
 
 builder.Services
-      .AddTransient<ICommandService, CommandService>()
-      .AddTransient<ICubaseService, CubaseService>()
-      .AddTransient<IKeyboardService, KeyboardService>()
+      .AddSingleton<ICommandService, CommandService>()
+      .AddSingleton<ICubaseService, CubaseService>()
+      .AddSingleton<IKeyboardService, KeyboardService>()
       .AddSingleton<IMidiService, MidiService>() 
       .AddSingleton<ICacheService, CacheService>()  
-      .AddTransient<IMixerService, MixerService>()
+      .AddSingleton<IMixerService, MixerService>()
+      .AddSingleton<ICubaseWindowMonitor, CubaseWindowMonitor>()
       .AddSingleton<WebSocketServer>() 
-      .AddKeyedTransient<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
-      .AddKeyedTransient<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
+      .AddKeyedSingleton<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
+      .AddKeyedSingleton<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
 
 builder.Services.AddControllers();
 
 builder.Services.AddHostedService<MidiWebSocketService>();
+builder.Services.AddHostedService<CubaseWindowsBackgroundService>();
 
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -96,7 +106,6 @@ cache.Initialise();
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
-    var midi = app.Services.GetRequiredService<IMidiService>();
     midi.Dispose();
 });
 
@@ -105,6 +114,36 @@ lifetime.ApplicationStopping.Register(() =>
 var wsServer = app.Services.GetRequiredService<WebSocketServer>();
 wsServer.Configure(app);
 
+AppDomain.CurrentDomain.ProcessExit += (_, __) =>
+{
+    midi.Dispose();
+};
+
 app.Run();
 
+
+static void RestartTeVirtualMidi()
+{
+    string devconPath = @"C:\Program Files (x86)\Windows Kits\10\Tools\10.0.26100.0\x64\devcon.exe";
+    string arguments = "restart *teVirtualMIDI*";
+
+    var process = new Process
+    {
+        StartInfo = new ProcessStartInfo
+        {
+            FileName = devconPath,
+            Arguments = arguments,
+            Verb = "runas",        // requires admin
+            UseShellExecute = false,
+            // CreateNoWindow = true,
+        }
+    };
+
+    process.Start();
+    process.WaitForExit();
+    if (process.ExitCode != 0)
+    {
+        Log.Logger.Error("Could not restart virtual midi driver");
+    }
+}
 public partial class Program { }

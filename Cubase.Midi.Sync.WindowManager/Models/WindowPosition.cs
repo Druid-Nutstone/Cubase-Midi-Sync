@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Cubase.Midi.Sync.WindowManager.Services.Win.WindowManagerService;
@@ -17,6 +18,7 @@ namespace Cubase.Midi.Sync.WindowManager.Models
 
         public WindowState State { get; set; } = WindowState.Unknown;
 
+        [JsonIgnore]
         public nint Hwnd {  get; set; }
 
         public WindowType Type { get; set; } = WindowType.Transiant;
@@ -34,6 +36,30 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         public bool SetOriginalPosition()
         {
             return MoveTo(OriginalPosition.Value);
+        }
+
+        public WindowPosition Focus()
+        {
+            WindowManagerService.FocusWindow(this.Hwnd);
+            return this;
+        }
+
+        public WindowPosition Maximise()
+        {
+            WindowManagerService.MaximiseWindow(this.Hwnd);
+            return this;
+        }
+
+        public WindowPosition Minimise()
+        {
+            WindowManagerService.MinimiseWindow(this.Hwnd);
+            return this;
+        }
+
+        public WindowPosition Restore()
+        {
+            WindowManagerService.RestoreWindow(this.Hwnd);
+            return this;
         }
 
         public WindowPosition WithPosition(Rect? rect)

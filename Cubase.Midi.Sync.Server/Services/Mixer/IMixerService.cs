@@ -7,5 +7,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
         Task<CubaseMixerCollection> MixerCommand(CubaseMixer cubaseMixer);
 
         Task<CubaseMixerCollection> GetMixer();
+    
+        Task<CubaseMixerResponse> MixerRequest(CubaseMixerRequest cubaseMixerRequest);
     }
 }

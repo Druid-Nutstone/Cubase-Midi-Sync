@@ -3,6 +3,7 @@ using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,6 +17,10 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private readonly ICategoryService keyService;
         
         private readonly ILogger<MidiService> logger;
+
+        //private readonly Thread midiThread;
+
+        //private readonly BlockingCollection<CubaseMidiCommand> midiQueue = new();
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
@@ -45,7 +50,33 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 {MidiCommand.TrackComplete.ToString(), this.TracksComplete },   
               
             };
+            //midiThread = new Thread(ProcessMidiQueue)
+            //{
+            //    IsBackground = true,
+            //    Name = "MidiThread"
+            //};
+            //midiThread.SetApartmentState(ApartmentState.STA);
+            //midiThread.Start();
         }
+
+        //private void ProcessMidiQueue()
+        //{
+        //    foreach (var cmd in midiQueue.GetConsumingEnumerable())
+        //    {
+        //        try
+        //        {
+        //            if (cmd.Channel > -1)
+        //                midiDriver.SendNoteOn(cmd.Channel, cmd.Note, cmd.Velocity);
+        //            else
+        //                midiDriver.SendMessage(MidiCommand.Message, cmd.Command);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            this.logger.LogError($"Cannot send midi {ex.Message}");
+        //            // log failures if needed
+        //        }
+        //    }
+        //}
 
         public void Initialise()
         {
@@ -61,6 +92,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             {
                 if (cubaseMidiCommand.Channel > -1)
                 {
+                    //midiQueue.Add(cubaseMidiCommand);
+                    //return true;
                     this.logger.LogInformation($"Sending Midi Name:{cubaseMidiCommand.Name} Command:{cubaseMidiCommand.Command} Channel:{cubaseMidiCommand.Channel} Note:{cubaseMidiCommand.Note} ");
                     this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
                     return true;
@@ -77,6 +110,15 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             }
         }
 
+        public async Task<bool> SendMidiMessageAsync(CubaseMidiCommand midiCommand)
+        {
+            var result = true;
+            await Task.Run(() => 
+            { 
+               result = this.SendMidiMessage(midiCommand);   
+            });
+            return result;
+        }
 
 
         public MidiChannelCollection GetChannels()
@@ -138,6 +180,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private void ChannelChange(string channelInfo)
         {
             var channelData = JsonSerializer.Deserialize<MidiChannel>(channelInfo);
+            this.logger.LogInformation($"Channel Change: {channelData.Name} Index:{channelData.Index} Selected:{channelData.Selected}");
             var channelCollection = this.MidiChannels.AddOrUpdateChannel(channelData);
             if (OnChannelChanged != null)
             {
@@ -154,6 +197,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         {
             var channel = JsonSerializer.Deserialize<MidiChannel>(tracksJson);
             this.MidiChannels.AddOrUpdateChannel(channel);
+            this.logger.LogInformation($"Channel add/changed {channel.Name} Index:{channel.Index} Selected:{channel.Selected} volume:{channel.Volume}");
         }
 
         private void TracksComplete(string emptyString)

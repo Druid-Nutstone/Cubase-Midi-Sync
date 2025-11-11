@@ -7,12 +7,12 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
     public interface ICubaseService
     {
-       Task<CubaseActionResponse> ExecuteAction(CubaseActionRequest request);
+       Task<CubaseActionResponse> ExecuteActionAsync(CubaseActionRequest request);
 
         Task<MidiChannelCollection> GetTracks();
 
         Task<MidiChannelCollection> SetSelectedTrack(MidiChannel midiChannel);
 
-        Task<WebSocketMessage> ExecuteWebSocket(WebSocketMessage request);
+        Task<WebSocketMessage> ExecuteWebSocketAsync(WebSocketMessage request);
     }
 }

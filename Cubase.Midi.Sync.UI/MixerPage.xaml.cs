@@ -7,6 +7,7 @@ using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Common.Window;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
@@ -21,17 +22,23 @@ namespace Cubase.Midi.Sync.UI
 
         private IMidiWebSocketClient webSocketClient;
 
+        private IMidiWebSocketResponse midiWebSocketResponse;
+
+        private CubaseActiveWindowCollection cubaseActiveWindows;
+
         private BasePage basePage;
 
         private IServiceProvider serviceProvider;
 
-        private CubaseMixerCollection mixerCollection;
+        public CubaseMixerCollection mixerCollection { get; set; }
 
         private List<CubaseCommand> staticCommands;
 
         private IMidiWebSocketResponse webSocketResponse;
 
         private List<CubaseCommandCollection> commandCollection;
+
+        private string currentMixerConsole;
 
         public MixerPage(ICubaseHttpClient cubaseHttpClient, 
                          IMidiWebSocketClient webSocketClient, 
@@ -43,12 +50,24 @@ namespace Cubase.Midi.Sync.UI
             this.serviceProvider = serviceProvider;
             this.webSocketClient = webSocketClient;
             this.webSocketResponse = midiWebSocketResponse;
+            this.midiWebSocketResponse = midiWebSocketResponse;
+            this.midiWebSocketResponse.RegisterCubaseWindowHandler(this.OnCubaseWindowChanges);
             BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
 
         }
 
+        private void OnCubaseWindowChanges(CubaseActiveWindowCollection cubaseActiveWindows)
+        {
+            if (cubaseActiveWindows?.Count > 0)
+            {
+                this.cubaseActiveWindows = cubaseActiveWindows;
+            }
+
+        }
+        
         protected override async void OnDisappearing()
         {
+            // todo - stop this from closing mixers - going to close via hwnd
             await this.OpenCloseMixer();
             base.OnDisappearing();
         }
@@ -133,47 +152,43 @@ namespace Cubase.Midi.Sync.UI
         {
             this.StaticButtons.Children.Clear();
             this.staticCommands = new List<CubaseCommand>();
-            foreach (var midiToggleCommand in this.mixerCollection.Where(x => x.Visible))
+            foreach (var midiStaticCommand in this.mixerCollection.GetStaticMixConsoleCommands())
             {
-                this.staticCommands.Add(CubaseCommand.CreateToggleButton(midiToggleCommand.ButtonText, ActionEvent.Create(CubaseAreaTypes.Midi, midiToggleCommand.Command.ToString()), midiToggleCommand.ButtonTextToggled)
-                                                     .WithIsInitiallyVisible(midiToggleCommand.IsInitiallyVisible));
-
+                this.staticCommands.Add(CubaseCommand.CreateStandardButton(midiStaticCommand.ButtonText, ActionEvent.Create(CubaseAreaTypes.Midi, midiStaticCommand.Command.ToString())));
             }
 
             foreach (var command in this.staticCommands)
             {
                 var btn = RaisedButtonFactory.Create(command.Name, ColourConstants.ButtonBackground.ToSerializableColour(), ColourConstants.ButtonText.ToSerializableColour(), async (s, e) =>
                 {
-                    this.mixerCollection = await this.cubaseHttpClient.SetMixer(CubaseMixer.Create(Enum.Parse<KnownCubaseMidiCommands>(command.Action.Action), string.Empty, string.Empty), this);
-                    foreach (var mixer in mixerCollection)
-                    {
-                        // command.IsToggled = mixer.Toggled;
-                        var showHideBtn = this.StaticButtons.Children.OfType<Button>().FirstOrDefault(x => x.AutomationId == mixer.Command.ToString());
-                        // if null it's probably open/close mixer 
-                        if (showHideBtn != null)
-                        {
-                            showHideBtn.IsVisible = mixer.Visible;
-                            var mixerCommand = this.staticCommands.First(x => x.Name.Equals(mixer.ButtonText, StringComparison.OrdinalIgnoreCase));
-                            mixerCommand.IsToggled = mixer.Toggled;
-                            this.SetButtonState(showHideBtn, mixerCommand);
-                        }
-                    }
-                    this.SetButtonState((Button)s, command);
+                    this.webSocketResponse.mixerCollection = null;
+                    await this.SendMidiCommand(CubaseMixerCommand.MixerStaticCommand, currentMixerConsole, command.Action);
                 }, command.IsToggleButton, command.Action.Action);
                 StaticButtons.Children.Add(btn.Button);
-                if (!command.IsInitiallyVisible)
-                {
-                    btn.Button.IsVisible = false;
-                }
             }
         }
 
         private async Task<CubaseMixerCollection> OpenCloseMixer()
         {
-            var cubaseMixer = CubaseMixer.Create(KnownCubaseMidiCommands.Mixer, string.Empty, string.Empty);
-            var socketMessage = WebSocketMessage.Create(WebSocketCommand.Mixer, cubaseMixer);
-            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.Windows, CubaseWindowRequest.CreateCommand(CubaseWindowRequestCommand.ActiveWindows));
+            await this.webSocketClient.SendMidiCommand(socketMessage);
+            if (!this.cubaseActiveWindows.HaveAnyMixers())
+            {
+                await this.SendMidiCommand(CubaseMixerCommand.OpenMixer);
+            }
+            else
+            {
+                // focus mixers and move them based on number of mixers   
+            }
             return await this.webSocketResponse.GetMixer();
+
+        }
+
+        private async Task SendMidiCommand(CubaseMixerCommand cubaseMixerCommand, string? targetMixer = null, object? data = null)
+        {
+            var mixerRequest = CubaseMixerRequest.Create(cubaseMixerCommand, data, targetMixer);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.Mixer, mixerRequest);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
         }
 
         public async Task Initialise(List<CubaseCommandCollection>? mainCommands = null)

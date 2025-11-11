@@ -7,5 +7,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes
     public interface ICategoryService
     {
         CubaseActionResponse ProcessAction(ActionEvent request);
+
+        Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request);
     }
 }

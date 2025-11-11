@@ -13,10 +13,13 @@ namespace Cubase.Midi.Sync.Common.Keys
             var commands = new CubaseKeyCommandParser().Parse(keyCommandsFilePath);
             this.Add(new RequiredKey() { Id = RequiredKeyId.Mixer_Hide_All, Category = "Mixer", Name = "Hide: Hide All" });
             this.Add(new RequiredKey() { Id = RequiredKeyId.Mixer_Show_All, Category = "Mixer", Name = "Hide: Reveal All" });
+            this.Add(new RequiredKey() { Id = RequiredKeyId.Mixer_Show_Selected, Category = "Mixer", Name = "ShowSelected" });
             var hideAll = this.GetById(RequiredKeyId.Mixer_Hide_All);
             hideAll.WithKey(commands.GetByCategoryAndName(hideAll.Category, hideAll.Name).Key);
             var showAll = this.GetById(RequiredKeyId.Mixer_Show_All);
             showAll.WithKey(commands.GetByCategoryAndName(showAll.Category, showAll.Name).Key);
+            var showSelected = this.GetById(RequiredKeyId.Mixer_Show_Selected);
+            showSelected.WithKey(commands.GetByCategoryAndName(showSelected.Category, showSelected.Name).Key);
         }
 
         public bool AreAllKeysDefined()
@@ -67,6 +70,7 @@ namespace Cubase.Midi.Sync.Common.Keys
     public enum RequiredKeyId
     {
         Mixer_Hide_All,
-        Mixer_Show_All
+        Mixer_Show_All,
+        Mixer_Show_Selected
     }
 }

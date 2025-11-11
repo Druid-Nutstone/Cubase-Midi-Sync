@@ -18,6 +18,8 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
 
         // --- Win32 imports ---
         [DllImport("user32.dll", SetLastError = true)]
@@ -141,9 +143,42 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             if (hWnd == IntPtr.Zero)
                 return;
 
-            // Restore if minimized, otherwise SetForegroundWindow may fail
-            ShowWindow(hWnd, SW_RESTORE);
+            var currentFocusedwindow = GetForegroundWindow();
+
+            if (currentFocusedwindow != hWnd)
+            {
+                // Restore if minimized, otherwise SetForegroundWindow may fail
+                ShowWindow(hWnd, SW_RESTORE);
+                SetForegroundWindow(hWnd);
+            }
+        }
+
+        public static void FocusWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
             SetForegroundWindow(hWnd);
+        }
+
+        public static void MaximiseWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            ShowWindow(hWnd, (int)WindowState.Maximized);
+        }
+
+        public static void MinimiseWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            ShowWindow(hWnd, (int)WindowState.Minimized);
+        }
+
+        public static void RestoreWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            ShowWindow(hWnd, SW_RESTORE);
         }
 
         public static IEnumerable<(IntPtr Handle, Rect MonitorRect, Rect WorkRect)> GetAllMonitors()

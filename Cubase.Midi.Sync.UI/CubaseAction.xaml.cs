@@ -278,7 +278,7 @@ public partial class CubaseAction : ContentPage
     private async Task SetMomentaryOrToggleButton(Button button, CubaseCommand command)
     {
         string errMsg = null;
-        VisualStateManager.GoToState(button, "Pressed");
+        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
         var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
         var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
         var response = await this.webSocketClient.SendMidiCommand(socketMessage);
@@ -287,7 +287,7 @@ public partial class CubaseAction : ContentPage
             await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
             command.IsToggled = !command.IsToggled;
         }
-        VisualStateManager.GoToState(button, "Normal");
+        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Normal"));
         SetButtonState(button, command);
     }
 

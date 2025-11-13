@@ -14,6 +14,10 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         bool HaveAtLeastOneMixer { get; }
 
+        bool WindowExists(string windowName);
+
+        bool MixerExists(string mixerName);
+
         List<string> MixerConsoles { get; }
 
         bool FocusCubase(Action<string> errorHandler);

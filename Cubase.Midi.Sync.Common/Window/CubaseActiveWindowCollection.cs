@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.Common.Window
 {
     public class CubaseActiveWindowCollection : List<CubaseActiveWindow> 
     {
-        public CubaseActiveWindow AddCubaseWindow(string name, CubaseWindowState state, CubaseWindowType type)
+        public CubaseActiveWindow AddCubaseWindow(string name, CubaseWindowState state, CubaseWindowType type, CubaseWindowZOrder zOrder)
         {
             var cubaseWindow = new CubaseActiveWindow()
             {
                 Name = name,
                 State = state,
-                Type = type
+                Type = type,
+                ZOrder = zOrder
             };
             this.Add(cubaseWindow);
             return cubaseWindow;
@@ -29,6 +32,27 @@ namespace Cubase.Midi.Sync.Common.Window
         {
             return this.Count(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase));
         }
+
+        public bool Compare(CubaseActiveWindowCollection other)
+        {
+            this doesn;T work 
+            var areEqual = this.ComputeHash().Equals(other.ComputeHash());
+            return areEqual;
+        }
+
+        public string ComputeHash()
+        {
+            var json = JsonSerializer.Serialize(this);
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var hash = sha.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
+        public List<CubaseActiveWindow> GetAllMixers()
+        {
+            return this.Where(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase)).ToList();
+        }
     }
 
     public class CubaseActiveWindow
@@ -38,6 +62,8 @@ namespace Cubase.Midi.Sync.Common.Window
         public CubaseWindowState State { get; set; }    
 
         public CubaseWindowType Type { get; set; }
+
+        public CubaseWindowZOrder ZOrder { get; set; }
     }
 
     public enum CubaseWindowState
@@ -55,5 +81,12 @@ namespace Cubase.Midi.Sync.Common.Window
         Primary = 0,
         Secondary = 1,
         Transiant = 2,
+    }
+
+    public enum CubaseWindowZOrder
+    {
+        Focused = 0,
+        Active = 1,
+        Unknown = 99
     }
 }

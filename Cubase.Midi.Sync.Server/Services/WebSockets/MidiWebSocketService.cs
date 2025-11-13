@@ -65,61 +65,78 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
             // Map the endpoint and use the HttpContext.RequestServices for per-request scope.
             app.Map("/ws/midi", builder =>
             {
+                
                 builder.Run(async context =>
                 {
-                    if (!context.WebSockets.IsWebSocketRequest)
+                    WebSocket ws = null;
+                    try
                     {
-                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                        return;
+                        if (!context.WebSockets.IsWebSocketRequest)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                            return;
+                        }
+
+                        ws = await context.WebSockets.AcceptWebSocketAsync();
+                        _logger.LogInformation("WebSocket connected from {ip}", context.Connection.RemoteIpAddress);
+
+                        var buffer = new byte[1024 * 10];
+                        var ct = context.RequestAborted;
+
+                        var requestServices = context.RequestServices;
+
+                        this.midiService.OnChannelChanged = async (channels) =>
+                        {
+                            if (ws.State == WebSocketState.Open)
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
+                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                            }
+                        };
+
+                        this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
+                        {
+                            if (ws.State == WebSocketState.Open)
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
+                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                            }
+                        });
+
+                        while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
+                        {
+                            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", ct);
+                                _logger.LogInformation("WebSocket closed by client.");
+                            }
+                            else
+                            {
+                                var messageAsString = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+                                var sourceMessage = WebSocketMessage.Deserialise(messageAsString);
+
+                                _logger.LogInformation($"Received WS MIDI command: {sourceMessage.Command}");
+
+                                var responseMessage = await cubaseService.ExecuteWebSocketAsync(sourceMessage);
+
+                                // var response = Encoding.UTF8.GetBytes("ACK: " + message);
+                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(responseMessage.Serialise())), WebSocketMessageType.Text, true, ct);
+                            }
+                        }
                     }
-
-                    using var ws = await context.WebSockets.AcceptWebSocketAsync();
-                    _logger.LogInformation("WebSocket connected from {ip}", context.Connection.RemoteIpAddress);
-
-                    var buffer = new byte[1024 * 10];
-                    var ct = context.RequestAborted;
-
-                    var requestServices = context.RequestServices;
-
-                    this.midiService.OnChannelChanged = async (channels) =>
+                    catch (Exception ex)
                     {
-                        if (ws.State == WebSocketState.Open)
-                        {
-                            var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
-                            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
-                        }
-                    };
-
-                    this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
+                        _logger.LogError(ex, "WebSocket error: {message}", ex.Message);
+                    }
+                    finally
                     {
-                        if (ws.State == WebSocketState.Open)
+                        _logger.LogInformation("WebSocket connection closed.");
+                        if (ws != null && ws.State != WebSocketState.Closed)
                         {
-                            var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
-                            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
-                        }
-                    });
-
-                    while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
-                    {
-                        var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
-
-                        if (result.MessageType == WebSocketMessageType.Close)
-                        {
-                            await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", ct);
-                            _logger.LogInformation("WebSocket closed by client.");
-                        }
-                        else
-                        {
-                            var messageAsString = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-                            var sourceMessage = WebSocketMessage.Deserialise(messageAsString);
-
-                            _logger.LogInformation($"Received WS MIDI command: {sourceMessage.Command}");
-
-                            var responseMessage = await cubaseService.ExecuteWebSocketAsync(sourceMessage);
-
-                            // var response = Encoding.UTF8.GetBytes("ACK: " + message);
-                            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(responseMessage.Serialise())), WebSocketMessageType.Text, true, ct);
+                            await ws.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception", CancellationToken.None);
                         }
                     }
                 });

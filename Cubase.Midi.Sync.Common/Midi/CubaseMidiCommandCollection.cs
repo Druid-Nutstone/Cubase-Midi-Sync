@@ -61,6 +61,9 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Loop", 1, 16, "Transport", "Cycle", 127));
             this.Add(CubaseMidiCommand.Create("Duplicate", 1, 17, "Edit", "Duplicate", 127));
             this.Add(CubaseMidiCommand.Create("Undo Visibility Change", 1, 18, "Agents", "channelOrganizerUndo", 127));
+            this.Add(CubaseMidiCommand.Create("Mixer 2", 1, 19, "Devices", "Mixer 2", 127));
+            this.Add(CubaseMidiCommand.Create("Mixer 3", 1, 20, "Devices", "Mixer 3", 127));
+            this.Add(CubaseMidiCommand.Create("Mixer 4", 1, 21, "Devices", "Mixer 4", 127));
         }
 
 
@@ -143,6 +146,9 @@ namespace Cubase.Midi.Sync.Common.Midi
         Key_Hide_All,
         Key_Show_All,
         Undo_Visibility_Change,
-        Key_Show_Selected
+        Key_Show_Selected,
+        Mixer_2,
+        Mixer_3,
+        Mixer_4
     }
 }

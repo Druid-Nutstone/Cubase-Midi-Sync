@@ -34,6 +34,9 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowTextLength(IntPtr hWnd);
 
+        [DllImport("shell32.dll", SetLastError = true)]
+        private static extern uint SHAppBarMessage(uint dwMessage, ref APPBARDATA pData);
+
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
@@ -96,6 +99,19 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
+        private const int ABM_GETTASKBARPOS = 0x00000005;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct APPBARDATA
+        {
+            public uint cbSize;
+            public IntPtr hWnd;
+            public uint uCallbackMessage;
+            public uint uEdge;
+            public Rect rc;
+            public int lParam;
+        }
+
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct MonitorInfo
         {
@@ -136,6 +152,19 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             public int Height => Bottom - Top;
 
             public int TwoThirdsWidth => (Width * 2) / 3;
+        }
+
+
+        public static Rect GetTaskBarSize()
+        {
+            APPBARDATA abd = new APPBARDATA();
+            abd.cbSize = (uint)Marshal.SizeOf(abd);
+            uint ret = SHAppBarMessage(ABM_GETTASKBARPOS, ref abd);
+            if (ret != 0)
+            {
+                return abd.rc;
+            }
+            return new Rect();
         }
 
         public static void ActivateWindow(IntPtr hWnd)
@@ -285,7 +314,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         public static bool SetPosition(IntPtr hWnd, int x, int y, int width, int height)
         {
-            return SetWindowPos(hWnd, HWND_TOP, x - border, y, width + (border * 2), height + border, SWP_SHOWWINDOW);
+            return SetWindowPos(hWnd, HWND_TOP, x, y, width, height, SWP_SHOWWINDOW);
         }
 
         public static void SetWindowToMax(IntPtr hWnd)
@@ -321,7 +350,16 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return Enum.GetValues<WindowState>().Contains((WindowState)placement.showCmd) ? (WindowState)placement.showCmd : WindowState.Unknown; 
         }
         
-        
+
+        public static WindowZorder GetWindowZorder(IntPtr hWnd)
+        {
+            var foregroundHwnd = GetForegroundWindow();
+            if (foregroundHwnd == hWnd)
+                return WindowZorder.Focused;
+            // Additional logic can be added here to determine Active window if needed
+            return WindowZorder.Active;
+        }
+
         private static string GetErrorMessage(int errorCode)
         {
             var message = new StringBuilder(256);

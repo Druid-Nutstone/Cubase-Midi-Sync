@@ -58,6 +58,7 @@ namespace Cubase.Midi.Sync.Common.Mixer
         MixerCollection = 0,
         OpenMixer = 1,
         MixerStaticCommand = 2,
+        FocusMixer = 3,
         Error = 99,
     }
 }

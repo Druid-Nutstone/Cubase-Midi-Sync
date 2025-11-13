@@ -72,6 +72,11 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
+        public WindowPosition GetWindowThatStartsWith(string name)
+        {
+            return this.FirstOrDefault(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+        }
+
         public List<WindowPosition> GetActiveWindows()
         {
             return this.Where(x => x.State != WindowState.Unknown)
@@ -96,21 +101,6 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         {
             return this.Select(x => x.Name);    
         }
-
-        //public WindowPositionCollection GetCurrentPosition(string windowName, WindowTargetLocation windowTargetLocation)
-        //{
-        //    this.GetWindowPosition(windowName, windowTargetLocation);
-        //    return this;
-        //} 
-        
-        //public WindowPositionCollection GetCurrentPositions(List<string> windowNames, WindowTargetLocation windowTargetLocation)
-        //{
-        //    foreach (var windowName in windowNames)
-        //    {
-        //        this.GetWindowPosition(windowName, windowTargetLocation);
-        //    }
-        //    return this;
-        //}
 
         public bool SetToCurrentPositions()
         {

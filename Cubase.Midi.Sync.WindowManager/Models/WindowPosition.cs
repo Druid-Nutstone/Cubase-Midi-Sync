@@ -23,6 +23,8 @@ namespace Cubase.Midi.Sync.WindowManager.Models
 
         public WindowType Type { get; set; } = WindowType.Transiant;
 
+        public WindowZorder Zorder { get; set; } = WindowZorder.Unknown;
+
         public Rect? Position { get; set; } = null;
 
         public Rect? OriginalPosition { get; set; } = null;  
@@ -83,6 +85,12 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this;
         }
 
+        public WindowPosition WithWindowZorder()
+        {
+            this.Zorder = WindowManagerService.GetWindowZorder(this.Hwnd);
+            return this;
+        }
+
         public WindowPosition WithWindowType(WindowType windowType)
         {
             this.Type = windowType;
@@ -121,7 +129,10 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return new WindowPosition()
             {
                 Name = name,
-                Hwnd = hwnd 
+                Hwnd = hwnd,
+                OriginalPosition = WindowManagerService.GetWindowPosition(hwnd),
+                State = WindowManagerService.GetWindowState(hwnd),
+                Zorder = WindowManagerService.GetWindowZorder(hwnd)
             };
         }
 

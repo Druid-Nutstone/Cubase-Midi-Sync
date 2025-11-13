@@ -19,7 +19,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
 
         private Func<string, Task>? errorHandler = null;
 
-        private List<Action<CubaseActiveWindowCollection>> registeredWindowEventHandlers = new List<Action<CubaseActiveWindowCollection>>();
+        private readonly List<Func<CubaseActiveWindowCollection, Task>> registeredWindowEventHandlers
+            = new();
 
         public async Task ProcessWebSocket(WebSocketMessage request)
         {
@@ -45,7 +46,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                     var cubaseWindowCollection = request.GetMessage<CubaseActiveWindowCollection>();
                     foreach (var windowHandler in this.registeredWindowEventHandlers)
                     {
-                        windowHandler.Invoke(cubaseWindowCollection);
+                        await windowHandler(cubaseWindowCollection);
                     }
                     break;
             }
@@ -75,7 +76,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
             this.errorHandler = errorHandler;
         }
 
-        public void RegisterCubaseWindowHandler(Action<CubaseActiveWindowCollection> windowHander)
+        public void RegisterCubaseWindowHandler(Func<CubaseActiveWindowCollection, Task> windowHander)
         {
             if (!this.registeredWindowEventHandlers.Contains(windowHander))
             {

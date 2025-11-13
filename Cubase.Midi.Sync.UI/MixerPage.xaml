@@ -10,6 +10,18 @@
                 <!-- Top flexible toolbar -->
                 <Border BackgroundColor="LightGray"
                        Padding="10">
+                    <Label Text="Mixer Consoles"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Border>
+                <FlexLayout x:Name="MixerConsoles"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Start" />                
+                <Border BackgroundColor="LightGray"
+                       Padding="10">
                     <Label Text="Standard Show/Hide Mixer Views"
                            FontSize="20"
                            FontAttributes="Bold"

@@ -7,11 +7,21 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
     {
         public WindowPositionCollection CubaseWindows { get; set; } = new WindowPositionCollection();
 
-        public bool HaveAtLeastOneMixer => this.CubaseWindows.Any(x => x.Name.Contains("MixConsole", StringComparison.OrdinalIgnoreCase));
+        public bool HaveAtLeastOneMixer => this.CubaseWindows.Any(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase));
 
         public List<string> MixerConsoles => this.CubaseWindows.Select(x => x.Name)
-                                                               .Where(x => x.Contains("MixConsole", StringComparison.OrdinalIgnoreCase))
+                                                               .Where(x => x.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase))
                                                                .ToList();
+
+        public bool WindowExists(string windowName)
+        {
+            return this.CubaseWindows.Any(x => x.Name.Equals(windowName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool MixerExists(string mixerName)
+        {
+            return this.CubaseWindows.Any(x => x.Name.StartsWith(mixerName, StringComparison.OrdinalIgnoreCase));
+        }
 
         public List<Action<CubaseActiveWindowCollection>> registeredWindowEventHandlers = new();
 
@@ -50,7 +60,7 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
             var cubaseWindowCollection = new CubaseActiveWindowCollection();
             foreach (var cubaseWindow in this.CubaseWindows)
             {
-                cubaseWindowCollection.AddCubaseWindow(cubaseWindow.Name, (CubaseWindowState)cubaseWindow.State, (CubaseWindowType)cubaseWindow.Type);
+                cubaseWindowCollection.AddCubaseWindow(cubaseWindow.Name, (CubaseWindowState)cubaseWindow.State, (CubaseWindowType)cubaseWindow.Type, (CubaseWindowZOrder)cubaseWindow.Zorder);
             }
             return cubaseWindowCollection;
         }

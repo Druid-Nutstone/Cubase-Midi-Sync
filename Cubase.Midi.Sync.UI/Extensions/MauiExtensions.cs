@@ -25,6 +25,5 @@ namespace Cubase.Midi.Sync.UI.Extensions
                 colour.A / 255.0f
             );
         }
-
     }
 }

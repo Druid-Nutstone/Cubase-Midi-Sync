@@ -10,6 +10,7 @@ using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Common.Window;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
+using Cubase.Midi.Sync.UI.Models;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Microsoft.Maui.Controls;
 
@@ -38,6 +39,8 @@ namespace Cubase.Midi.Sync.UI
 
         private List<CubaseCommandCollection> commandCollection;
 
+        private CubaseUIMixerCollection uiMixerCollection = new CubaseUIMixerCollection();
+
         private string currentMixerConsole;
 
         public MixerPage(ICubaseHttpClient cubaseHttpClient, 
@@ -56,20 +59,72 @@ namespace Cubase.Midi.Sync.UI
 
         }
 
-        private void OnCubaseWindowChanges(CubaseActiveWindowCollection cubaseActiveWindows)
+        private async Task OnCubaseWindowChanges(CubaseActiveWindowCollection cubaseActiveWindows)
         {
-            if (cubaseActiveWindows?.Count > 0)
-            {
-                this.cubaseActiveWindows = cubaseActiveWindows;
-            }
-
+            this.cubaseActiveWindows = cubaseActiveWindows;
+            await this.UpdateMixConsoles();
         }
         
         protected override async void OnDisappearing()
         {
             // todo - stop this from closing mixers - going to close via hwnd
-            await this.OpenCloseMixer();
+            // await this.OpenCloseMixer();
             base.OnDisappearing();
+        }
+
+        private async Task UpdateMixConsoles()
+        {
+            uiMixerCollection.Populate(this.cubaseActiveWindows);
+            foreach (var mixerButton in MixerConsoles.Children.OfType<Button>())
+            {
+                var buttonText = mixerButton.Text;
+                var uimixer = this.uiMixerCollection.FirstOrDefault(x => x.Name == buttonText);
+                if (uimixer != null)
+                {
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        mixerButton.BackgroundColor = uimixer.GetBackgroundColour();
+                        mixerButton.TextColor = uimixer.GetForeGroundColour();
+                        mixerButton.InvalidateMeasure();
+                        (mixerButton.Parent as VisualElement)?.InvalidateMeasure();
+                    });
+                }
+            }
+        }
+
+        private async void InitialiseMixers()
+        {
+            MixerConsoles.Children.Clear(); 
+            foreach (var uimixer in this.uiMixerCollection)
+            {
+                var button = RaisedButtonFactory.Create(uimixer.Name, System.Drawing.Color.White.ToSerializableColour(), System.Drawing.Color.SlateGray.ToSerializableColour(), async (s, e) =>
+                {
+                    try
+                    {
+                        var button = (Button)s;
+                        var mixer = this.uiMixerCollection.GetMixerByName(button.Text); 
+                        if (mixer != null)
+                        {
+                            switch (mixer.GetZOrder())
+                            {
+                                case CubaseWindowZOrder.Focused:
+                                case CubaseWindowZOrder.Active:
+                                    await this.SendMidiCommand(CubaseMixerCommand.FocusMixer, mixer.WindowTitle);
+                                    break;
+                                case CubaseWindowZOrder.Unknown:
+                                    await SendMidiCommand(CubaseMixerCommand.OpenMixer, mixer.Indentifier);
+                                    break;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Error InitialiseMixers", ex.Message, "OK");
+                    }
+                }, true);
+                MixerConsoles.Children.Add(button.Button);
+            }
+            // todo - add close all mixers command 
         }
 
         private async Task InitialiseCustomCommands(List<CubaseCommandCollection> collections)
@@ -172,9 +227,9 @@ namespace Cubase.Midi.Sync.UI
         {
             var socketMessage = WebSocketMessage.Create(WebSocketCommand.Windows, CubaseWindowRequest.CreateCommand(CubaseWindowRequestCommand.ActiveWindows));
             await this.webSocketClient.SendMidiCommand(socketMessage);
-            if (!this.cubaseActiveWindows.HaveAnyMixers())
+            if (this.cubaseActiveWindows == null || !this.cubaseActiveWindows.HaveAnyMixers())
             {
-                await this.SendMidiCommand(CubaseMixerCommand.OpenMixer);
+                await this.SendMidiCommand(CubaseMixerCommand.OpenMixer, this.uiMixerCollection.GetPrimaryMixerName());
             }
             else
             {
@@ -202,6 +257,7 @@ namespace Cubase.Midi.Sync.UI
                 this.mixerCollection = await this.OpenCloseMixer();
                 if (this.mixerCollection.Count > 0)
                 {
+                    this.InitialiseMixers();
                     this.InitialiseMixer();
                     if (mainCommands != null)
                     {

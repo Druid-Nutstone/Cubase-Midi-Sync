@@ -21,7 +21,7 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
 
         void RegisterForErrors(Func<string, Task> errorHandler);
 
-        void RegisterCubaseWindowHandler(Action<CubaseActiveWindowCollection> windowHander);
+        void RegisterCubaseWindowHandler(Func<CubaseActiveWindowCollection, Task> windowHander);
 
     }
 }

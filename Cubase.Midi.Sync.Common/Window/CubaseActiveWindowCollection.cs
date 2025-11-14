@@ -35,7 +35,6 @@ namespace Cubase.Midi.Sync.Common.Window
 
         public bool Compare(CubaseActiveWindowCollection other)
         {
-            this doesn;T work 
             var areEqual = this.ComputeHash().Equals(other.ComputeHash());
             return areEqual;
         }
@@ -52,6 +51,16 @@ namespace Cubase.Midi.Sync.Common.Window
         public List<CubaseActiveWindow> GetAllMixers()
         {
             return this.Where(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        public CubaseActiveWindowCollection Clone() 
+        { 
+            var clone = new CubaseActiveWindowCollection();
+            foreach (var window in this)
+            {
+                clone.AddCubaseWindow(window.Name, window.State, window.Type, window.ZOrder);
+            }
+            return clone;
         }
     }
 

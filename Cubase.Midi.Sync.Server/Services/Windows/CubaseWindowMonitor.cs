@@ -27,12 +27,13 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         public void CubaseWindowEvent(WindowPositionCollection cubaseWindows)
         {
-            if (!cubaseWindows.Compare(this.CubaseWindows))
+            if (!this.CubaseWindows.Compare(cubaseWindows))
             {
                 this.CubaseWindows = cubaseWindows;
+                var activeWindowCollection = this.CreateFromCubaseWindows();
                 foreach (var handler in this.registeredWindowEventHandlers)
                 {
-                    handler.Invoke(this.CreateFromCubaseWindows());
+                    handler.Invoke(activeWindowCollection);
                 }
             }
             this.CubaseWindows = cubaseWindows;

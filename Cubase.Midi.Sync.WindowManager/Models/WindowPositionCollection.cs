@@ -13,41 +13,25 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         public string Name { get; set; }
 
 
-        //private void GetWindowPosition(string windowName, WindowTargetLocation windowTargetLocation)
-        //{
-        //    WindowPosition windowPosition = null;
-
-        //    windowPosition = this.FirstOrDefault(x => x.Name.Equals(windowName, StringComparison.OrdinalIgnoreCase));
-
-        //    if (windowPosition == null)
-        //    {
-        //        windowPosition = WindowPosition.Create(windowName);
-        //        this.Add(windowPosition);
-        //    }
-
-        //    if (windowTargetLocation == WindowTargetLocation.New)
-        //    {
-        //        windowPosition.WithPosition(windowPosition.GetCurrentPosition());
-        //    }
-        //    else
-        //    {
-        //        windowPosition.WithOriginalPosition(windowPosition.GetCurrentPosition());
-        //    }
-        //}
-
-        private string ComputeHash()
+        public bool Compare(WindowPositionCollection other)
         {
-            var json = JsonSerializer.Serialize(this);
-            using var sha = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(json);
-            var hash = sha.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
-        }
+            if (other == null) return false;
+            if (this.Count != other.Count) return false;
 
-        public bool Compare(WindowPositionCollection windowPositions)
-        {
-            var areEqual = this.ComputeHash().Equals(windowPositions.ComputeHash());
-            return areEqual;
+            var a = this.OrderBy(i => i.Name).ToArray();
+            var b = other.OrderBy(i => i.Name).ToArray();
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i].Name != b[i].Name) return false;
+                if (a[i].State != b[i].State) return false;
+                if (a[i].Type != b[i].Type) return false;
+                if (a[i].Zorder != b[i].Zorder) return false;
+                // don't think i want to check the position because i may want to 
+                // move the window myself 
+            }
+
+            return true;
         }
 
         public WindowPositionCollection WithWindowPosition(WindowPosition windowPosition)

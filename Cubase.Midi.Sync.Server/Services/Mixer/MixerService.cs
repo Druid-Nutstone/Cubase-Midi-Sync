@@ -49,30 +49,27 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private void CubaseWindowsEvent(CubaseActiveWindowCollection cubaseActiveWindows)
         {
-            if (!this.windowsCollection.Compare(cubaseActiveWindows))
+            this.windowsCollection = cubaseActiveWindows;
+            if (this.windowsCollection.HaveAnyMixers())
             {
-                this.windowsCollection = cubaseActiveWindows;
-                if (this.windowsCollection.HaveAnyMixers())
+                if (this.windowsCollection.CountOfMixers() == 1)
                 {
-                    if (this.windowsCollection.CountOfMixers() == 1)
+                    var firstMixer = this.windowsCollection.GetAllMixers().FirstOrDefault();
+                    if (firstMixer != null)
                     {
-                        var firstMixer = this.windowsCollection.GetAllMixers().FirstOrDefault();
-                        if (firstMixer != null)
+                        if (firstMixer.State != CubaseWindowState.Maximized)
                         {
-                            if (firstMixer.State != CubaseWindowState.Maximized)
-                            {
-                                this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(firstMixer.Name)
-                                       .Maximise()
-                                       .Focus();
-                            }
+                            this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(firstMixer.Name)
+                                   .Maximise()
+                                   .Focus();
                         }
                     }
-                    else
+                }
+                else
+                {
+                    if (this.windowsCollection.CountOfMixers() > 1)
                     {
-                        if (this.windowsCollection.CountOfMixers() > 1)
-                        {
-                            BuildMixerLayout();
-                        }
+                        BuildMixerLayout();
                     }
                 }
             }
@@ -211,7 +208,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
             var heightPerWindow = mixerLayoutMode == MixerLayoutMode.ByHeight 
                 ? primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count 
-                : primaryScreen.Height;
+                : primaryScreen.Height + border;
             
             var widthPerWindow = mixerLayoutMode == MixerLayoutMode.ByWidth 
                 ? primaryScreen.Width / this.cubaseWindowMonitor.MixerConsoles.Count
@@ -250,7 +247,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private void FocusWindow(string windowName)
         {
-            var window = this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(windowName);
+            var window = this.cubaseWindowMonitor.CubaseWindows.GetWindowThatStartsWith(windowName);
             if (window != null)
             {
                 window.Focus();

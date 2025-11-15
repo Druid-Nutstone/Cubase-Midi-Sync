@@ -25,26 +25,24 @@ namespace Cubase.Midi.Sync.UI.Models
 
         public void Populate(CubaseActiveWindowCollection cubaseActiveWindows)
         {
+            this.ForEach((x) => { x.Window = null; x.WindowTitle = string.Empty; });
+            
             var matchedMixers = new HashSet<CubaseUIMixer>();
 
             foreach (var cubaseWindow in cubaseActiveWindows.GetAllMixers())
             {
-                var mixer = this.FirstOrDefault(m => cubaseWindow.Name.StartsWith(m.Indentifier) && !matchedMixers.Any(x => x.WindowTitle == m.WindowTitle));
+                int index = ExtractIndex(cubaseWindow.Name);
+
+                // Find matching UI mixer
+                var mixer = this.FirstOrDefault(m =>
+                    ExtractIndex(m.Indentifier) == index &&
+                    !matchedMixers.Contains(m));
+
                 if (mixer != null)
                 {
                     mixer.WindowTitle = cubaseWindow.Name;
                     mixer.Window = cubaseWindow;
                     matchedMixers.Add(mixer);
-                }
-            }
-
-            // Nullify any mixers that weren't matched
-            foreach (var mixer in this)
-            {
-                if (!matchedMixers.Contains(mixer))
-                {
-                    mixer.WindowTitle = null;
-                    mixer.Window = null;
                 }
             }
         }
@@ -53,6 +51,21 @@ namespace Cubase.Midi.Sync.UI.Models
         {
             return this.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) 
                    ?? new CubaseUIMixer();
+        }
+
+        private int ExtractIndex(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return 1;
+
+            title = title.Trim();
+
+            var parts = title.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length >= 2 && int.TryParse(parts[1], out int mixerNumber))
+                return mixerNumber;
+
+            return 1;
         }
     }
 

@@ -52,6 +52,17 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this;
         }
 
+        public WindowPosition Refresh()
+        {
+            WindowManagerService.RefreshWindow(this.Hwnd);
+            return this;
+        }
+
+        public WindowPosition Close()
+        {
+             WindowManagerService.CloseWindow(this.Hwnd);
+            return this;
+        }
         public WindowPosition Minimise()
         {
             WindowManagerService.MinimiseWindow(this.Hwnd);

@@ -20,6 +20,8 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         List<string> MixerConsoles { get; }
 
+        List<WindowPosition> GetMixerWindows();
+
         bool FocusCubase(Action<string> errorHandler);
     }
 }

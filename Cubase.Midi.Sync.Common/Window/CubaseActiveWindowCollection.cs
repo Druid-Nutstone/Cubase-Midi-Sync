@@ -62,6 +62,11 @@ namespace Cubase.Midi.Sync.Common.Window
             }
             return clone;
         }
+
+        public CubaseActiveWindow? GetPrimaryWindow()
+        {
+            return this.FirstOrDefault(x => x.Type == CubaseWindowType.Primary);    
+        }
     }
 
     public class CubaseActiveWindow

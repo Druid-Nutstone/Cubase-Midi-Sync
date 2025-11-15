@@ -22,6 +22,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         void Dispose();
 
+        public Action? OnReadyReceived { get; set; } 
+
         bool ReadyReceived { get; set; }
     }
 }

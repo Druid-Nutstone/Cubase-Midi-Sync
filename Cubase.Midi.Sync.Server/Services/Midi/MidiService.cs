@@ -24,6 +24,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
+        public Action? OnReadyReceived { get; set; } = null;
+
         public bool ReadyReceived { get; set; } = false;
 
         private bool disposed;
@@ -92,8 +94,25 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             {
                 if (cubaseMidiCommand.Channel > -1)
                 {
-                    //midiQueue.Add(cubaseMidiCommand);
-                    //return true;
+                    bool isReady = false;
+                    var maxAttempts = 10000;
+                    var attempts = 0;
+                    isReady = false;
+                    this.OnReadyReceived = () => { isReady = true; };
+                    this.SendSysExMessage(MidiCommand.Ready, "{}");
+                    while (!isReady && attempts < maxAttempts)
+                    {
+                        attempts++;
+                        if (!isReady)
+                        {
+                            Task.Delay(1).Wait();
+                        }
+                    }
+                    if (attempts == maxAttempts)
+                    {
+                        this.logger.LogError($"Cubase virtual.js is not responding to the ready message");
+                        return false;
+                    }
                     this.logger.LogInformation($"Sending Midi Name:{cubaseMidiCommand.Name} Command:{cubaseMidiCommand.Command} Channel:{cubaseMidiCommand.Channel} Note:{cubaseMidiCommand.Note} ");
                     this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
                     return true;
@@ -210,6 +229,10 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         {
             this.ReadyReceived = true;
             this.logger.LogInformation($"Cubase Midi Sync is ready..");
+            if (OnReadyReceived != null)
+            {
+                OnReadyReceived();
+            }
         }
 
         public void VerifyDriver()

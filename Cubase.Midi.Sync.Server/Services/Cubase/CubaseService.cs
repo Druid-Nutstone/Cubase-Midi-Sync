@@ -134,7 +134,6 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                        for (int i = 0; i < steps; i++)
                        {
                            this.midiService.SendMidiMessage(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Next_Track));
-                           await Task.Delay(20); // give Cubase time to process   
                        }
                    }
                    else if (targetTrack.Index < currentTrack.Index)
@@ -143,7 +142,6 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
                        for (int i = 0; i < steps; i++)
                        {
                            this.midiService.SendMidiMessage(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Previous_Track));
-                           await Task.Delay(20); // give Cubase time to process   
                        }
                     }
                 }

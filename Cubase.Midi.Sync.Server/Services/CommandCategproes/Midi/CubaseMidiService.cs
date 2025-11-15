@@ -36,6 +36,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             this.midiService = midiService;
             this.cacheService = cacheService;
             this.commandCollection = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation); 
+            
         } 
         
         public CubaseActionResponse ProcessAction(ActionEvent request)
@@ -82,6 +83,17 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             var currentMidiCommand = this.commandCollection.GetCommandByCommand(midiCommand);
             if (currentMidiCommand != null)
             {
+                bool isReady = false;
+                this.midiService.OnReadyReceived = () => 
+                { 
+                    isReady = true;
+                };
+                this.midiService.SendSysExMessage(MidiCommand.Ready, "{}");
+                while (!isReady)
+                {
+                    Thread.Sleep(50); // Wait for ready signal
+                }
+
                 return this.midiService.SendMidiMessage(currentMidiCommand);
             }
             else

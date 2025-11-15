@@ -13,6 +13,26 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                                                                .Where(x => x.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase))
                                                                .ToList();
 
+        public List<WindowPosition> GetMixerWindows()
+        {
+            return this.CubaseWindows
+                       .Where(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase))
+                       .OrderBy(x =>
+                       {
+                           // Remove the prefix
+                           var rest = x.Name.Substring("MixConsole".Length).Trim();
+
+                           // Try to read the number immediately following "MixConsole"
+                           if (int.TryParse(rest.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(), out int num))
+                               return num;
+
+                           // No number → treat as 1 (or 0)
+                           return 1;
+                       })
+             .ToList();
+
+        }
+
         public bool WindowExists(string windowName)
         {
             return this.CubaseWindows.Any(x => x.Name.Equals(windowName, StringComparison.OrdinalIgnoreCase));

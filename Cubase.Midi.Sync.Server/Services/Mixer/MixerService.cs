@@ -15,12 +15,12 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 {
     public class MixerService : IMixerService
     {
-        private readonly ICacheService cacheService;    
+        private readonly ICacheService cacheService;
 
         private readonly IMidiService midiService;
-        
-        private readonly IServiceProvider services;  
-        
+
+        private readonly IServiceProvider services;
+
         private readonly ILogger<MixerService> logger;
 
         private readonly ICubaseWindowMonitor cubaseWindowMonitor;
@@ -32,15 +32,15 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
         public MixerService(ILogger<MixerService> logger,
-                            ICacheService cacheService, 
-                            IMidiService midiService, 
+                            ICacheService cacheService,
+                            IMidiService midiService,
                             ICubaseWindowMonitor cubaseWindowMonitor,
                             IServiceProvider services)
         {
-            this.cacheService = cacheService;    
+            this.cacheService = cacheService;
             this.midiService = midiService;
             this.cubaseWindowMonitor = cubaseWindowMonitor;
-            this.logger = logger;   
+            this.logger = logger;
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
             this.services = services;
             this.categoryService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
@@ -52,16 +52,15 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
             this.windowsCollection = cubaseActiveWindows;
             if (this.windowsCollection.HaveAnyMixers())
             {
-                if (this.windowsCollection.CountOfMixers() == 1)
+                if (this.cubaseWindowMonitor.GetMixerWindows().Count == 1)
                 {
-                    var firstMixer = this.windowsCollection.GetAllMixers().FirstOrDefault();
+                    var firstMixer = this.cubaseWindowMonitor.GetMixerWindows().FirstOrDefault();
                     if (firstMixer != null)
                     {
-                        if (firstMixer.State != CubaseWindowState.Maximized)
+                        if (firstMixer.State != WindowManager.Models.WindowState.Maximized)
                         {
-                            this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(firstMixer.Name)
-                                   .Maximise()
-                                   .Focus();
+                            
+                            firstMixer.Maximise().Focus();
                         }
                     }
                 }
@@ -71,17 +70,31 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     {
                         BuildMixerLayout();
                     }
+                    else
+                    {
+                        if (this.windowsCollection.CountOfMixers() == 0)
+                        {
+                            // No mixers
+                            var mainCubaseWindow = this.windowsCollection.GetPrimaryWindow();
+                            if (mainCubaseWindow != null)
+                            {
+                                this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(mainCubaseWindow.Name)
+                                       .Maximise()
+                                       .Focus();
+                            }
+                        }
+                    }
                 }
             }
         }
-        
+
         public async Task<CubaseMixerCollection> GetMixer()
         {
             this.logger.LogInformation($"MixerService - Loading CubaseMixer Collection. The current Success flag is {this.cacheService.CubaseMixer.Success} with an error message of {this.cacheService.CubaseMixer.ErrorMessage}");
             await Task.Delay(1);
             return this.cacheService.CubaseMixer;
         }
-        
+
         public async Task<CubaseMixerCollection> MixerCommand(CubaseMixer cubaseMixer)
         {
             if (!string.IsNullOrEmpty(cubaseMixer.KeyAction))
@@ -129,6 +142,13 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerCollection, await GetMixer());
                 case CubaseMixerCommand.MixerCollection:
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerCollection, await GetMixer());
+                case CubaseMixerCommand.CloseMixers:
+                    var mixerWindows = this.cubaseWindowMonitor.GetMixerWindows();
+                    foreach (var mixer in mixerWindows)
+                    {
+                        mixer.Close();
+                    }
+                    return CubaseMixerResponse.Create(CubaseMixerCommand.CloseMixers);
                 default:
                     return CubaseMixerResponse.CreateError("Unknown Mixer command.");
             }
@@ -148,7 +168,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 var windowBits = mixerName.Split(' ');
                 if (windowBits.Length >= 2 && int.TryParse(windowBits[1], out int mixerNumber))
                 {
-                    switch (mixerNumber) 
+                    switch (mixerNumber)
                     {
                         case 2:
                             midiCommand = KnownCubaseMidiCommands.Mixer_2;
@@ -156,7 +176,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                         case 3:
                             midiCommand = KnownCubaseMidiCommands.Mixer_3;
                             break;
-                        case 4: 
+                        case 4:
                             midiCommand = KnownCubaseMidiCommands.Mixer_4;
                             break;
                     }
@@ -167,7 +187,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 if (currentMixerCount > 1)
                 {
                     BuildMixerLayout();
-                    this.FocusWindow(mixerName);
+                    // this.FocusWindow(mixerName);
                 }
                 else
                 {
@@ -199,50 +219,53 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
             // var taskBarSize = WindowManagerService.GetTaskBarSize();
 
-            primaryScreen.Left = primaryScreen.Left - border; 
+            primaryScreen.Left = primaryScreen.Left - border;
             primaryScreen.Right = primaryScreen.Right + (border * 2);
             // primaryScreen.Bottom = primaryScreen.Bottom - border;
 
             var currentTop = primaryScreen.Top;
             var currentLeft = primaryScreen.Left;
 
-            var heightPerWindow = mixerLayoutMode == MixerLayoutMode.ByHeight 
-                ? primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count 
+            var heightPerWindow = mixerLayoutMode == MixerLayoutMode.ByHeight
+                ? primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count
                 : primaryScreen.Height + border;
-            
-            var widthPerWindow = mixerLayoutMode == MixerLayoutMode.ByWidth 
+
+            var widthPerWindow = mixerLayoutMode == MixerLayoutMode.ByWidth
                 ? primaryScreen.Width / this.cubaseWindowMonitor.MixerConsoles.Count
                 : primaryScreen.Width;
 
-            this.cubaseWindowMonitor.MixerConsoles.ForEach((mixer) =>
-            {
-                var mixerWindow = this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(mixer);
-                if (mixerWindow != null)
-                {
-                    mixerWindow.Restore();
-                    // assume height is ok 
-                    var targetRect = new Rect()
-                    {
-                        Left = primaryScreen.Left,
-                        Top = currentTop,
-                        Right = primaryScreen.Right,
-                        Bottom = currentTop + heightPerWindow
-                    };
-                    
-                    if (mixerLayoutMode == MixerLayoutMode.ByWidth)
-                    {
-                        targetRect.Left = currentLeft;
-                        targetRect.Right = currentLeft + (widthPerWindow + border);
-                        targetRect.Top = primaryScreen.Top;
-                        targetRect.Bottom = primaryScreen.Bottom;
-                    }
+            var mixerWindows = this.cubaseWindowMonitor.GetMixerWindows();
 
-                    mixerWindow.WithPosition(targetRect)
-                               .SetPosition();
-                    currentTop += heightPerWindow;
-                    currentLeft += (widthPerWindow - border);
+            mixerWindows.ForEach((mixer) =>
+            {
+                // assume height is ok 
+                var targetRect = new Rect()
+                {
+                    Left = primaryScreen.Left,
+                    Top = currentTop,
+                    Right = primaryScreen.Right,
+                    Bottom = currentTop + heightPerWindow
+                };
+
+                if (mixerLayoutMode == MixerLayoutMode.ByWidth)
+                {
+                    targetRect.Left = currentLeft;
+                    targetRect.Right = currentLeft + (widthPerWindow + border);
+                    targetRect.Top = primaryScreen.Top;
+                    targetRect.Bottom = primaryScreen.Bottom;
                 }
+
+                mixer.WithPosition(targetRect)
+                                .SetPosition()
+                                .Refresh();
+                currentTop += heightPerWindow;
+                currentLeft += (widthPerWindow - border);
             });
+            if (mixerWindows.Count == 1)
+            {
+                mixerWindows[0].Maximise()
+                               .Focus();
+            }
         }
 
         private void FocusWindow(string windowName)

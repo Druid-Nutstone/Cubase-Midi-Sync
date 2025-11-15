@@ -67,18 +67,21 @@ namespace Cubase.Midi.Sync.UI
         
         protected override async void OnDisappearing()
         {
-            // todo - stop this from closing mixers - going to close via hwnd
-            // await this.OpenCloseMixer();
             base.OnDisappearing();
         }
 
         private async Task UpdateMixConsoles()
         {
             uiMixerCollection.Populate(this.cubaseActiveWindows);
+            if (this.cubaseActiveWindows.GetAllMixers().Count > 0)
+            {
+                currentMixerConsole = uiMixerCollection.FirstOrDefault(x => x.GetZOrder() == CubaseWindowZOrder.Focused)?.WindowTitle ?? string.Empty;
+            }
+
             foreach (var mixerButton in MixerConsoles.Children.OfType<Button>())
             {
                 var buttonText = mixerButton.Text;
-                var uimixer = this.uiMixerCollection.FirstOrDefault(x => x.Name == buttonText);
+                var uimixer = this.uiMixerCollection.FirstOrDefault(x => x.Name.Equals(mixerButton.Text, StringComparison.OrdinalIgnoreCase));
                 if (uimixer != null)
                 {
                     await MainThread.InvokeOnMainThreadAsync(() =>
@@ -124,7 +127,12 @@ namespace Cubase.Midi.Sync.UI
                 }, true);
                 MixerConsoles.Children.Add(button.Button);
             }
-            // todo - add close all mixers command 
+            var closeButton = RaisedButtonFactory.Create("Close Mixers", System.Drawing.Color.Firebrick.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) => 
+            {
+                await this.SendMidiCommand(CubaseMixerCommand.CloseMixers);
+                await this.Navigation.PopToRootAsync();
+            });
+            MixerConsoles.Children.Add(closeButton.Button);
         }
 
         private async Task InitialiseCustomCommands(List<CubaseCommandCollection> collections)

@@ -76,8 +76,20 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         [DllImport("dwmapi.dll")]
         private static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out Rect pvAttribute, int cbAttribute);
 
+        [DllImport("user32.dll")]
+        private static extern bool RedrawWindow(
+                IntPtr hWnd,
+                IntPtr lprcUpdate,
+                IntPtr hrgnUpdate,
+                uint flags
+        );
 
+        [DllImport("user32.dll")]
+        static extern bool PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
+        const uint RDW_INVALIDATE = 0x0001;
+        const uint RDW_UPDATENOW = 0x0100;
+        const uint RDW_ALLCHILDREN = 0x0080;
 
 
         private delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData);
@@ -133,7 +145,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         }
 
         //private const int SW_HIDE = 0;
-        //private const int SW_NORMAL = 1;
+        private const int SW_NORMAL = 1;
         //private const int SW_MINIMIZE = 6;
         //private const int SW_MAXIMIZE = 3;
 
@@ -187,6 +199,15 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             if (hWnd == IntPtr.Zero)
                 return;
             SetForegroundWindow(hWnd);
+        }
+
+        public static void RefreshWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+
+            RedrawWindow(hWnd, IntPtr.Zero, IntPtr.Zero,
+                RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
         }
 
         public static void MaximiseWindow(IntPtr hWnd)
@@ -266,6 +287,14 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return windows;
         }
         
+        public static void CloseWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            const int WM_CLOSE = 0x0010;
+            PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+        }
+
         public static Rect GetVisibleBounds(IntPtr hwnd)
         {
             DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out Rect rect, Marshal.SizeOf(typeof(Rect)));

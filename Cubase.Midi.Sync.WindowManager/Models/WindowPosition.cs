@@ -27,7 +27,7 @@ namespace Cubase.Midi.Sync.WindowManager.Models
 
         public Rect? Position { get; set; } = null;
 
-        public Rect? OriginalPosition { get; set; } = null;  
+        public Rect? OriginalPosition { get; set; } = null;
 
         public WindowPosition SetPosition()
         {

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Management;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         // --- Win32 imports ---
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumChildWindows(IntPtr hWnd, EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool IsWindowVisible(IntPtr hWnd);
@@ -62,6 +67,9 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
 
         [DllImport("user32.dll")]
         private static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+        
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("kernel32.dll")]
         private static extern uint FormatMessage(
@@ -287,6 +295,36 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return windows;
         }
         
+        public static List<(IntPtr Hwnd, string Title, string ClassName)> GetChildWindows(IntPtr parent)
+        {
+            var list = new List<(IntPtr, string, string)>();
+
+
+            EnumChildWindows(parent, (hWnd, _) =>
+            {
+                if (!IsWindowVisible(hWnd))
+                    return true;
+
+                StringBuilder classSb = new(256);
+                GetClassName(hWnd, classSb, classSb.Capacity);
+                string className = classSb.ToString();
+
+                int length = GetWindowTextLength(hWnd);
+                string title = string.Empty;
+                if (length > 0)
+                {
+                    StringBuilder sb = new(length + 2);
+                    GetWindowText(hWnd, sb, sb.Capacity);
+                    title = sb.ToString();
+                }
+                list.Add((hWnd, title, className));
+                return true;
+
+            }, IntPtr.Zero);
+
+            return list;
+        }
+
         public static void CloseWindow(IntPtr hWnd)
         {
             if (hWnd == IntPtr.Zero)

@@ -1,10 +1,12 @@
-﻿using Cubase.Midi.Sync.WindowManager.Models;
+﻿using Cubase.Midi.Sync.Server.Constants;
+using Cubase.Midi.Sync.WindowManager.Models;
 using Cubase.Midi.Sync.WindowManager.Services.Cubase;
 using Cubase.Midi.Sync.WindowManager.Services.Win;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +15,34 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
     [TestClass]
     public class WindowManagerTests
     {
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
+        public const uint GW_OWNER = 4;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumChildWindows(IntPtr hWnd, EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
         private string testFileName = "C:\\deleteme\\testwindows.json";
         
         [TestMethod]
@@ -21,6 +51,59 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
             var handle = WindowManagerService.FindWindowByTitle("Cubase Version");
         }
 
+        [TestMethod] 
+        public void Can_Enum_Cubase()
+        {
+            var cubaseMain = WindowManagerService.FindWindowByTitle("Cubase Pro Project");
+
+            // Get Cubase PID
+            _ = GetWindowThreadProcessId(cubaseMain.Value, out uint cubasePid);
+
+            var results = new List<(IntPtr Hwnd, string Title, string Class)>();
+
+            // 1. Get ALL top-level windows belonging to Cubase.exe
+            EnumWindows((hWnd, _) =>
+            {
+                _ = (nint)GetWindowThreadProcessId(hWnd, out uint pid);
+                if (pid != cubasePid)
+                    return true;
+
+                // Now scan ALL children recursively
+                EnumChildWindows(hWnd, (child, _) =>
+                {
+                    StringBuilder cls = new(256);
+                    GetClassName(child, cls, cls.Capacity);
+                    string className = cls.ToString();
+
+                    int len = GetWindowTextLength(child);
+                    StringBuilder sb = new(len + 1);
+                    GetWindowText(child, sb, sb.Capacity);
+                    string title = sb.ToString();
+
+                    results.Add((child, title, className));
+                    return true;
+
+                }, IntPtr.Zero);
+
+                return true;
+            }, IntPtr.Zero);
+
+            var r = results;
+        }
+
+        [TestMethod]
+        public void Can_Get_Cubase_Children()
+        {
+            var cubase = WindowManagerService.FindWindowByTitle("Cubase Pro Project");
+            var childeren = WindowManagerService.GetChildWindows(cubase.Value);
+            foreach (var child in childeren)
+            {
+                var txt = child.Title;
+                var hwnd = child.Hwnd;
+                var className = child.ClassName;
+                var evenMore = WindowManagerService.GetChildWindows(hwnd);
+            }
+        }
 
 
         [TestMethod]

@@ -59,7 +59,6 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                             var windowTitle = title.ToString();
                             var windowPosition = WindowPosition.Create(windowTitle, hwnd)
                                                                .WithWindowType(windowTitle.Contains("Cubase Pro Project", StringComparison.OrdinalIgnoreCase) ? WindowType.Primary : WindowType.Transiant);
-
                             cubaseWindowCollection.WithWindowPosition(windowPosition)
                                                   .SetCurrentPosition(hwnd, windowTitle);
 

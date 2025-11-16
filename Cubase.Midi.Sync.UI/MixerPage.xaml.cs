@@ -133,6 +133,13 @@ namespace Cubase.Midi.Sync.UI
                 await this.Navigation.PopToRootAsync();
             });
             MixerConsoles.Children.Add(closeButton.Button);
+            var projectButton = RaisedButtonFactory.Create("Project Window", System.Drawing.Color.DarkBlue.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
+            {
+                await this.SendMidiCommand(CubaseMixerCommand.ProjectWindow);
+                await Navigation.PopToRootAsync();
+            });
+            MixerConsoles.Children.Add(projectButton.Button);
+
         }
 
         private async Task InitialiseCustomCommands(List<CubaseCommandCollection> collections)
@@ -241,7 +248,7 @@ namespace Cubase.Midi.Sync.UI
             }
             else
             {
-                // focus mixers and move them based on number of mixers   
+                await this.SendMidiCommand(CubaseMixerCommand.RestoreMixers);
             }
             return await this.webSocketResponse.GetMixer();
 

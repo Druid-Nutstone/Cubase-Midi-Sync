@@ -31,6 +31,8 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
+        private bool mixersEnabled = false;
+
         public MixerService(ILogger<MixerService> logger,
                             ICacheService cacheService,
                             IMidiService midiService,
@@ -50,6 +52,10 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
         private void CubaseWindowsEvent(CubaseActiveWindowCollection cubaseActiveWindows)
         {
             this.windowsCollection = cubaseActiveWindows;
+            if (mixersEnabled == false)
+            {
+                return;
+            }
             if (this.windowsCollection.HaveAnyMixers())
             {
                 if (this.cubaseWindowMonitor.GetMixerWindows().Count == 1)
@@ -115,6 +121,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         public async Task<CubaseMixerResponse> MixerRequest(CubaseMixerRequest cubaseMixerRequest)
         {
+            this.mixersEnabled = true;
             switch (cubaseMixerRequest.Command)
             {
                 case CubaseMixerCommand.FocusMixer:
@@ -140,15 +147,35 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 case CubaseMixerCommand.OpenMixer:
                     await this.AddOrFocusMixer(cubaseMixerRequest.TargetMixer ?? string.Empty);
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerCollection, await GetMixer());
+                case CubaseMixerCommand.RestoreMixers:
+                    BuildMixerLayout();
+                    return CubaseMixerResponse.Create(CubaseMixerCommand.RestoreMixers);
                 case CubaseMixerCommand.MixerCollection:
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerCollection, await GetMixer());
                 case CubaseMixerCommand.CloseMixers:
+                    this.mixersEnabled = false;
                     var mixerWindows = this.cubaseWindowMonitor.GetMixerWindows();
                     foreach (var mixer in mixerWindows)
                     {
                         mixer.Close();
                     }
                     return CubaseMixerResponse.Create(CubaseMixerCommand.CloseMixers);
+                case CubaseMixerCommand.ProjectWindow:
+                    this.mixersEnabled = false;
+                    var mainCubaseWindow = this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow();
+
+                    if (mainCubaseWindow != null)
+                    {
+                        this.cubaseWindowMonitor.CubaseWindows
+                                       .GetActiveWindows()
+                                       .Where(w => w.Name.StartsWith("MixConsole"))
+                                       .ToList()
+                                       .ForEach(w => w.Minimise());
+
+                        mainCubaseWindow.Maximise()
+                                        .Focus();
+                    }
+                    return CubaseMixerResponse.Create(CubaseMixerCommand.ProjectWindow);
                 default:
                     return CubaseMixerResponse.CreateError("Unknown Mixer command.");
             }
@@ -238,6 +265,11 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
             mixerWindows.ForEach((mixer) =>
             {
+                if (mixer.State == WindowManager.Models.WindowState.Minimized)
+                {
+                    mixer.Restore();
+                }
+
                 // assume height is ok 
                 var targetRect = new Rect()
                 {

@@ -33,6 +33,8 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private bool mixersEnabled = false;
 
+        private MixerOrientation currentOrientation = MixerOrientation.Auto;
+
         public MixerService(ILogger<MixerService> logger,
                             ICacheService cacheService,
                             IMidiService midiService,
@@ -65,8 +67,9 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     {
                         if (firstMixer.State != WindowManager.Models.WindowState.Maximized)
                         {
-                            
-                            firstMixer.Maximise().Focus();
+                            this.logger.LogInformation("Setting focus to the first mixer window.");
+                            firstMixer.Maximise()
+                                     .Focus();
                         }
                     }
                 }
@@ -97,7 +100,6 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
         public async Task<CubaseMixerCollection> GetMixer()
         {
             this.logger.LogInformation($"MixerService - Loading CubaseMixer Collection. The current Success flag is {this.cacheService.CubaseMixer.Success} with an error message of {this.cacheService.CubaseMixer.ErrorMessage}");
-            await Task.Delay(1);
             return this.cacheService.CubaseMixer;
         }
 
@@ -124,6 +126,10 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
             this.mixersEnabled = true;
             switch (cubaseMixerRequest.Command)
             {
+                case CubaseMixerCommand.Orientation:
+                    this.currentOrientation = cubaseMixerRequest.Orientation;
+                    BuildMixerLayout();
+                    return CubaseMixerResponse.Create(CubaseMixerCommand.Orientation);
                 case CubaseMixerCommand.FocusMixer:
                     this.FocusWindow(cubaseMixerRequest.TargetMixer ?? this.cubaseWindowMonitor.MixerConsoles.First());
                     return CubaseMixerResponse.Create(CubaseMixerCommand.FocusMixer);
@@ -242,7 +248,13 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 .OrderByDescending(r => (long)r.Width * r.Height)
                 .FirstOrDefault();
 
-            var mixerLayoutMode = primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count < minMixerHeight ? MixerLayoutMode.ByWidth : MixerLayoutMode.ByHeight;
+            MixerLayoutMode mixerLayoutMode = primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count < minMixerHeight ? MixerLayoutMode.ByWidth : MixerLayoutMode.ByHeight;
+
+            if (this.currentOrientation != MixerOrientation.Auto)
+            {
+                // primaryScreen.Bottom = primaryScreen.Top + (minMixerHeight * this.cubaseWindowMonitor.MixerConsoles.Count) + border;
+                mixerLayoutMode = this.currentOrientation == MixerOrientation.Vertical ? MixerLayoutMode.ByWidth : MixerLayoutMode.ByHeight;    
+            }
 
             // var taskBarSize = WindowManagerService.GetTaskBarSize();
 
@@ -287,17 +299,15 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     targetRect.Bottom = primaryScreen.Bottom;
                 }
 
-                mixer.WithPosition(targetRect)
-                                .SetPosition()
-                                .Refresh();
+                mixer.RestoreResize(targetRect).Refresh();
                 currentTop += heightPerWindow;
                 currentLeft += (widthPerWindow - border);
             });
-            if (mixerWindows.Count == 1)
-            {
-                mixerWindows[0].Maximise()
-                               .Focus();
-            }
+            //if (mixerWindows.Count == 1)
+            //{
+            //    mixerWindows[0].Maximise()
+            //                   .Focus();
+            //}
         }
 
         private void FocusWindow(string windowName)

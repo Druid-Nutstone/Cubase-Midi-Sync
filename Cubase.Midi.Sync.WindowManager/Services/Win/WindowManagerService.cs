@@ -105,6 +105,10 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         [DllImport("user32.dll")]
         private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumDelegate lpfnEnum, IntPtr dwData);
 
+
+        [DllImport("user32.dll")]
+        static extern bool SetWindowPlacement(IntPtr hWnd, [In] ref WINDOWPLACEMENT lpwndpl);
+
         private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
         private const uint FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
         private static readonly IntPtr HWND_TOP = IntPtr.Zero;
@@ -120,6 +124,14 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         private const int ABM_GETTASKBARPOS = 0x00000005;
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct APPBARDATA
@@ -200,6 +212,26 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
                 ShowWindow(hWnd, SW_RESTORE);
                 SetForegroundWindow(hWnd);
             }
+        }
+
+        public static void RestoreResizeWindow(IntPtr hWnd, int x, int y, int width, int height)
+        {
+            WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
+            wp.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
+
+            GetWindowPlacement(hWnd, ref wp);
+
+            // Restore
+            wp.showCmd = 1; // SW_SHOWNORMAL
+
+            // Position in rcNormalPosition
+            wp.rcNormalPosition.Left = x;
+            wp.rcNormalPosition.Top = y;
+            wp.rcNormalPosition.Right = x + width;
+            wp.rcNormalPosition.Bottom = y + height;
+
+            // Atomic apply – no flicker
+            SetWindowPlacement(hWnd, ref wp);
         }
 
         public static void FocusWindow(IntPtr hWnd)

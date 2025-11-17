@@ -52,6 +52,12 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this;
         }
 
+        public WindowPosition RestoreResize(Rect rect)
+        {
+            WindowManagerService.RestoreResizeWindow(this.Hwnd, rect.Left, rect.Top, rect.Width, rect.Height);
+            return this;
+        }
+
         public WindowPosition Refresh()
         {
             WindowManagerService.RefreshWindow(this.Hwnd);

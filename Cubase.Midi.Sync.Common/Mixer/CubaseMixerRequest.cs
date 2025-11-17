@@ -12,6 +12,8 @@ namespace Cubase.Midi.Sync.Common.Mixer
     {
         public CubaseMixerCommand Command { get; set; }
 
+        public MixerOrientation Orientation { get; set; } = MixerOrientation.Auto;
+
         public string TargetMixer { get; set; } 
 
         public string DataAsString { get; set; }
@@ -23,6 +25,15 @@ namespace Cubase.Midi.Sync.Common.Mixer
                 return default(T);
             }
             return JsonSerializer.Deserialize<T>(DataAsString.FromWebSocketDeserialise());
+        }
+
+        public static CubaseMixerRequest CreateOrientation(MixerOrientation orientation)
+        {
+            return new CubaseMixerRequest
+            {
+                Command = CubaseMixerCommand.Orientation,
+                Orientation = orientation
+            };
         }
 
         public static CubaseMixerRequest Create(CubaseMixerCommand command)
@@ -62,6 +73,14 @@ namespace Cubase.Midi.Sync.Common.Mixer
         CloseMixers = 4,
         ProjectWindow = 5,
         RestoreMixers = 6,
+        Orientation = 7,
         Error = 99,
+    }
+
+    public enum MixerOrientation
+    {
+        Auto = 0,
+        Vertical = 1,
+        Horizontal = 2,
     }
 }

@@ -127,18 +127,27 @@ namespace Cubase.Midi.Sync.UI
                 }, true);
                 MixerConsoles.Children.Add(button.Button);
             }
-            var closeButton = RaisedButtonFactory.Create("Close Mixers", System.Drawing.Color.Firebrick.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) => 
+            var closeButton = RaisedButtonFactory.Create("Close", System.Drawing.Color.Firebrick.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) => 
             {
                 await this.SendMidiCommand(CubaseMixerCommand.CloseMixers);
                 await this.Navigation.PopToRootAsync();
             });
             MixerConsoles.Children.Add(closeButton.Button);
-            var projectButton = RaisedButtonFactory.Create("Project Window", System.Drawing.Color.DarkBlue.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
+            var projectButton = RaisedButtonFactory.Create("Project", System.Drawing.Color.DarkBlue.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
             {
                 await this.SendMidiCommand(CubaseMixerCommand.ProjectWindow);
                 await Navigation.PopToRootAsync();
             });
             MixerConsoles.Children.Add(projectButton.Button);
+            var orientationButton = RaisedButtonFactory.Create("Vertical", System.Drawing.Color.DarkOrange.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
+            {
+                var but = (Button)s;
+
+                var orientation = but.Text.Equals("Vertical", StringComparison.OrdinalIgnoreCase) ? MixerOrientation.Vertical : MixerOrientation.Horizontal;
+                but.Text = orientation == MixerOrientation.Vertical ? "Horizontal" : "Vertical";
+                await SendOrientation(orientation);
+            });
+            MixerConsoles.Children.Add(orientationButton.Button);
 
         }
 
@@ -257,6 +266,13 @@ namespace Cubase.Midi.Sync.UI
         private async Task SendMidiCommand(CubaseMixerCommand cubaseMixerCommand, string? targetMixer = null, object? data = null)
         {
             var mixerRequest = CubaseMixerRequest.Create(cubaseMixerCommand, data, targetMixer);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.Mixer, mixerRequest);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+        }
+
+        private async Task SendOrientation(MixerOrientation mixerOrientation)
+        {
+            var mixerRequest = CubaseMixerRequest.CreateOrientation(mixerOrientation);
             var socketMessage = WebSocketMessage.Create(WebSocketCommand.Mixer, mixerRequest);
             var response = await this.webSocketClient.SendMidiCommand(socketMessage);
         }

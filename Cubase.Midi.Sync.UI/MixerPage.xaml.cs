@@ -170,13 +170,16 @@ namespace Cubase.Midi.Sync.UI
 
             foreach (var command in customCommands)
             {
-                var button = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
+                var customButton = RaisedButtonFactory.Create(command.Name, command.ButtonBackgroundColour, command.ButtonTextColour, async (s, e) =>
                 {
                     try
                     {
                         var button = (Button)s;
 
-                        command.IsToggled = !command.IsToggled;
+                        if (command.ButtonType == CubaseButtonType.MacroToggle || command.ButtonType == CubaseButtonType.MacroToggle)
+                        {
+                            command.IsToggled = !command.IsToggled;
+                        }
                         CubaseActionResponse response = null;
                         if (command.IsMacro)
                         {
@@ -193,8 +196,8 @@ namespace Cubase.Midi.Sync.UI
                         await DisplayAlert("Error MixerPage InitialiseCustomCommands", ex.Message, "OK");
                     }
                 }, command.IsToggleButton);
-                this.SetButtonState(button.Button, command);
-                CustomCommands.Children.Add(button.Button);
+                this.SetButtonState(customButton.Button, command);
+                CustomCommands.Children.Add(customButton.Button);
             }
         }
 

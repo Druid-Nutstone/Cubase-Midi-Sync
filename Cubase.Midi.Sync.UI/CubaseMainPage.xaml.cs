@@ -41,7 +41,7 @@ public partial class CubaseMainPage : ContentPage
         basePage.AddToolbars(this);
         this.client = client;
         CollectionsLayout.Clear();
-
+        midiWebSocketResponse.RegisterForSystemMessages(this.ProcessSystemError);
         //this.serverAvailable = this.client.CanConnectToServer();
         //if (!this.serverAvailable)
         //{
@@ -65,8 +65,6 @@ public partial class CubaseMainPage : ContentPage
         base.OnAppearing();
         if (this.appSettings.Connect)
         {
-
-
             if (loaded) return;
             SetSpinner(true);
             var webSocketState = await this.webSocketClient.ConnectAsync();
@@ -95,6 +93,32 @@ public partial class CubaseMainPage : ContentPage
         await LoadCommands();
         loaded = true;
         SetSpinner(false);
+    }
+
+    private async Task ProcessSystemError(WebSocketCommand webSocketCommand)
+    {
+        switch (webSocketCommand)
+        {
+            case WebSocketCommand.ServerClosed:
+                await DisplayAlert("Cubase Server Closed", "The Cubase Midi Sync server has closed the connection.", "OK");
+                CollectionsLayout.Children.Clear();
+                break;
+            case WebSocketCommand.CubaseNotReady:
+                CollectionsLayout.Children.Clear();
+                CollectionsLayout.Children.Add(new Label
+                {
+                    Text = "Cubase Not Ready",
+                    TextColor = Colors.Red,
+                    FontSize = 20,
+                    FontAttributes = FontAttributes.Bold,
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                });
+                break;
+            case WebSocketCommand.CubaseReady:
+                await Reload();
+                break;
+        }
     }
 
     private async Task LoadCommands()

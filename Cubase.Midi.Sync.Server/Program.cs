@@ -1,4 +1,5 @@
 using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
@@ -62,7 +63,7 @@ builder.Services
       .AddSingleton<ICacheService, CacheService>()  
       .AddSingleton<IMixerService, MixerService>()
       .AddSingleton<ICubaseWindowMonitor, CubaseWindowMonitor>()
-      .AddSingleton<WebSocketServer>() 
+      .AddSingleton<IWebSocketServer, WebSocketServer>() 
       .AddKeyedSingleton<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
       .AddKeyedSingleton<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
 
@@ -103,24 +104,32 @@ midi.Initialise();
 var cache = app.Services.GetRequiredService<ICacheService>();
 cache.Initialise();
 
+// Call Configure explicitly on the built app
+var wsServer = app.Services.GetRequiredService<IWebSocketServer>();
+wsServer.Configure(app);
+
+
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
     midi.Dispose();
+    SendClosingMessage(wsServer);
 });
 
 
-// Call Configure explicitly on the built app
-var wsServer = app.Services.GetRequiredService<WebSocketServer>();
-wsServer.Configure(app);
 
 AppDomain.CurrentDomain.ProcessExit += (_, __) =>
 {
     midi.Dispose();
+    SendClosingMessage(wsServer);
 };
 
 app.Run();
 
+static void SendClosingMessage(IWebSocketServer socketServer)
+{
+    socketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.ServerClosed, "Server is shutting down"));
+}
 
 static void RestartTeVirtualMidi()
 {

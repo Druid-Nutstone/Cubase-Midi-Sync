@@ -1,5 +1,7 @@
 ﻿
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Constants;
+using Cubase.Midi.Sync.Server.Services.WebSockets;
 using Cubase.Midi.Sync.WindowManager.Models;
 using Cubase.Midi.Sync.WindowManager.Services.Win;
 using System.Diagnostics;
@@ -13,9 +15,14 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         private readonly ICubaseWindowMonitor cubaseWindowMonitor;
 
-        public CubaseWindowsBackgroundService(ILogger<CubaseWindowsBackgroundService> logger, ICubaseWindowMonitor cubaseWindowMonitor)
+        private readonly IWebSocketServer webSocketServer;
+
+        public CubaseWindowsBackgroundService(ILogger<CubaseWindowsBackgroundService> logger, 
+                                              ICubaseWindowMonitor cubaseWindowMonitor,
+                                              IWebSocketServer webSocketServer)
         {
             this.logger = logger;
+            this.webSocketServer = webSocketServer;
             this.cubaseWindowMonitor = cubaseWindowMonitor;
         }
 
@@ -34,16 +41,22 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         private async Task Monitorcubasewindows(CancellationToken stoppingToken)
         {
-
+            var statusChange = false;
             while (!stoppingToken.IsCancellationRequested)
             {
-
+                var cubaseIsRunning = true;
                 var cubaseWindowCollection = WindowPositionCollection.Create("Cubase Windows");
 
                 var cubase = Process.GetProcessesByName(CubaseServerConstants.CubaseExeName).FirstOrDefault();
                 if (cubase == null)
                 {
-                    this.logger.LogError("Cubase is not running");
+
+                    if (cubaseIsRunning)
+                    {
+                        this.logger.LogError("Cubase is not running");
+                        this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady));
+                        cubaseIsRunning = false;
+                    }
                 }
                 else
                 {
@@ -58,18 +71,45 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                             WindowManagerService.GetWindowText(hwnd, title, title.Capacity);
                             var windowTitle = title.ToString();
                             var windowPosition = WindowPosition.Create(windowTitle, hwnd)
-                                                               .WithWindowType(windowTitle.Contains("Cubase Pro Project", StringComparison.OrdinalIgnoreCase) ? WindowType.Primary : WindowType.Transiant);
+                                                               .WithWindowType(this.GetwindowTypeFromTitle(windowTitle));
                             cubaseWindowCollection.WithWindowPosition(windowPosition)
                                                   .SetCurrentPosition(hwnd, windowTitle);
 
                         }
                     }
                 }
+                if (cubaseWindowCollection.GetPrimaryWindow() == null)
+                {
+                    this.logger.LogWarning("No primary Cubase window found.");
+                    this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady));
+                    statusChange = false;
+                }
+                else
+                {
+                    if (!statusChange)
+                    {
+                        this.logger.LogInformation("Cubase is running and primary window found.");
+                        this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseReady));
+                        statusChange = true;
+                    }
+                }
                 this.cubaseWindowMonitor?.CubaseWindowEvent(cubaseWindowCollection);
-                await Task.Delay(500);
+                await Task.Delay(200);
 
             };
         }
 
+        private WindowType GetwindowTypeFromTitle(string title)
+        {
+            if (title.StartsWith("Cubase Pro Project", StringComparison.OrdinalIgnoreCase) ||
+                title.StartsWith("Cubase Artist", StringComparison.OrdinalIgnoreCase) ||
+                title.StartsWith("Cubase LE", StringComparison.OrdinalIgnoreCase) ||
+                title.StartsWith("Cubase Version", StringComparison.OrdinalIgnoreCase) ||
+                title.StartsWith("Cubase Elements", StringComparison.OrdinalIgnoreCase))  
+            {
+                return WindowType.Primary;
+            }
+            return WindowType.Transiant;
+        }
     }
 }

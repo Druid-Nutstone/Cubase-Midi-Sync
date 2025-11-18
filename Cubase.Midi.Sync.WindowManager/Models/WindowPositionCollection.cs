@@ -48,7 +48,7 @@ namespace Cubase.Midi.Sync.WindowManager.Models
 
         public WindowPosition GetPrimaryWindow()
         {
-            return this.First(x => x.Type == WindowType.Primary);   
+            return this.FirstOrDefault(x => x.Type == WindowType.Primary);   
         }
 
         public WindowPosition GetWindowByName(string name)

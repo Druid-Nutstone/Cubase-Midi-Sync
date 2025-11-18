@@ -53,6 +53,7 @@ namespace Cubase.Midi.Sync.UI
             this.serviceProvider = serviceProvider;
             this.webSocketClient = webSocketClient;
             this.webSocketResponse = midiWebSocketResponse;
+            this.webSocketResponse.RegisterForSystemMessages(this.OnSystemError);
             this.midiWebSocketResponse = midiWebSocketResponse;
             this.midiWebSocketResponse.RegisterCubaseWindowHandler(this.OnCubaseWindowChanges);
             BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
@@ -68,6 +69,14 @@ namespace Cubase.Midi.Sync.UI
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
+        }
+
+        private async Task OnSystemError(WebSocketCommand command)
+        {
+            if (command == WebSocketCommand.CubaseNotReady || command == WebSocketCommand.ServerClosed)
+            {
+                await Navigation.PopToRootAsync();
+            }
         }
 
         private async Task UpdateMixConsoles()

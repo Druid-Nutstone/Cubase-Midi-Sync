@@ -22,10 +22,21 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         private readonly List<Func<CubaseActiveWindowCollection, Task>> registeredWindowEventHandlers
             = new();
 
+        private readonly List<Func<WebSocketCommand, Task>> registeredSystemMessageHandlers
+            = new();
+
         public async Task ProcessWebSocket(WebSocketMessage request)
         {
             switch (request.Command)
             {
+                case WebSocketCommand.ServerClosed:
+                case WebSocketCommand.CubaseReady:
+                case WebSocketCommand.CubaseNotReady: 
+                    foreach (var systemMessageHandler in this.registeredSystemMessageHandlers)
+                    {
+                        await systemMessageHandler(request.Command);
+                    }
+                    break;
                 case WebSocketCommand.Commands:
                     this.commands = request.GetMessage<CubaseCommandsCollection>();
                     break;
@@ -74,6 +85,14 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         public void RegisterForErrors(Func<string, Task> errorHandler)
         {
             this.errorHandler = errorHandler;
+        }
+
+        public void RegisterForSystemMessages(Func<WebSocketCommand, Task> systemMessageHandler)
+        {
+            if (!this.registeredSystemMessageHandlers.Contains(systemMessageHandler))
+            {
+                this.registeredSystemMessageHandlers.Add(systemMessageHandler);
+            }
         }
 
         public void RegisterCubaseWindowHandler(Func<CubaseActiveWindowCollection, Task> windowHander)

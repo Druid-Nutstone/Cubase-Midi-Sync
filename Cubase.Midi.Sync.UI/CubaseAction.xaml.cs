@@ -48,7 +48,8 @@ public partial class CubaseAction : ContentPage
         InitializeComponent();
         this.commands = commands;
         this.client = client;
-        this.webSocketResponse = webSocketResponse; 
+        this.webSocketResponse = webSocketResponse;
+        this.webSocketResponse.RegisterForSystemMessages(this.OnSystemError);
         this.commandsCollection = commandsCollection;   
         this.webSocketClient = webSocketClient;
         this.internalCommands = new Dictionary<InternalCommandType, Action<InternalCommand>>()
@@ -64,6 +65,14 @@ public partial class CubaseAction : ContentPage
     private async Task OnError(string message)
     {
         await DisplayAlert("Error CubaseAction", message, "OK");
+    }
+
+    private async Task OnSystemError(WebSocketCommand command)
+    {
+        if (command == WebSocketCommand.CubaseNotReady || command == WebSocketCommand.ServerClosed)
+        {
+            await Navigation.PopToRootAsync();
+        }
     }
 
     private void LoadCommand()

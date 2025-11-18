@@ -36,13 +36,15 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
     // WebSocketServer no longer tries to resolve WebApplication from IServiceProvider.
     // It exposes a Configure method that Program.cs calls with the real `app`.
-    public class WebSocketServer
+    public class WebSocketServer : IWebSocketServer
     {
         private readonly ILogger<WebSocketServer> _logger;
         private readonly IServiceProvider _services;
         private readonly ICubaseService cubaseService;
         private readonly IMidiService midiService;
         private readonly ICubaseWindowMonitor cubaseWindowMonitor;
+
+        private List<WebSocket> _sockets = new List<WebSocket>();
 
         public WebSocketServer(ILogger<WebSocketServer> logger, 
                                IServiceProvider services, 
@@ -55,6 +57,23 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
             this.midiService = midiService;
             this.cubaseService = cubaseService;
             this.cubaseWindowMonitor = cubaseWindowMonitor; 
+        }
+
+        public void BroadcastMessage(WebSocketMessage message)
+        {
+            var messageBytes = Encoding.UTF8.GetBytes(message.Serialise());
+            var messageSegment = new ArraySegment<byte>(messageBytes);
+            foreach (var ws in _sockets.ToList())
+            {
+                if (ws.State == WebSocketState.Open)
+                {
+                    ws.SendAsync(messageSegment, WebSocketMessageType.Text, true, CancellationToken.None).Wait();
+                }
+                else
+                {
+                    _sockets.Remove(ws);
+                }
+            }
         }
 
         // Call this from Program.cs: wsServer.Configure(app);
@@ -78,6 +97,7 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                         }
 
                         ws = await context.WebSockets.AcceptWebSocketAsync();
+                        this._sockets.Add(ws);
                         _logger.LogInformation("WebSocket connected from {ip}", context.Connection.RemoteIpAddress);
 
                         var buffer = new byte[1024 * 10];
@@ -125,6 +145,10 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                                 // var response = Encoding.UTF8.GetBytes("ACK: " + message);
                                 await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(responseMessage.Serialise())), WebSocketMessageType.Text, true, ct);
                             }
+                        }
+                        if (ct.IsCancellationRequested)
+                        {
+                            _logger.LogInformation("WebSocket connection cancelled.");
                         }
                     }
                     catch (Exception ex)

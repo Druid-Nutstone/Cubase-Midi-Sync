@@ -30,7 +30,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         {
             try
             {
-                var url = $"ws://{appSettings.CubaseConnection.Host}:{appSettings.CubaseConnection.Port}/ws/midi";
+                var connection = appSettings.CubaseConnection.First(x => x.Name.Equals(appSettings.ActiveConnection, StringComparison.OrdinalIgnoreCase));
+                var url = $"ws://{connection.Host}:{connection.Port}/ws/midi";
                 await _ws.ConnectAsync(new Uri(url), CancellationToken.None);
                 _ = ReceiveLoop(); // Start receiving in background
                 return WebSocketMessage.Create(WebSocketCommand.Connected);

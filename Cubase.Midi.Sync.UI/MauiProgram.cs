@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 
 
@@ -40,11 +41,16 @@ namespace Cubase.Midi.Sync.UI
             string fileName = $"appsettings.{environment}.json";
             string writablePath = Path.Combine(FileSystem.AppDataDirectory, fileName);
 
-            if (!File.Exists(writablePath))
+            void WriteAppSettings()
             {
                 using var assetStream = FileSystem.OpenAppPackageFileAsync(fileName).Result;
                 using var destStream = File.Create(writablePath);
                 assetStream.CopyTo(destStream);
+            }
+            
+            if (!File.Exists(writablePath))
+            {
+                WriteAppSettings();
             }
 
             // Always read from writable path
@@ -67,6 +73,14 @@ namespace Cubase.Midi.Sync.UI
             AppSettings appSettings;
             appSettings = new AppSettings();
             config.Bind(appSettings); // This now works because of the using above
+
+            if (appSettings.CubaseConnection.Count == 0)
+            {
+                File.Delete(writablePath);
+                WriteAppSettings();
+                appSettings = new AppSettings();
+                config.Bind(appSettings);
+            }
 
             builder.Services.AddSingleton<ICubaseHttpClient, CubaseHttpClient>()
                             .AddSingleton<IMidiWebSocketClient, MidiWebSocketClient>() 

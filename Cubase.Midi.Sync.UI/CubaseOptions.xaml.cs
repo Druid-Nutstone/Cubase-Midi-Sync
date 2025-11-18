@@ -49,13 +49,30 @@ public partial class CubaseOptions : ContentPage
 
     private void TargetIPAddress_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        this.appSettings.CubaseConnection.Host = this.TargetIPAddress.Text;
-        this.FullHost.Text = this.appSettings.CubaseConnection.BaseUrl;
+        this.GetActiveConnection().Host = this.TargetIPAddress.Text;
+        this.FullHost.Text = this.GetActiveConnection().BaseUrl;
     }
 
     private void Initialise()
     {
+        this.TargetIPAddress.Text = this.GetActiveConnection().Host;
+        this.InitialiseComponents();
+    }
 
-        this.TargetIPAddress.Text = this.appSettings.CubaseConnection.Host;
+    private CubaseConnection GetActiveConnection()
+    {
+        return this.appSettings.CubaseConnection.First(x => x.Name.Equals(this.appSettings.ActiveConnection, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void InitialiseComponents()
+    {
+        ActiveConnections.ItemsSource = this.appSettings.CubaseConnection.Select(x => x.Name).ToList();
+        ActiveConnections.SelectedIndexChanged += ActiveConnections_SelectedIndexChanged; ;       
+    }
+
+    private void ActiveConnections_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        this.appSettings.ActiveConnection = ActiveConnections.SelectedItem.ToString() ?? string.Empty;
+        this.TargetIPAddress.Text = this.GetActiveConnection().Host;
     }
 }

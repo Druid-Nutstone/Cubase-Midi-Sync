@@ -22,7 +22,8 @@ namespace Cubase.Midi.Sync.UI.CubaseService.NutstoneClient
         public CubaseHttpClient(AppSettings appSettings)
         {
             this.appSettings = appSettings;
-            this.BaseAddress = new Uri(appSettings.CubaseConnection.BaseUrl);
+            var connection = appSettings.CubaseConnection.First(x => x.Name.Equals(appSettings.ActiveConnection, StringComparison.OrdinalIgnoreCase));
+            this.BaseAddress = new Uri(connection.BaseUrl);
         }
 
         public string GetBaseConnection()

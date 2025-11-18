@@ -63,19 +63,29 @@ public partial class CubaseMainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (loaded) return;
-        SetSpinner(true);
-        var webSocketState = await this.webSocketClient.ConnectAsync();
-        if (webSocketState.Command == Common.WebSocket.WebSocketCommand.Connected)
+        if (this.appSettings.Connect)
         {
-            await LoadCommands();
-            loaded = true;
-            SetSpinner(false);
+
+
+            if (loaded) return;
+            SetSpinner(true);
+            var webSocketState = await this.webSocketClient.ConnectAsync();
+            if (webSocketState.Command == Common.WebSocket.WebSocketCommand.Connected)
+            {
+                await LoadCommands();
+                loaded = true;
+                SetSpinner(false);
+            }
+            else
+            {
+                var activeconnection = this.appSettings.CubaseConnection.First(x => x.Name.Equals(this.appSettings.ActiveConnection, StringComparison.OrdinalIgnoreCase));
+                await DisplayAlert($"Cannot connect to {activeconnection.Host}:{activeconnection.Port}", webSocketState.Message, "OK");
+                SetSpinner(false);
+            }
         }
         else
         {
-            await DisplayAlert($"Cannot connect to {this.appSettings.CubaseConnection.Host}:{this.appSettings.CubaseConnection.Port}", webSocketState.Message, "OK");
-            SetSpinner(false);
+            await DisplayAlert("Oops","Appsettings connect is set to false. so not connecting", "OK");
         }
     }
 

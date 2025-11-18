@@ -10,7 +10,12 @@
             FontSize="18"
             TextColor="White"
             HorizontalOptions="Start" />
-
+        <Picker
+        x:Name="ActiveConnections"
+        Title="Select the connection"
+        HorizontalOptions="Fill"
+        BackgroundColor="White"
+        TextColor="Black" />
         <Entry 
             x:Name="TargetIPAddress"
             Placeholder="192.168.x.x"

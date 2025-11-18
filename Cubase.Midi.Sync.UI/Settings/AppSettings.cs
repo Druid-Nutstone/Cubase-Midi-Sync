@@ -8,12 +8,19 @@ namespace Cubase.Midi.Sync.UI.Settings
 {
     public class AppSettings
     {
-        public CubaseConnection CubaseConnection { get; set; } = new CubaseConnection();
+        public List<CubaseConnection> CubaseConnection { get; set; } = new List<CubaseConnection>();
+
+        public string ActiveConnection { get; set; }
+
+        public bool Connect { get; set;  } = true;  
+
     }
 
 
     public class CubaseConnection
     {
+        public string Name { get; set; }
+
         public string Host { get; set; }
         public int Port { get; set; }
 

@@ -3,38 +3,89 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Cubase.Midi.Sync.UI.CubaseOptions"
              Title="CubaseOptions">
-    <VerticalStackLayout Padding="20" Spacing="10">
+    <ScrollView Orientation="Vertical">
+        <VerticalStackLayout Padding="20" Spacing="10" x:Name="OptionCollection">
 
-        <Label 
+            <Label 
             Text="Target Cubase server IP address" 
             FontSize="18"
             TextColor="White"
             HorizontalOptions="Start" />
-        <Picker
+            <Picker
         x:Name="ActiveConnections"
         Title="Select the connection"
         HorizontalOptions="Fill"
         BackgroundColor="White"
         TextColor="Black" />
-        <Entry 
+            <Entry 
             x:Name="TargetIPAddress"
             Placeholder="192.168.x.x"
             BackgroundColor="White"
             TextColor="Black"
             HorizontalOptions="Fill"
             />
-        <Label 
+            <Button 
+               x:Name="IncreaseButtonHeight"
+               BackgroundColor="White"
+               TextColor="Black"
+               FontSize="18"
+               Text="Increase Button Height +"
+            />
+            <Button 
+               x:Name="IncreaseButtonWidth"
+               BackgroundColor="White"
+               TextColor="Black"
+               FontSize="18" 
+               Text="Increase Button Width +"
+            />            
+            <Button 
+               x:Name="DescreaseButtonHeight"
+               BackgroundColor="White"
+               TextColor="Black"
+               FontSize="18"
+               Text="Decrease Button Height -"
+            />
+            <Button 
+               x:Name="DescreaseButtonWidth"
+               BackgroundColor="White"
+               TextColor="Black"
+               FontSize="18"
+               Text="Decrease Button Width -"
+            />
+            <Label 
+            x:Name="ButtonSize"
+            Text="" 
+            FontSize="18"
+            TextColor="AntiqueWhite"
+            HorizontalOptions="Start" />
+            <Label 
             x:Name="FullHost"
             Text="" 
             FontSize="18"
             TextColor="AntiqueWhite"
             HorizontalOptions="Start" />
-        <Button 
-            x:Name="SaveButton"
-            BackgroundColor="White"
-            TextColor="Black"
-            FontSize="18"
-            Text="Save"
+            <HorizontalStackLayout Spacing="10">
+                <Button 
+               x:Name="SaveButton"
+               BackgroundColor="White"
+               TextColor="Black"
+               FontSize="18"
+               Text="Save"
             />
-    </VerticalStackLayout>
+                <Button 
+               x:Name="ClearSettings"
+               BackgroundColor="Red"
+               TextColor="White"
+               FontSize="18"
+               Text="Clear Existing Settings"
+            />
+            </HorizontalStackLayout>
+            <Label 
+            x:Name="ExampleButton"
+            Text="Example Button" 
+            FontSize="18"
+            TextColor="AntiqueWhite"
+            HorizontalOptions="Start" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

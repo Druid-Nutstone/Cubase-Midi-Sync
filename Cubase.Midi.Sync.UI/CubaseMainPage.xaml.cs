@@ -149,7 +149,7 @@ public partial class CubaseMainPage : ContentPage
                 {
                     await DisplayAlert("Error CubaseMainPage LoadCommands - Initialise Mixer", ex.Message, "OK");
                 }
-            });
+            }, this.appSettings);
             CollectionsLayout.Children.Add(mixerButton.Button);
 
             if (collections == null || collections.Count == 0) return;
@@ -165,13 +165,13 @@ public partial class CubaseMainPage : ContentPage
                     {
                         try
                         {
-                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client, this.webSocketClient, this.midiWebSocketResponse, this.basePage));
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.client, this.webSocketClient, this.midiWebSocketResponse, this.appSettings, this.basePage));
                         }
                         catch (Exception ex)
                         {
                             await DisplayAlert("Error CubaseMainPage LoadCommands", ex.Message, "OK");
                         }
-                    });
+                    }, this.appSettings);
                     CollectionsLayout.Children.Add(button.Button);
                 }
             }

@@ -1,34 +1,37 @@
 ﻿using Cubase.Midi.Sync.Common.Colours;
 using Cubase.Midi.Sync.UI.Extensions;
+using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 
 namespace Cubase.Midi.Sync.UI;
-
+ 
 public static class RaisedButtonFactory
 {
 
 
     public record RaisedButton(Button Button);
 
-    public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, bool toggleMode = false, string? id = null)
+    public static RaisedButton Create(string text, SerializableColour backgroundColour, SerializableColour textColour,  EventHandler onClicked, AppSettings appSettings, bool toggleMode = false, string? id = null)
     {
         var displayInfo = DeviceDisplay.MainDisplayInfo;
         var screenWidth = displayInfo.Width / displayInfo.Density;   // in DIPs
         var screenHeight = displayInfo.Height / displayInfo.Density; // in DIPs
 
         // Example: make button 1/10 of screen width and scale font accordingly
-        var buttonWidth = screenWidth / 2.5;   // wider
-        var buttonHeight = screenHeight / 9;   // taller
+        var buttonWidth = screenWidth / appSettings.ButtonSizes.Width;   // wider
+        var buttonHeight = screenHeight / appSettings.ButtonSizes.Height;   // taller
         var shortestSide = Math.Min(screenWidth, screenHeight);
+
         // var fontSize = shortestSide / 20;
 
         var button = new Button
         {
             Text = text,
             HeightRequest = buttonHeight,
-            WidthRequest = double.NaN,
+            // WidthRequest = double.NaN,
+            WidthRequest = buttonWidth,
             HorizontalOptions = LayoutOptions.Start,
             BackgroundColor = backgroundColour.ToMauiColour(),
             TextColor = textColour.ToMauiColour(),

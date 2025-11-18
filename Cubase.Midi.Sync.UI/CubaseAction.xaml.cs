@@ -7,6 +7,7 @@ using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
+using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;
@@ -28,6 +29,7 @@ public partial class CubaseAction : ContentPage
     private readonly IMidiWebSocketClient webSocketClient;
     private readonly List<CubaseCommandCollection> commandsCollection;
     private readonly IMidiWebSocketResponse webSocketResponse;
+    private readonly AppSettings appSettings;
 
     private Dictionary<InternalCommandType, Action<InternalCommand>> internalCommands;
     
@@ -41,6 +43,7 @@ public partial class CubaseAction : ContentPage
                         ICubaseHttpClient client, 
                         IMidiWebSocketClient webSocketClient,
                         IMidiWebSocketResponse webSocketResponse,
+                        AppSettings appSettings,
                         BasePage basePage)
     {
         this.basePage = basePage;
@@ -52,6 +55,7 @@ public partial class CubaseAction : ContentPage
         this.webSocketResponse.RegisterForSystemMessages(this.OnSystemError);
         this.commandsCollection = commandsCollection;   
         this.webSocketClient = webSocketClient;
+        this.appSettings = appSettings;
         this.internalCommands = new Dictionary<InternalCommandType, Action<InternalCommand>>()
         {
             { InternalCommandType.Navigate, this.ProcessInternalNavigate }
@@ -275,7 +279,7 @@ public partial class CubaseAction : ContentPage
                 {
                     await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
                 }
-            },
+            }, this.appSettings,
             toggleMode: true
         );
 
@@ -347,7 +351,7 @@ public partial class CubaseAction : ContentPage
         var target = this.commandsCollection.FirstOrDefault(x => x.Name.Equals(command.Parameter, StringComparison.OrdinalIgnoreCase));
         if (target != null)
         {
-            Navigation.PushAsync(new CubaseAction(target, this.commandsCollection, this.client, this.webSocketClient, this.webSocketResponse, this.basePage));
+            Navigation.PushAsync(new CubaseAction(target, this.commandsCollection, this.client, this.webSocketClient, this.webSocketResponse, this.appSettings, this.basePage));
         }
     }
 

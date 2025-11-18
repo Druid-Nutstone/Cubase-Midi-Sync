@@ -12,6 +12,7 @@ using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Extensions;
 using Cubase.Midi.Sync.UI.Models;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
+using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Maui.Controls;
 
 namespace Cubase.Midi.Sync.UI
@@ -26,6 +27,8 @@ namespace Cubase.Midi.Sync.UI
         private IMidiWebSocketResponse midiWebSocketResponse;
 
         private CubaseActiveWindowCollection cubaseActiveWindows;
+
+        private AppSettings appSettings;
 
         private BasePage basePage;
 
@@ -46,11 +49,13 @@ namespace Cubase.Midi.Sync.UI
         public MixerPage(ICubaseHttpClient cubaseHttpClient, 
                          IMidiWebSocketClient webSocketClient, 
                          IMidiWebSocketResponse midiWebSocketResponse,
+                         AppSettings appSettings,
                          IServiceProvider serviceProvider)
         {
             InitializeComponent();
             this.cubaseHttpClient = cubaseHttpClient;
             this.serviceProvider = serviceProvider;
+            this.appSettings = appSettings;
             this.webSocketClient = webSocketClient;
             this.webSocketResponse = midiWebSocketResponse;
             this.webSocketResponse.RegisterForSystemMessages(this.OnSystemError);
@@ -133,20 +138,20 @@ namespace Cubase.Midi.Sync.UI
                     {
                         await DisplayAlert("Error InitialiseMixers", ex.Message, "OK");
                     }
-                }, true);
+                }, this.appSettings, true);
                 MixerConsoles.Children.Add(button.Button);
             }
             var closeButton = RaisedButtonFactory.Create("Close", System.Drawing.Color.Firebrick.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) => 
             {
                 await this.SendMidiCommand(CubaseMixerCommand.CloseMixers);
                 await this.Navigation.PopToRootAsync();
-            });
+            }, this.appSettings);
             MixerConsoles.Children.Add(closeButton.Button);
             var projectButton = RaisedButtonFactory.Create("Project", System.Drawing.Color.DarkBlue.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
             {
                 await this.SendMidiCommand(CubaseMixerCommand.ProjectWindow);
                 await Navigation.PopToRootAsync();
-            });
+            }, this.appSettings);
             MixerConsoles.Children.Add(projectButton.Button);
             var orientationButton = RaisedButtonFactory.Create("Vertical", System.Drawing.Color.DarkOrange.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
@@ -155,7 +160,7 @@ namespace Cubase.Midi.Sync.UI
                 var orientation = but.Text.Equals("Vertical", StringComparison.OrdinalIgnoreCase) ? MixerOrientation.Vertical : MixerOrientation.Horizontal;
                 but.Text = orientation == MixerOrientation.Vertical ? "Horizontal" : "Vertical";
                 await SendOrientation(orientation);
-            });
+            }, this.appSettings);
             MixerConsoles.Children.Add(orientationButton.Button);
 
         }
@@ -195,7 +200,7 @@ namespace Cubase.Midi.Sync.UI
                     {
                         await DisplayAlert("Error MixerPage InitialiseCustomCommands", ex.Message, "OK");
                     }
-                }, command.IsToggleButton);
+                }, this.appSettings, command.IsToggleButton);
                 this.SetButtonState(customButton.Button, command);
                 CustomCommands.Children.Add(customButton.Button);
             }
@@ -215,7 +220,7 @@ namespace Cubase.Midi.Sync.UI
                 {
                     await DisplayAlert("Error InitialisePages", ex.Message, "OK");
                 }
-            });
+            }, this.appSettings);
             Pages.Children.Add(homeButton.Button);
 
             foreach (var collection in collections)
@@ -227,13 +232,13 @@ namespace Cubase.Midi.Sync.UI
                     {
                         try
                         {
-                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.cubaseHttpClient, this.webSocketClient, this.webSocketResponse, this.basePage));
+                            await Navigation.PushAsync(new CubaseAction(collection, collections, this.cubaseHttpClient, this.webSocketClient, this.webSocketResponse, this.appSettings, this.basePage));
                         }
                         catch (Exception ex)
                         {
                             await DisplayAlert("Error InitialisePages", ex.Message, "OK");
                         }
-                    });
+                    }, this.appSettings);
                     Pages.Children.Add(button.Button);
                 }
             }
@@ -254,7 +259,7 @@ namespace Cubase.Midi.Sync.UI
                 {
                     this.webSocketResponse.mixerCollection = null;
                     await this.SendMidiCommand(CubaseMixerCommand.MixerStaticCommand, currentMixerConsole, command.Action);
-                }, command.IsToggleButton, command.Action.Action);
+                }, this.appSettings, command.IsToggleButton, command.Action.Action);
                 StaticButtons.Children.Add(btn.Button);
             }
         }

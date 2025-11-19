@@ -152,16 +152,6 @@ namespace Cubase.Midi.Sync.WindowManager.Models
                 Zorder = WindowManagerService.GetWindowZorder(hwnd)
             };
         }
-
-        public static WindowPosition Create(string name, Rect position, Rect originalPosition)
-        {
-            return new WindowPosition()
-            {
-                Name = name,
-                Position = position,
-                OriginalPosition = originalPosition
-            };
-        }
-    
+   
     }
 }

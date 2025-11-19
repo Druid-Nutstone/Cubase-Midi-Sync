@@ -22,6 +22,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
         private readonly IServiceProvider services;
 
         private CubaseMidiCommandCollection commandCollection;
+        public IEnumerable<string> SupportedKeys => ["Midi"];
 
         private ICategoryService keyService;
 

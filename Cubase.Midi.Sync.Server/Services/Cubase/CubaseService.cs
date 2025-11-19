@@ -157,7 +157,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent actionEvent)
         {
-            var processor = this.serviceProvider.GetRequiredKeyedService<ICategoryService>(actionEvent.CommandType.ToString());
+            var processor = this.serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(actionEvent.CommandType.ToString()));
             if (processor == null)
             {
                 return new CubaseActionResponse

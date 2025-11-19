@@ -63,7 +63,29 @@ public partial class CubaseAction : ContentPage
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         Title = commands.Name;
         this.webSocketResponse.RegisterForErrors(this.OnError);
+        LoadPreCommands();
         LoadCommand();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        this.commands.PostCommands.ForEach(pcmd => 
+        {
+            var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+            this.webSocketClient.SendMidiCommand(socketMessage).Wait();
+        });
+    }
+    
+    private void LoadPreCommands()
+    {
+        this.commands.PreCommands.ForEach(pcmd =>
+        {
+            var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+            this.webSocketClient.SendMidiCommand(socketMessage).Wait();
+        });
     }
 
     private async Task OnError(string message)

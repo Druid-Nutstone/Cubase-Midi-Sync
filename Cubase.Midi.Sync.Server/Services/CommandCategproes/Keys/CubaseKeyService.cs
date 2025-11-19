@@ -15,6 +15,8 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
 
         private readonly ICubaseWindowMonitor cubaseWindowMonitor;
 
+        public IEnumerable<string> SupportedKeys => ["Keys","KeyMacro"];
+
         public CubaseKeyService(IKeyboardService keyboardService, 
                                 ILogger<CubaseKeyService> logger, 
                                 ICubaseWindowMonitor cubaseWindowMonitor)
@@ -24,15 +26,24 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
             this.logger = logger;
         }
 
+
+
         public CubaseActionResponse ProcessAction(ActionEvent request)
         {
             try
             {
                 var response = CubaseActionResponse.CreateSuccess();
-                var result = SendKey(request.Action, (err) =>
+                if (this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())
                 {
-                    response = CubaseActionResponse.CreateError(err);
-                });
+                    var result = SendKey(request.Action, (err) =>
+                    {
+                        response = CubaseActionResponse.CreateError(err);
+                    });
+                }
+                else
+                {
+                    response = CubaseActionResponse.CreateError("Either cubase is not running or cannot focus a cubase window");
+                }
                 return response;
             }
             catch (Exception ex)

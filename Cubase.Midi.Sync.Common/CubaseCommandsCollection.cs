@@ -64,7 +64,7 @@ namespace Cubase.Midi.Sync.Common
         {
             if (this.Any())
             {
-                return this.First(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                return this.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             }
             return null;
         }
@@ -113,6 +113,14 @@ namespace Cubase.Midi.Sync.Common
         public string Name { get; set; }
 
         public bool Visible { get; set; } = true;
+
+        /// <summary>
+        /// Commands to execute when this command collection is entered/exited
+        /// i.e a list of actions or actiongroups to execute immediately the command collection is initialised
+        /// </summary>
+        public List<PrePostCommand> PreCommands { get; set; } = new List<PrePostCommand>();
+
+        public List<PrePostCommand> PostCommands { get; set; } = new List<PrePostCommand>();
 
         public List<string> ButtonCategories { get; set; } = new List<string>();    
 
@@ -172,6 +180,8 @@ namespace Cubase.Midi.Sync.Common
 
         // button text when toggled
         public string NameToggle { get; set; }
+
+
 
         public string ButtonCategory { get; set; }  
 
@@ -443,6 +453,23 @@ namespace Cubase.Midi.Sync.Common
         public static ActionEvent CreateFromMidiAndKey(MidiAndKey midiAndKey)
         {
             return ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action);
+        }
+    }
+
+    public class PrePostCommand
+    {
+        public string Name { get; set; }
+
+        public ActionEvent Action { get; set; } 
+
+
+        public static PrePostCommand CreateFromMidiAndKey(MidiAndKey midiAndKey)
+        {
+            return new PrePostCommand()
+            {
+                Name = midiAndKey.Name,
+                Action = ActionEvent.CreateFromMidiAndKey(midiAndKey)
+            };
         }
     }
 

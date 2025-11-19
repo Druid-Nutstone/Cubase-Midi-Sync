@@ -85,5 +85,19 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
             }
             return cubaseWindowCollection;
         }
+
+        public bool HaveAtLeastOneCubaseWindowFocused()
+        {
+            var cubaseWindow = this.CubaseWindows.GetPrimaryWindow();
+            if (cubaseWindow != null)
+            {
+                if (!this.CubaseWindows.HaveFocusedwindow())
+                {
+                    cubaseWindow.Focus();
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }

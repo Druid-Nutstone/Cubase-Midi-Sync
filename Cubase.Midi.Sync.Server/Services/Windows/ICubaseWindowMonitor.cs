@@ -23,5 +23,7 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
         List<WindowPosition> GetMixerWindows();
 
         bool FocusCubase(Action<string> errorHandler);
+
+        bool HaveAtLeastOneCubaseWindowFocused();
     }
 }

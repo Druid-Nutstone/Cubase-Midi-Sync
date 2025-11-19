@@ -238,8 +238,8 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Keys
             }
             else
             {
-                AreaBackgroundColour.SetColour(this.GetSelectAreaCollection().BackgroundColour);
-                AreaButtonTextColour.SetColour(this.GetSelectAreaCollection().TextColour);
+                AreaBackgroundColour.SetColour(this.GetSelectAreaCollection()?.BackgroundColour);
+                AreaButtonTextColour.SetColour(this.GetSelectAreaCollection()?.TextColour);
                 VisibleCheckBox.Checked = this.GetSelectAreaCollection().Visible;
             }
             this.PopulateButtonCategories();

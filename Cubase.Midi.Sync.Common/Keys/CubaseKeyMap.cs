@@ -96,7 +96,9 @@ namespace Cubase.Midi.Sync.Common.Keys
     {"PADENTER", 0x0D}, {"PAD+", 0x6B}, {"PAD-", 0x6D}, {"PAD*", 0x6A}, {"PAD/", 0x6F},
 
     // Misc
-    {"CAPSLOCK", 0x14}, {"PRINTSCREEN", 0x2C}, {"SCROLLLOCK", 0x91}, {"PAUSE", 0x13}
+    {"CAPSLOCK", 0x14}, {"PRINTSCREEN", 0x2C}, {"SCROLLLOCK", 0x91}, {"PAUSE", 0x13},
+    // windows key 
+    {"META", 0x5B}, {"Meta", 0x5B}, {"meta", 0x5B},
 };
 
 
@@ -148,7 +150,9 @@ namespace Cubase.Midi.Sync.Common.Keys
         {"PADENTER", 0x0D}, {"PAD+", 0x6B}, {"PAD-", 0x6D}, {"PAD*", 0x6A}, {"PAD/", 0x6F},
 
         // Misc
-        {"CAPSLOCK", 0x14}, {"PRINTSCREEN", 0x2C}, {"SCROLLLOCK", 0x91}, {"PAUSE", 0x13}
+        {"CAPSLOCK", 0x14}, {"PRINTSCREEN", 0x2C}, {"SCROLLLOCK", 0x91}, {"PAUSE", 0x13},
+        // windows key 
+            {"META", 0x5B}, {"Meta", 0x5B}, {"meta", 0x5B},
         };
     }
 

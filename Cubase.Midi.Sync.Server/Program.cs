@@ -64,8 +64,8 @@ builder.Services
       .AddSingleton<IMixerService, MixerService>()
       .AddSingleton<ICubaseWindowMonitor, CubaseWindowMonitor>()
       .AddSingleton<IWebSocketServer, WebSocketServer>() 
-      .AddKeyedSingleton<ICategoryService, CubaseMidiService>(CubaseServiceConstants.MidiService)
-      .AddKeyedSingleton<ICategoryService, CubaseKeyService>(CubaseServiceConstants.KeyService);
+      .AddSingleton<ICategoryService, CubaseMidiService>()
+      .AddSingleton<ICategoryService, CubaseKeyService>();
 
 
 builder.Services.AddControllers();

@@ -1,4 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Keys;
+using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+using Cubase.Midi.Sync.Configuration.UI.Controls.MidiAndKeys;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +22,11 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
 
         private CubaseCommandCollection command;
 
-        private string buttonCategory;  
+        private string buttonCategory;
+
+        private PrePostCommand preCommandName;
+
+        private PrePostCommand postCommandName;
 
         public AreaMainControl()
         {
@@ -29,6 +36,67 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.MoveDown.Click += MoveDown_Click;  
             this.AddCategory.Click += AddCategory_Click;  
             this.DeleteCategory.Click += DeleteCategory_Click;
+            this.PreCommandUp.Click += PreCommandUp_Click;
+            this.PreCommandAdd.Click += PreCommandAdd_Click;
+            this.PostCommandAdd.Click += PostCommandAdd_Click;
+        }
+
+        private void PostCommandAdd_Click(object? sender, EventArgs e)
+        {
+            this.GetMidiOrKeyCommand((key) =>
+            {
+                this.command.PostCommands.Add(PrePostCommand.CreateFromMidiAndKey(key));
+                this.SaveCollection();
+                this.PopulatePrePostCommands(this.command);
+            });
+        }
+
+        private void PreCommandAdd_Click(object? sender, EventArgs e)
+        {
+            this.GetMidiOrKeyCommand((key) => 
+            {
+                this.command.PreCommands.Add(PrePostCommand.CreateFromMidiAndKey(key));
+                this.SaveCollection();
+                this.PopulatePrePostCommands(this.command);
+            });
+        }
+
+        private void GetMidiOrKeyCommand(Action<MidiAndKey> action)
+        {
+            var parentForm = this.GetParentForm(this);
+            MidiAndKeysForm form;
+            form = new MidiAndKeysForm(action);
+            form.StartPosition = FormStartPosition.Manual;
+            form.CloseAfterSelect = true;
+            parentForm.Move += (sender, e) =>
+            {
+                form.Location = new Point(
+                    parentForm.Bounds.Right,   // right edge in screen coordinates
+                    parentForm.Bounds.Top      // top edge in screen coordinates
+               );
+            };
+
+            // Align left side of child to right side of parent
+            form.Location = new Point(
+                 parentForm.Bounds.Right,   // right edge in screen coordinates
+                 parentForm.Bounds.Top      // top edge in screen coordinates
+            );
+            form.Show();
+        }
+
+        private void PreCommandUp_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.command.PreCommands.Count > 1)
+            {
+                int index = this.command.PreCommands.IndexOf(this.preCommandName);
+                if (index > 0)
+                {
+                    this.command.PreCommands.RemoveAt(index);
+                    this.command.PreCommands.Insert(index - 1, this.preCommandName);
+                    this.SaveCollection();
+                    this.PopulatePrePostCommands(this.command);
+                }
+            }
         }
 
         private void DeleteCategory_Click(object? sender, EventArgs e)
@@ -104,6 +172,29 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         
         }
 
+        private void PopulatePrePostCommands(CubaseCommandCollection command)
+        {
+            this.PreCommandListBox.Items.Clear();
+            this.PreCommandListBox.DisplayMember = nameof(PrePostCommand.Name);
+            this.PreCommandListBox.Items.AddRange(command.PreCommands.ToArray());
+            this.PreCommandListBox.SelectedIndexChanged += PreCommandListBox_SelectedIndexChanged;
+
+            this.PostCommandListBox.Items.Clear();
+            this.PostCommandListBox.DisplayMember = nameof(PrePostCommand.Name);
+            this.PostCommandListBox.Items.AddRange(command.PostCommands.ToArray());
+            this.PostCommandListBox.SelectedIndexChanged += PostCommandListBox_SelectedIndexChanged;
+        }
+
+        private void PostCommandListBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            this.postCommandName = this.PostCommandListBox.SelectedItem as PrePostCommand;
+        }
+
+        private void PreCommandListBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            this.preCommandName = this.PreCommandListBox.SelectedItem as PrePostCommand;
+        }
+
         private void PopulateButtonCategories(CubaseCommandCollection command)
         {
             this.ButtonCategoryListBox.Items.Clear();   
@@ -120,6 +211,24 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
         {
             this.command = command; 
             this.PopulateButtonCategories(command); 
+            this.PopulatePrePostCommands(command);  
+        }
+
+        private Control GetParentForm(Control control)
+        {
+            var cntrl = control;
+            while (cntrl.GetType() != typeof(Form1))
+            {
+                if (cntrl.Parent != null)
+                {
+                    cntrl = cntrl.Parent;
+                }
+                else
+                {
+                    return cntrl;
+                }
+            }
+            return cntrl;
         }
     }
 }

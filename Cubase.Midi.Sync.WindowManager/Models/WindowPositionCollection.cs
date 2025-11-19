@@ -95,6 +95,11 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return true;
         }
 
+        public bool HaveFocusedwindow()
+        {
+            return this.Any(x => x.Zorder == WindowZorder.Focused);
+        }
+
         public bool Save(string fileName)
         {
             File.WriteAllText(fileName, JsonSerializer.Serialize(this, new JsonSerializerOptions() { WriteIndented = true }));

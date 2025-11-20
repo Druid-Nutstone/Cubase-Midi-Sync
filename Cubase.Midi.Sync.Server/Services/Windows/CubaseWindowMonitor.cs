@@ -7,11 +7,18 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
     {
         public WindowPositionCollection CubaseWindows { get; set; } = new WindowPositionCollection();
 
+        private readonly ILogger<CubaseWindowMonitor> logger;
+
         public bool HaveAtLeastOneMixer => this.CubaseWindows.Any(x => x.Name.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase));
 
         public List<string> MixerConsoles => this.CubaseWindows.Select(x => x.Name)
                                                                .Where(x => x.StartsWith("MixConsole", StringComparison.OrdinalIgnoreCase))
                                                                .ToList();
+
+        public CubaseWindowMonitor(ILogger<CubaseWindowMonitor> logger)
+        {
+            this.logger = logger;
+        }
 
         public List<WindowPosition> GetMixerWindows()
         {

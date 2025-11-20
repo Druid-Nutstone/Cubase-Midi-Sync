@@ -14,9 +14,9 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
     {
         private NutstoneDriver midiDriver;
 
-        private readonly ICategoryService keyService;
-        
         private readonly ILogger<MidiService> logger;
+
+        private readonly IServiceProvider serviceProvider;
 
         //private readonly Thread midiThread;
 
@@ -41,7 +41,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         public MidiService(ILogger<MidiService> logger, IServiceProvider serviceProvider) 
         { 
             this.logger = logger;
-            this.keyService = serviceProvider.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
+            this.serviceProvider = serviceProvider;
             this.commandProcessors = new Dictionary<string, Action<string>>()
             {
                 {MidiCommand.ClearChannels.ToString(), this.ClearChannels},
@@ -119,8 +119,13 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 }
                 else
                 {
-                    var keyResult = this.keyService.ProcessAction(ActionEvent.Create(CubaseAreaTypes.Keys, cubaseMidiCommand.Command));
-                    return keyResult.Success;
+                    var keyService = serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(CubaseServiceConstants.KeyService));
+                    if (keyService != null)
+                    {
+                        var keyResult = keyService.ProcessAction(ActionEvent.Create(CubaseAreaTypes.Keys, cubaseMidiCommand.Command));
+                        return keyResult.Success;
+                    }
+                    return false;
                 }
             }
             catch (Exception ex) 

@@ -26,6 +26,16 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
             this.midiWebSocketResponse = midiWebSocketResponse; 
         }
 
+        public async Task<WebSocketMessage> ConnectIfNotConnectedAsync()
+        {
+            if (_ws.State != WebSocketState.Open)
+            {
+                _ws = new ClientWebSocket();
+                return await this.ConnectAsync();
+            }
+            return WebSocketMessage.Create(WebSocketCommand.Success);
+        }
+
         public async Task<WebSocketMessage> ConnectAsync()
         {
             try

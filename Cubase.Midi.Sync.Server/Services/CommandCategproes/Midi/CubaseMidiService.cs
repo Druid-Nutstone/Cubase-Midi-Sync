@@ -24,8 +24,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
         private CubaseMidiCommandCollection commandCollection;
         public IEnumerable<string> SupportedKeys => ["Midi"];
 
-        private ICategoryService keyService;
-
         public CubaseMidiService(ILogger<CubaseMidiService> logger, 
                                  IMidiService midiService, 
                                  ICacheService cacheService,
@@ -33,7 +31,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
         { 
             this.logger = logger;
             this.services = serviceCollection;
-            this.keyService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
             this.midiService = midiService;
             this.cacheService = cacheService;
             this.commandCollection = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation); 

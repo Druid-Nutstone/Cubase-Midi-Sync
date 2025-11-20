@@ -11,10 +11,15 @@ public class BasePage
 
     private CubaseOptions optionsPage;
 
-    public BasePage(MixerPage mixerPage, CubaseOptions cubaseOptions)
+    private IServiceProvider serviceProvider;
+
+    public BasePage(MixerPage mixerPage, 
+                    CubaseOptions cubaseOptions,
+                    IServiceProvider serviceProvider)
 	{
         this.mixerPage = mixerPage; 
-        this.optionsPage = cubaseOptions;   
+        this.optionsPage = cubaseOptions;
+        this.serviceProvider = serviceProvider;
     }
 
     public void AddToolbars(ContentPage contentPage)
@@ -40,12 +45,26 @@ public class BasePage
         });
         contentPage.ToolbarItems.Add(new ToolbarItem
         {
+            Text = "Refresh",
+            Order = ToolbarItemOrder.Primary, // must be Primary
+            Priority = 1, // appears after Mixer
+            Command = new Command(OnRefreshClicked)
+        });
+        contentPage.ToolbarItems.Add(new ToolbarItem
+        {
             Text = "Home",
             Order = ToolbarItemOrder.Primary, // must be Primary
             Priority = 2, // appears after Mixer
             Command = new Command(OnHomeClicked)
         });
     }
+
+    protected async virtual void OnRefreshClicked()
+    {
+        var cubaseMainPage = this.serviceProvider.GetService<CubaseMainPage>(); 
+        this.contentPage.Navigation.PopToRootAsync();
+        cubaseMainPage.Reload();
+    } 
 
     protected async virtual void OnMixerClicked()
     {

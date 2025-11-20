@@ -8,6 +8,7 @@ using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Server.Services.Windows;
+using Cubase.Midi.Sync.WindowManager.Models;
 using Cubase.Midi.Sync.WindowManager.Services.Win;
 using static Cubase.Midi.Sync.WindowManager.Services.Win.WindowManagerService;
 
@@ -47,7 +48,11 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
             this.logger = logger;
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
             this.services = services;
-            this.categoryService = this.services.GetKeyedService<ICategoryService>(CubaseServiceConstants.KeyService);
+            this.categoryService = this.services.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(CubaseServiceConstants.KeyService));
+            if (this.categoryService == null)
+            {
+                throw new Exception("Cannot get key service");
+            }
             this.cubaseWindowMonitor.RegisterForWindowEvents(this.CubaseWindowsEvent);
         }
 
@@ -137,17 +142,25 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     var actionEvent = cubaseMixerRequest.GetData<ActionEvent>();
                     var knownCommand = Enum.Parse<KnownCubaseMidiCommands>(actionEvent.Action);
                     var commandList = this.cacheService.CubaseMixer.GetCommands(knownCommand);
-                    var targetWindow = cubaseMixerRequest.TargetMixer ?? this.cubaseWindowMonitor.MixerConsoles.First();
-                    this.FocusWindow(targetWindow);
+                    var targetWindow = cubaseMixerRequest.TargetMixer ?? this.cubaseWindowMonitor.MixerConsoles.FirstOrDefault();
                     if (!string.IsNullOrEmpty(cubaseMixerRequest.TargetMixer))
                     {
                         this.cubaseWindowMonitor.CubaseWindows
                                                 .GetWindowByName(cubaseMixerRequest.TargetMixer)
-                                                .Focus();
+                                                .Focus()
+                                                .WithWindowZorder();
+                    }
+                    else
+                    {
+                        if (targetWindow != null)
+                        {
+                            this.FocusWindow(targetWindow)
+                                .WithWindowZorder();
+                        } 
                     }
                     foreach (var cmd in commandList)
                     {
-                        await this.SendMidiCommand(cmd);
+                      await this.SendMidiCommand(cmd);
                     }
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerStaticCommand);
                 case CubaseMixerCommand.OpenMixer:
@@ -310,13 +323,14 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
             //}
         }
 
-        private void FocusWindow(string windowName)
+        private WindowPosition FocusWindow(string windowName)
         {
             var window = this.cubaseWindowMonitor.CubaseWindows.GetWindowThatStartsWith(windowName);
             if (window != null)
             {
-                window.Focus();
+                return window.Focus();
             }
+            return null;
         }
 
         private async Task<bool> WaitForMixConsoleCount(int consoleCount)
@@ -338,7 +352,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
         private async Task SendMidiCommand(CubaseMidiCommand cmd)
         {
             this.midiService.SendMidiMessage(cmd);
-            await Task.Delay(20); // Small delay to ensure Cubase processes the command
+            // await Task.Delay(20); // Small delay to ensure Cubase processes the command
         }
     }
 

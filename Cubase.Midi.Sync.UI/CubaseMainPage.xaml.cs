@@ -90,9 +90,17 @@ public partial class CubaseMainPage : ContentPage
     public async Task Reload()
     {
         SetSpinner(true);
-        await LoadCommands();
-        loaded = true;
-        SetSpinner(false);
+        var checkSocket = await this.webSocketClient.ConnectIfNotConnectedAsync();
+        if (string.IsNullOrEmpty(checkSocket.Message))
+        {
+            await LoadCommands();
+            loaded = true;
+            SetSpinner(false);
+        }
+        else
+        {
+            await DisplayAlert("Oops - cannot connect to server", checkSocket.Message, "OK");
+        }
     }
 
     private async Task ProcessSystemError(WebSocketCommand webSocketCommand)
@@ -125,19 +133,9 @@ public partial class CubaseMainPage : ContentPage
     {
         try
         {
+            collections = null;
             await this.webSocketClient.SendMidiCommand(WebSocketMessage.Create(WebSocketCommand.Commands));
             collections = await this.midiWebSocketResponse.GetCommands();
-            /*
-            // CollectionsLayout.Children.Clear();
-            collections = await this.client.GetCommands(async (msg) =>
-            {
-                // todo show acrtionsin a non-blocking ui section
-            }, async (exception) =>
-            {
-                await DisplayAlert("Error CubaseMainPage LoadCommands", exception, "OK");
-            });
-            */
-
             var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
                 try

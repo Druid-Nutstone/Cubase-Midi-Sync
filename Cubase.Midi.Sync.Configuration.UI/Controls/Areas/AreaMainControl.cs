@@ -39,6 +39,94 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Areas
             this.PreCommandUp.Click += PreCommandUp_Click;
             this.PreCommandAdd.Click += PreCommandAdd_Click;
             this.PostCommandAdd.Click += PostCommandAdd_Click;
+            this.PreCommandUp.Click += PreCommandUp_Click1;
+            this.PostCommandUp.Click += PostCommandUp_Click;
+            this.PreCommandDown.Click += PreCommandDown_Click;
+            this.PostCommandDown.Click += PostCommandDown_Click;
+            this.PreCommandDelete.Click += PreCommandDelete_Click;
+            this.PostCommandDelete.Click += PostCommandDelete_Click;
+        }
+
+        private void PostCommandDelete_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.postCommandName != null)
+            {
+                this.command.PostCommands.Remove(this.postCommandName);
+
+                this.SaveCollection();
+                this.PopulatePrePostCommands(this.command);
+            }
+        }
+
+        private void PreCommandDelete_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.preCommandName != null)
+            {
+                this.command.PreCommands.Remove(this.preCommandName);
+
+                this.SaveCollection();
+                this.PopulatePrePostCommands(this.command);
+            }
+        }
+
+        private void PostCommandDown_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.command.PostCommands.Count > 1)
+            {
+                int index = this.command.PostCommands.IndexOf(this.postCommandName);
+                if (index < this.command.PostCommands.Count - 1)
+                {
+                    this.command.PostCommands.RemoveAt(index);
+                    this.command.PostCommands.Insert(index + 1, this.postCommandName);
+                    this.SaveCollection();
+                    this.PopulatePrePostCommands(this.command);
+                }
+            }
+        }
+
+        private void PreCommandDown_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.command.PreCommands.Count > 1)
+            {
+                int index = this.command.PreCommands.IndexOf(this.preCommandName);
+                if (index < this.command.PreCommands.Count - 1)
+                {
+                    this.command.PreCommands.RemoveAt(index);
+                    this.command.PreCommands.Insert(index + 1, this.preCommandName);
+                    this.SaveCollection();
+                    this.PopulatePrePostCommands(this.command);
+                }
+            }
+        }
+
+        private void PostCommandUp_Click(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.command.PostCommands.Count > 1)
+            {
+                int index = this.command.PostCommands.IndexOf(this.postCommandName);
+                if (index > 0)
+                {
+                    this.command.PostCommands.RemoveAt(index);
+                    this.command.PostCommands.Insert(index - 1, this.postCommandName);
+                    this.SaveCollection();
+                    this.PopulatePrePostCommands(this.command);
+                }
+            }
+        }
+
+        private void PreCommandUp_Click1(object? sender, EventArgs e)
+        {
+            if (this.command != null && this.command.PreCommands.Count > 1)
+            {
+                int index = this.command.PreCommands.IndexOf(this.preCommandName);
+                if (index > 0)
+                {
+                    this.command.PreCommands.RemoveAt(index);
+                    this.command.PreCommands.Insert(index - 1, this.preCommandName);
+                    this.SaveCollection();
+                    this.PopulatePrePostCommands(this.command);
+                }
+            }
         }
 
         private void PostCommandAdd_Click(object? sender, EventArgs e)

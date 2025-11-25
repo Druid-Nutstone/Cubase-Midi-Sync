@@ -490,5 +490,6 @@ namespace Cubase.Midi.Sync.Common
         /// </summary>
         Macro,
         MacroToggle,
+        Script
     }
 }

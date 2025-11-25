@@ -1,5 +1,8 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Configuration.UI.Controls.Keys;
+using Cubase.Midi.Sync.Configuration.UI.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +18,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
         {
             this.Items.Clear();
             this.Items.Add(new EditCommand(commands, cubaseServerSettings, listView));
+            this.Items.Add(new RunCommand(commands, cubaseServerSettings, listView));
             this.Items.Add(new MoveUpCommand(commands, cubaseServerSettings, listView));
             this.Items.Add(new MoveDownCommand(commands, cubaseServerSettings, listView));
             this.Items.Add(new DeleteSingleCommand(commands, cubaseServerSettings, listView));
@@ -137,6 +141,35 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
             this.commands.RemoveCubaseCommand(cubaseCommandItem.Command);
             commands.SaveToFile(serverSettings.FilePath);
             listView.RefreshCubaseCommands();
+        }
+    }
+
+    public class RunCommand : ToolStripMenuItem
+    {
+        private CubaseCommandsCollection commands;
+
+        private CubaseServerSettings serverSettings;
+
+        private CommandsListView listView;
+
+        public RunCommand(CubaseCommandsCollection commands, CubaseServerSettings cubaseServerSettings, CommandsListView listView)
+        {
+            this.commands = commands;
+            this.serverSettings = cubaseServerSettings;
+            this.listView = listView;
+            this.Text = "Run";
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            if (this.listView.SelectedItems.Count > 0)
+            {
+                var cubaseCommandItem = (CommandsListViewItem)this.listView.SelectedItems[0];
+                var command = cubaseCommandItem.Command;
+                var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, command.ActionGroup);
+                var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+                var response = CubaseWebSocketClient.Instance.SendCommand(socketMessage);
+            }
         }
     }
 

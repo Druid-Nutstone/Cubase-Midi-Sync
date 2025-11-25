@@ -9,4 +9,8 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Scripts\ScriptNodes.cs" />
+  </ItemGroup>
+
 </Project>

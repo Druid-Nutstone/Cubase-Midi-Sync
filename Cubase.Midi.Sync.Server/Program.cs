@@ -5,6 +5,7 @@ using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi;
+using Cubase.Midi.Sync.Server.Services.CommandCategproes.Script;
 using Cubase.Midi.Sync.Server.Services.Commands;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Keyboard;
@@ -135,7 +136,8 @@ public partial class Program
               .AddSingleton<ICubaseWindowMonitor, CubaseWindowMonitor>()
               .AddSingleton<IWebSocketServer, WebSocketServer>()
               .AddSingleton<ICategoryService, CubaseMidiService>()
-              .AddSingleton<ICategoryService, CubaseKeyService>();
+              .AddSingleton<ICategoryService, CubaseKeyService>()
+              .AddSingleton<ICategoryService, CubaseScriptService>();
 
 
         builder.Services.AddControllers();

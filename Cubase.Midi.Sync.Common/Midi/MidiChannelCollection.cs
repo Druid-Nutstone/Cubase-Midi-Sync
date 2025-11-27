@@ -19,6 +19,11 @@ namespace Cubase.Midi.Sync.Common.Midi
             return this.FirstOrDefault(x => x.Name != null && x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
+        public List<MidiChannel> GetTracksThatContain(string name)
+        {
+            return this.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
         public MidiChannel GetSelectedTrack()
         {
             return this.FirstOrDefault(x => x.Selected.HasValue && x.Selected.Value);

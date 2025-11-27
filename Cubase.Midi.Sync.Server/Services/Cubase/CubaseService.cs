@@ -14,6 +14,9 @@ using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.WindowManager.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Windows;
 using Cubase.Midi.Sync.WindowManager.Models;
+using Cubase.Midi.Sync.Server.Services.Cache;
+using Cubase.Midi.Sync.Server.Services.WebSockets;
+using Cubase.Midi.Sync.Common.Tracks;
 
 namespace Cubase.Midi.Sync.Server.Services.Cubase
 {
@@ -29,6 +32,8 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         private readonly IMixerService mixerService;
 
+        private readonly ICacheService cacheService;
+
         private readonly ICubaseWindowMonitor cubaseWindowMonitor;
 
         private CubaseMidiCommandCollection cubaseMidiCommands;
@@ -36,6 +41,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
         public CubaseService(IServiceProvider serviceProvider, 
                              ILogger<CubaseService> logger, 
                              IMidiService midiService, 
+                             ICacheService cacheService,
                              IMixerService mixerService,
                              ICubaseWindowMonitor cubaseWindowMonitor,
                              ICommandService commandService)
@@ -43,6 +49,7 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
             this.serviceProvider = serviceProvider; 
             this.midiService = midiService;
             this.commandService = commandService;
+            this.cacheService = cacheService;
             this.cubaseWindowMonitor = cubaseWindowMonitor;
             this.mixerService = mixerService;   
             this.logger = logger;   
@@ -53,6 +60,16 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
         {
             switch (request.Command)
             {
+                case WebSocketCommand.TrackState:
+                    return WebSocketMessage.Create(WebSocketCommand.TrackState, TrackState.CreateFromChannels(await this.GetTracks()));
+                case WebSocketCommand.SelectTracks:
+                    var tracksToSelect = request.GetMessage<List<MidiChannel>>();
+                    this.midiService.SelectTracks(tracksToSelect);
+                    await this.GetTracks();
+                    return WebSocketMessage.Create(WebSocketCommand.Success);
+                case WebSocketCommand.Tracks:
+                    await this.GetTracks();
+                    return WebSocketMessage.Create(WebSocketCommand.Success);
                 case WebSocketCommand.Commands:
                     var commands = await commandService.GetCommands();
                     return WebSocketMessage.Create(WebSocketCommand.Commands, commands);
@@ -116,7 +133,8 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         public async Task<MidiChannelCollection> GetTracks()
         {
-            return await Task.Run(this.midiService.GetChannels);
+            await this.midiService.GetChannels();
+            return this.midiService.MidiChannels;
         }
 
 

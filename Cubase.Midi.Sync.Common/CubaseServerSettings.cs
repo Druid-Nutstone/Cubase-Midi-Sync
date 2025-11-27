@@ -12,6 +12,14 @@ namespace Cubase.Midi.Sync.Common
 
         public string CubseServerLogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings", "CubaseMidiSyncServerLog.txt");
 
+        public static string ScriptPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Cubase-Midi-Settings", "Scripts");
+
+        public static string ScriptExtension = ".cql";
+        
+        public static int MaxNumberOfChannels = 24;    
+
+        public static string KeyCommandsFileLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steinberg", "Cubase 15_64", "Key Commands.xml");
+
         public CubaseCommandsCollection GetVisibleCubaseCommands()
         {
             return CubaseCommandsCollection.CreateFromList(this.GetCubaseCommands().Where(c => c.Visible).ToList());

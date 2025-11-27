@@ -69,6 +69,12 @@ namespace Cubase.Midi.Sync.Common.Scripts
         public string Value { get; set; }
     }
 
+    public class CommandConditionNode : ConditionNode
+    {
+        public string Command { get; set; }
+        public List<string> Args { get; set; }
+    }
+
     // ------------------ PARSER ----------------------------
 
     public class CommandParser
@@ -78,6 +84,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
         public ScriptNode Parse(IEnumerable<string> lines, Action<ScriptParseException> errorHandler)
         {
+            lines = lines.RemoveBlankLines();
             _tokenLines = lines.Select(Tokenize).ToList();
             _lineIndex = 0;
 
@@ -265,8 +272,9 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
         private ConditionNode ParseCompare(TokenStream t)
         {
-            var left = t.RequireValue();
+            var first = t.RequireValue();
 
+            // If next token is a comparison operator -> normal comparison
             if (t.MatchAny("=", "!=", "<", ">", "<=", ">="))
             {
                 string op = t.LastMatch;
@@ -274,14 +282,30 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
                 return new CompareNode
                 {
-                    Left = left,
+                    Left = first,
                     Op = op,
                     Right = right
                 };
             }
 
-            return new ValueNode { Value = left };
+            // 🎯 NEW: treat remaining tokens as arguments to a command condition
+            if (t.HasMore)
+            {
+                var args = new List<string>();
+
+                while (t.HasMore)
+                    args.Add(t.RequireValue());
+
+                return new CommandConditionNode
+                {
+                    Command = first,
+                    Args = args
+                };
+            }
+
+            return new ValueNode { Value = first };
         }
+
 
         // ---------------- TOKEN UTILITIES --------------------------
 
@@ -354,6 +378,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
         private class TokenStream
         {
+            public bool HasMore => index < tokens.Count;
             private readonly List<string> tokens;
             private int index;
 

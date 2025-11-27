@@ -40,8 +40,8 @@ namespace Cubase.Midi.Sync.Server.Controllers
         [Route("tracks")]
         public async Task<IActionResult> GetTracks()
         {
-            var tracks = await cubaseService.GetTracks();
-            return Ok(tracks);
+            // var tracks = await cubaseService.GetTracks();
+            return BadRequest();
         }
 
         [HttpPost]

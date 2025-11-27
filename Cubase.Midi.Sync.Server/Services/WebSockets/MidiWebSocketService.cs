@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.Common.WebSocket;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Windows;
 using global::Cubase.Midi.Sync.Server.Services.Midi;
@@ -105,14 +106,19 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
                         var requestServices = context.RequestServices;
 
-                        this.midiService.OnChannelChanged = async (channels) =>
+                        this.midiService.RegisterOnChannelChanged(async (channels) =>
                         {
                             if (ws.State == WebSocketState.Open)
                             {
                                 var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
                                 await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                if (this.midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
+                                {
+                                    var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
+                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(allTracks.Serialise())), WebSocketMessageType.Text, true, ct);
+                                }
                             }
-                        };
+                        });
 
                         this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
                         {

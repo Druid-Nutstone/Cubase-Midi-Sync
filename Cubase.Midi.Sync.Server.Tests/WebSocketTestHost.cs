@@ -1,4 +1,6 @@
-﻿using Cubase.Midi.Sync.Server.Services.Cache;
+﻿using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Common.Window;
+using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Cubase.Midi.Sync.Server.Services.WebSockets;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +24,7 @@ public class WebSocketTestHost : IAsyncDisposable
         WebSocketUri = new Uri($"ws://localhost:{port}{path}");
     }
 
-    public async Task StartAsync()
+    public async Task StartAsync(Func<WebSocketMessage, Task> msgHandler)
     {
         var app = Program.BuildHost(); // returns IHost
         await app.StartAsync();
@@ -31,6 +33,41 @@ public class WebSocketTestHost : IAsyncDisposable
         // Connect WebSocket
         WebSocket = new ClientWebSocket();
         await WebSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
+        await WaitForResponse(msgHandler);
+    }
+
+    public async Task WaitForResponse(Func<WebSocketMessage, Task> msgHandler)
+    {
+        Task.Run(async () =>
+        {
+            var buffer = new byte[8192];
+
+            while (WebSocket.State == WebSocketState.Open)
+            {
+                using var ms = new MemoryStream();
+                WebSocketReceiveResult result;
+
+                do
+                {
+                    result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    ms.Write(buffer, 0, result.Count);
+                } while (!result.EndOfMessage);
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                }
+                else if (result.MessageType == WebSocketMessageType.Text)
+                {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    using var reader = new StreamReader(ms, Encoding.UTF8);
+                    string message = await reader.ReadToEndAsync();
+
+                    var wsMessage = WebSocketMessage.Deserialise(message);
+                    await msgHandler(wsMessage);
+                }
+            }
+        });
     }
 
     public async ValueTask DisposeAsync()

@@ -18,6 +18,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         private readonly IServiceProvider serviceProvider;
 
+        private List<Action<MidiChannelCollection>> onChannelChangedHandlers = new List<Action<MidiChannelCollection>>();
+
         //private readonly Thread midiThread;
 
         //private readonly BlockingCollection<CubaseMidiCommand> midiQueue = new();
@@ -35,8 +37,6 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         private Dictionary<string, Action<string>> commandProcessors;
 
         private bool tracksReceived = false;
-
-        public Action<MidiChannelCollection>? OnChannelChanged { get; set; } = null;
 
         public MidiService(ILogger<MidiService> logger, IServiceProvider serviceProvider) 
         { 
@@ -86,6 +86,11 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.midiDriver = new NutstoneDriver("Nutstone");
             this.midiDriver.MidiMessageReceived += MidiDriver_MidiMessageReceived;
             this.cubaseMidiCommands = new CubaseMidiCommandCollection(CubaseServerConstants.KeyCommandsFileLocation);
+        }
+
+        public void RegisterOnChannelChanged(Action<MidiChannelCollection> action)
+        {
+            this.onChannelChangedHandlers.Add(action);
         }
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand)
@@ -145,24 +150,20 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         }
 
 
-        public MidiChannelCollection GetChannels()
+        public async Task GetChannels()
         {
             this.tracksReceived = false;
-            this.MidiChannels = new MidiChannelCollection();    
             this.midiDriver.SendMessage(MidiCommand.Tracks, "");
-            var maxCount = 1000;
-            var count = 0;
-            while (!this.tracksReceived && count < maxCount)
-            {
-                Task.Delay(50).Wait();
-                count++; 
-            }
-            return this.MidiChannels;
         }
 
         public void SendSysExMessage<T>(MidiCommand command, T request)
         {
             this.midiDriver.SendMessage(command, request);  
+        }
+
+        public void SelectTracks(List<MidiChannel> tracks)
+        {
+            this.SendSysExMessage(MidiCommand.SelectTracks, tracks);
         }
 
         private void MidiDriver_MidiMessageReceived(byte[] message)
@@ -206,10 +207,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             var channelData = JsonSerializer.Deserialize<MidiChannel>(channelInfo);
             this.logger.LogInformation($"Channel Change: {channelData.Name} Index:{channelData.Index} Selected:{channelData.Selected}");
             var channelCollection = this.MidiChannels.AddOrUpdateChannel(channelData);
-            if (OnChannelChanged != null)
-            {
-                OnChannelChanged(channelCollection);
-            }   
+            this.onChannelChangedHandlers.ForEach(handler => handler.Invoke(channelCollection));
         }
 
         private void MessageReceived(string message)
@@ -253,5 +251,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.midiDriver.Dispose();
           
         }
+
+
     }
 }

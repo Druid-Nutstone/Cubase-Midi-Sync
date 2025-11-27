@@ -64,6 +64,8 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Mixer 2", 1, 19, "Devices", "Mixer 2", 127));
             this.Add(CubaseMidiCommand.Create("Mixer 3", 1, 20, "Devices", "Mixer 3", 127));
             this.Add(CubaseMidiCommand.Create("Mixer 4", 1, 21, "Devices", "Mixer 4", 127));
+            this.Add(CubaseMidiCommand.Create("Reload Scripts", 1, 22, "MIDI Remote", "Scripting Tools: Reload Scripts", 127));
+            this.Add(CubaseMidiCommand.Create("Expand Folders", 1, 23, "Project", "Folding: Unfold Tracks", 127));
         }
 
 
@@ -149,6 +151,8 @@ namespace Cubase.Midi.Sync.Common.Midi
         Key_Show_Selected,
         Mixer_2,
         Mixer_3,
-        Mixer_4
+        Mixer_4,
+        Reload_Scripts,
+        Expand_Folders,
     }
 }

@@ -88,6 +88,9 @@ namespace Cubase.Midi.Sync.Common.WebSocket
         Windows = 7,
         ServerClosed = 8,
         CubaseNotReady = 9,
-        CubaseReady = 10
+        CubaseReady = 10,
+        TracksComplete = 11,
+        SelectTracks = 12,
+        TrackState = 13
     }
 }

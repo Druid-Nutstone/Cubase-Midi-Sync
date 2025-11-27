@@ -23,10 +23,22 @@ public class BaseWebSocket
 
     }
 
-    public async Task StartServer()
+    public async Task StartServer(Func<WebSocketMessage, Task> msgHandler)
     {
         _host = new WebSocketTestHost();
-        await _host.StartAsync();
+        await _host.StartAsync(msgHandler);
+    }
+
+    public async Task<WebSocketMessage> SendSocketCommand(WebSocketMessage socketMessage)
+    {
+        return await Send(socketMessage);
+    }
+
+    public async Task<WebSocketMessage> SendCommand(CubaseCommand command)
+    {
+        var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
+        var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+        return await Send(socketMessage);
     }
 
     public async Task<WebSocketMessage> SendScript(string scriptName)
@@ -34,7 +46,12 @@ public class BaseWebSocket
         CubaseCommand command = CubaseCommand.Create().WithAction(ActionEvent.Create(CubaseAreaTypes.Script, scriptName));
         var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
         var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-        var commandString = socketMessage.Serialise();
+        return await Send(socketMessage);
+    }
+
+    private async Task<WebSocketMessage> Send(WebSocketMessage message)
+    {
+        var commandString = message.Serialise();
 
         if (_host.WebSocket.State == WebSocketState.Open)
         {

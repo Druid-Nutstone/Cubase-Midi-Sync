@@ -4,8 +4,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 {
     public interface IMidiService
     {
-        Action<MidiChannelCollection>? OnChannelChanged { get; set; }
-
+        void RegisterOnChannelChanged(Action<MidiChannelCollection> action);  
+        
         MidiChannelCollection MidiChannels { get; set; }    
 
         public void Initialise();
@@ -16,7 +16,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public void SendSysExMessage<T>(MidiCommand command, T request);
 
-        public MidiChannelCollection GetChannels();
+        public Task GetChannels();
 
         public void VerifyDriver();
 
@@ -25,5 +25,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         public Action? OnReadyReceived { get; set; } 
 
         bool ReadyReceived { get; set; }
+
+        public void SelectTracks(List<MidiChannel> tracks);
     }
 }

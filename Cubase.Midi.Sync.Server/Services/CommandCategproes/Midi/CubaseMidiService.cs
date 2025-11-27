@@ -67,7 +67,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
                 {
                     response = CubaseActionResponse.CreateError($"Could not execute Midi command {request.Action}");
                 }
-                ;
                 return response;
             }
             catch (Exception ex)

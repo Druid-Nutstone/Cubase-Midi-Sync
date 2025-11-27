@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

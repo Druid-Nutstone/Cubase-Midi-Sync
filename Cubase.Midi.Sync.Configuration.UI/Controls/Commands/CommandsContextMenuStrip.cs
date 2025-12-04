@@ -168,7 +168,10 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
                 var command = cubaseCommandItem.Command;
                 var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, command.ActionGroup);
                 var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-                var response = CubaseWebSocketClient.Instance.SendCommand(socketMessage);
+                Task.Run(async () =>
+                {
+                    await CubaseWebSocketClient.Instance.SendCommand(socketMessage);
+                });
             }
         }
     }

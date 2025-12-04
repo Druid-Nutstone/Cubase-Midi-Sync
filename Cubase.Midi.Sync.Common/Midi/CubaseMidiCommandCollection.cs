@@ -66,6 +66,7 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Mixer 4", 1, 21, "Devices", "Mixer 4", 127));
             this.Add(CubaseMidiCommand.Create("Reload Scripts", 1, 22, "MIDI Remote", "Scripting Tools: Reload Scripts", 127));
             this.Add(CubaseMidiCommand.Create("Expand Folders", 1, 23, "Project", "Folding: Unfold Tracks", 127));
+            this.Add(CubaseMidiCommand.Create("Navigate Top", 1, 24, "Navigate", "Top", 127));
         }
 
 
@@ -154,5 +155,6 @@ namespace Cubase.Midi.Sync.Common.Midi
         Mixer_4,
         Reload_Scripts,
         Expand_Folders,
+        Navigate_Top
     }
 }

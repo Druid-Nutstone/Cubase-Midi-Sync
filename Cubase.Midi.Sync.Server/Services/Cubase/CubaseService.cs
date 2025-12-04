@@ -133,8 +133,10 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
 
         public async Task<MidiChannelCollection> GetTracks()
         {
-            await this.midiService.GetChannels();
-            return this.midiService.MidiChannels;
+            return await this.midiService.GetTracksAsync((error) => 
+            {
+                this.logger.LogError($"could not execute GetTracks. Error from midi service {error}");
+            });
         }
 
 

@@ -13,7 +13,12 @@ namespace Cubase.Midi.Sync.Configuration.UI.Sockets
         
         public void ProcessResponse(WebSocketMessage message) 
         { 
-            
+            switch (message.Command) 
+            {
+                case WebSocketCommand.Error:
+                    MessageBox.Show(message.Message, "Error from websocket", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+            }
         }
     }
 }

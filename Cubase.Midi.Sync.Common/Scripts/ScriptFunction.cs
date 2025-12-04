@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.Common.Scripts
 {
-    public interface IScriptProcessor
+    public enum ScriptFunction
     {
-
-        ScriptNode? GetScript(IEnumerable<string> script, Action<ScriptParseException> errorHandler);
-
-
+        SelectTrack = 0,
+        GetTracks = 1,
+        DisableRecord = 2,
+        EnableRecord = 3,
+        Unknown = 99
     }
 }

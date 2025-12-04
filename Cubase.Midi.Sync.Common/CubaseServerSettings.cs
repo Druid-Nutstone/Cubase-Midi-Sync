@@ -16,7 +16,7 @@ namespace Cubase.Midi.Sync.Common
 
         public static string ScriptExtension = ".cql";
         
-        public static int MaxNumberOfChannels = 24;    
+        public static int MaxNumberOfChannels = 48;    
 
         public static string KeyCommandsFileLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steinberg", "Cubase 15_64", "Key Commands.xml");
 

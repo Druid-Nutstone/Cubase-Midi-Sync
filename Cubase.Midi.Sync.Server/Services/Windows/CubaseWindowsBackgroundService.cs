@@ -1,6 +1,7 @@
 ﻿
 using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Constants;
+using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.WebSockets;
 using Cubase.Midi.Sync.WindowManager.Models;
 using Cubase.Midi.Sync.WindowManager.Services.Win;
@@ -17,11 +18,15 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         private readonly IWebSocketServer webSocketServer;
 
+        private readonly ICacheService cacheService;
+
         public CubaseWindowsBackgroundService(ILogger<CubaseWindowsBackgroundService> logger, 
                                               ICubaseWindowMonitor cubaseWindowMonitor,
+                                              ICacheService cacheService,
                                               IWebSocketServer webSocketServer)
         {
             this.logger = logger;
+            this.cacheService = cacheService;
             this.webSocketServer = webSocketServer;
             this.cubaseWindowMonitor = cubaseWindowMonitor;
         }
@@ -31,16 +36,32 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
             logger.LogInformation("CubaseWindowsBackgroundService started.");
             try
             {
-                await this.Monitorcubasewindows(stoppingToken);
+                var windowMonitor = this.Monitorcubasewindows(stoppingToken);
+                var fileMonitor = this.MonitorChangedFiles(stoppingToken);
+
+                await Task.WhenAll(windowMonitor, fileMonitor);
+                
                 // Keep the hosted service alive; do not try to modify the web pipeline here.
-                await Task.Delay(Timeout.Infinite, stoppingToken);
+                // await Task.Delay(Timeout.Infinite, stoppingToken);
             }
             catch (OperationCanceledException) { /* expected on shutdown */ }
             logger.LogInformation("CubaseWindowsBackgroundService stopping.");
         }
 
+        private async Task MonitorChangedFiles(CancellationToken stoppingToken)
+        {
+            this.logger.LogInformation("Starting file monitor");
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await this.cacheService.RefreshCubaseMixer();
+                await this.cacheService.RefreshMidiAndKeys();
+                await Task.Delay(5 * 1000); 
+            }
+        }
+
         private async Task Monitorcubasewindows(CancellationToken stoppingToken)
         {
+            this.logger.LogInformation("Starting cubase window monitor");
             var statusChange = false;
             while (!stoppingToken.IsCancellationRequested)
             {

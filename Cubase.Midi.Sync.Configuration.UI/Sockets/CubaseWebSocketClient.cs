@@ -46,7 +46,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Sockets
             return this;
         }
 
-        public WebSocketMessage SendCommand(WebSocketMessage message)
+        public async Task<WebSocketMessage> SendCommand(WebSocketMessage message)
         {
             var commandString = message.Serialise();
 
@@ -55,7 +55,7 @@ namespace Cubase.Midi.Sync.Configuration.UI.Sockets
                 try
                 {
                     var data = Encoding.UTF8.GetBytes(commandString);
-                    _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None).Wait();
+                    await _ws.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
                     return WebSocketMessage.Create(WebSocketCommand.Success);
                 }
                 catch (Exception ex)

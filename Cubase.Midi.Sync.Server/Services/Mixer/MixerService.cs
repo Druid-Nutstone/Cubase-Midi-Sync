@@ -113,7 +113,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
             if (!string.IsNullOrEmpty(cubaseMixer.KeyAction))
             {
                 this.logger.LogInformation($"Executing mixer Key command {cubaseMixer.KeyAction}");
-                this.categoryService.ProcessAction(ActionEvent.Create(CubaseAreaTypes.Midi, cubaseMixer.KeyAction));
+                await this.categoryService.ProcessActionAsync(ActionEvent.Create(CubaseAreaTypes.Midi, cubaseMixer.KeyAction));
             }
             else
             {

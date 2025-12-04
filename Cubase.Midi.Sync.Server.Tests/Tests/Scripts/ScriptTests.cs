@@ -81,12 +81,23 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Scripts
         public async Task Can_Run_Script()
         {
             // Test Select Track
-            //await StartServer(this.ProcessWebSocketResponse);
-            //await SendCommand(CubaseCommand.Create()
-            //                   .WithButtonType(CubaseButtonType.Script)
-            //                   .WithAction(ActionEvent.Create(CubaseAreaTypes.Script, "Test Select Track")));
-            var sut = new CubaseScriptService();
-            var result = await sut.ProcessActionAsync(ActionEvent.Create(CubaseAreaTypes.Script, "Test Select Track"));
+            await StartServer(this.ProcessWebSocketResponse);
+            // wait for cubase to be up !!!!
+            await this.StartCubase();
+
+            await Task.Delay(20000);
+            
+            var scriptResult = await SendCommand(CubaseCommand.Create()
+                               .WithButtonType(CubaseButtonType.Script)
+                               .WithAction(ActionEvent.Create(CubaseAreaTypes.Script, "Test Select Track")));
+            
+            if (scriptResult == null)
+            {
+
+            }
+            
+            //var sut = new CubaseScriptService();
+            //var result = await sut.ProcessActionAsync(ActionEvent.Create(CubaseAreaTypes.Script, "Test Select Track"));
         }
 
         [TestMethod]

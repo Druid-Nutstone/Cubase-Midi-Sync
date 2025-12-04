@@ -4,9 +4,17 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 {
     public interface IMidiService
     {
-        void RegisterOnChannelChanged(Action<MidiChannelCollection> action);  
+        Action<MidiChannelCollection> RegisterOnChannelChanged(Action<MidiChannelCollection> action);  
         
-        MidiChannelCollection MidiChannels { get; set; }    
+        void UnRegisterOnChannelChanged(Action<MidiChannelCollection> action);
+
+        Action<MidiChannel> RegisterOnTrackSelected(Action<MidiChannel> action);
+
+        void UnRegisterOnTrackSelected(Action<MidiChannel> action);
+
+        MidiChannelCollection MidiChannels { get; set; }
+
+        Task<MidiChannelCollection?> GetTracksAsync(Action<string> errorHandler, int timeoutMs = 5000);
 
         public void Initialise();
 
@@ -22,8 +30,9 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         void Dispose();
 
-        public Action? OnReadyReceived { get; set; } 
+        public Action? OnReadyReceived { get; set; }
 
+        public Action<CommandValue> onCommandDataHandler { get; set; }
         bool ReadyReceived { get; set; }
 
         public void SelectTracks(List<MidiChannel> tracks);

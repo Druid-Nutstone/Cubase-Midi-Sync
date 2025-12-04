@@ -18,7 +18,21 @@ namespace Cubase.Midi.Sync.Common
 
         public static MidiAndKey AddKey(string name, string action, string category)
         {
-            return new MidiAndKey() { KeyType = category == "Macro" ? CubaseAreaTypes.KeyMacro : CubaseAreaTypes.Keys, Name = name, Action = action, Category = category };
+            return new MidiAndKey() 
+            { 
+                KeyType = category == "Macro" ? CubaseAreaTypes.KeyMacro : CubaseAreaTypes.Keys, Name = name, Action = action, Category = category };
+        }
+
+        public static MidiAndKey AddScript(string name, string fullName)
+        {
+            return new MidiAndKey() 
+            { 
+                Name = name, 
+                Action = fullName,
+                KeyType = CubaseAreaTypes.Script,
+                Category = CubaseAreaTypes.Script.ToString() 
+               
+            }; 
         }
 
         public static MidiAndKey AddMidi(string name, string action, string category)

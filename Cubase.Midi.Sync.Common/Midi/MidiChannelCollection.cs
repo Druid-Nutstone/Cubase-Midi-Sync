@@ -66,6 +66,13 @@ namespace Cubase.Midi.Sync.Common.Midi
             }
             return this;
         }
+
+        public static MidiChannelCollection FromArray(IEnumerable<MidiChannel> midiChannels)
+        {
+            var collection = new MidiChannelCollection();
+            collection.AddRange(midiChannels);
+            return collection;
+        }
     }
 
     public class MidiChannel

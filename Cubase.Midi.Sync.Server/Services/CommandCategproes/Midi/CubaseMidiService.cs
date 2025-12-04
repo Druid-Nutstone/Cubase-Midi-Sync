@@ -8,6 +8,7 @@ using Cubase.Midi.Sync.Server.Services.CommandCategproes;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.Midi;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System.Diagnostics;
 
 namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
 {
@@ -86,6 +87,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
                     isReady = true;
                 };
                 this.midiService.SendSysExMessage(MidiCommand.Ready, "{}");
+                // bool ok = await WaitUntilReadyAsync(() => isReady);
                 while (!isReady)
                 {
                     Thread.Sleep(50); // Wait for ready signal
@@ -99,12 +101,37 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             }
         }
 
+        public async Task<bool> WaitUntilReadyAsync(Func<bool> check, int timeoutMs = 3000)
+        {
+            var sw = Stopwatch.StartNew();
+
+            while (!check())
+            {
+                if (sw.ElapsedMilliseconds > timeoutMs)
+                    return false;
+
+                await Task.Delay(50);
+            }
+
+            return true;
+        }
+
         private async Task<bool> ExecuteMidiCommandAsync(string midiCommand)
         {
             var currentMidiCommand = this.commandCollection.GetCommandByCommand(midiCommand);
             if (currentMidiCommand != null)
             {
-                return this.midiService.SendMidiMessage(currentMidiCommand);
+                bool isReady = false;
+                this.midiService.onCommandDataHandler = (commandValue) =>
+                {
+                    if (commandValue.Name == currentMidiCommand.Name)
+                    {
+                        isReady = true;
+                    }
+                };
+                var result = await this.midiService.SendMidiMessageAsync(currentMidiCommand);
+                bool ok = await WaitUntilReadyAsync(() => isReady);
+                return ok ? result : false;
             }
             else
             {

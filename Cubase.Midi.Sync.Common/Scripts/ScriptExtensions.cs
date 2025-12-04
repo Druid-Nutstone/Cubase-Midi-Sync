@@ -13,5 +13,15 @@ namespace Cubase.Midi.Sync.Common.Scripts
         {
             return lines.Where(line => line.Trim().Length > 0);    
         }
+
+        public static ScriptFunction ToScriptFunction(this string command)
+        {
+            ScriptFunction func = ScriptFunction.Unknown;
+            if (!Enum.TryParse<ScriptFunction>(command, true, out func))
+            {
+                return ScriptFunction.Unknown;
+            }
+            return func;
+        }
     }
 }

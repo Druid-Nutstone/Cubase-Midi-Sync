@@ -26,40 +26,32 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
             this.logger = logger;
         }
 
-
-
         public CubaseActionResponse ProcessAction(ActionEvent request)
         {
-            try
+            if (!this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())
+                return CubaseActionResponse.CreateError("Cubase is not up or focused");
+
+            var result = SendKey(request.Action, (err) =>
             {
-                var response = CubaseActionResponse.CreateSuccess();
-                if (this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())
-                {
-                    var result = SendKey(request.Action, (err) =>
-                    {
-                        response = CubaseActionResponse.CreateError(err);
-                    });
-                }
-                else
-                {
-                    response = CubaseActionResponse.CreateError("Either cubase is not running or cannot focus a cubase window");
-                }
-                return response;
-            }
-            catch (Exception ex)
-            {
-                return CubaseActionResponse.CreateError($"Exception sending key: {ex.Message}");
-            }
+                this.logger.LogInformation($"Error running {request.Action} {err}");
+            });
+            return result ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError($"Cannot process {request.Action}");
         }
 
-        public async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
+        public Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
         {
-            var response = CubaseActionResponse.CreateSuccess();
-            await Task.Run(() => 
-            { 
-               response = this.ProcessAction(request);  
+            if (!this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())
+                return Task.FromResult(CubaseActionResponse.CreateError(
+                    "Either Cubase is not running or cannot focus a Cubase window"));
+
+            var result = SendKey(request.Action, (err) => 
+            {
+                this.logger.LogInformation($"Error running {request.Action} {err}");
             });
-            return response;
+
+            return Task.FromResult(result
+                ? CubaseActionResponse.CreateSuccess()
+                : CubaseActionResponse.CreateError("Invalid key or mapping"));
         }
 
         private bool SendKey(string key, Action<string> errHandler)

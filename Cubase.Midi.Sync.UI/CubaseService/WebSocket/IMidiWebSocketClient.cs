@@ -15,7 +15,6 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
 
         Task<WebSocketMessage> ConnectIfNotConnectedAsync();
 
-
         Task Close(); 
     }
 }

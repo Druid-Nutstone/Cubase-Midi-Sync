@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Common.Window;
@@ -19,11 +20,16 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
 
         CubaseMixerCollection? mixerCollection { get; set; }
 
+        MidiChannelCollection Tracks { get; set; }  
+
         void RegisterForErrors(Func<string, Task> errorHandler);
 
         void RegisterForSystemMessages(Func<WebSocketCommand, Task> systemMessageHandler);
 
         void RegisterCubaseWindowHandler(Func<CubaseActiveWindowCollection, Task> windowHander);
+
+
+        void RegisterdTrackHandler(Func<MidiChannel, Task> trackHandler);
 
     }
 }

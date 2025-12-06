@@ -12,6 +12,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         void UnRegisterOnTrackSelected(Action<MidiChannel> action);
 
+        Action<MidiChannel> RegisterOnTrackChanged(Action<MidiChannel> action);
+
         MidiChannelCollection MidiChannels { get; set; }
 
         Task<MidiChannelCollection?> GetTracksAsync(Action<string> errorHandler, int timeoutMs = 5000);
@@ -21,6 +23,8 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand);
 
         public Task<bool> SendMidiMessageAsync(CubaseMidiCommand midiCommand);
+
+        public Task<bool> SendSysExMessageAsync<T>(MidiCommand command, T request, int timeoutMs = 3000);
 
         public void SendSysExMessage<T>(MidiCommand command, T request);
 
@@ -35,6 +39,6 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
         public Action<CommandValue> onCommandDataHandler { get; set; }
         bool ReadyReceived { get; set; }
 
-        public void SelectTracks(List<MidiChannel> tracks);
+        public Task<bool> SelectTracks(List<MidiChannel> tracks, int timeOutMs = 5000);
     }
 }

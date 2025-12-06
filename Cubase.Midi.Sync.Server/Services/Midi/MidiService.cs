@@ -25,9 +25,13 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public List<Action<MidiChannel>> onTrackSelectedHandlers { get; set; } = new List<Action<MidiChannel>>();
 
+        private List<Action<MidiChannel>> onTrackChangedHandlers { get; set; } = new List<Action<MidiChannel>>();
+
         private CubaseMidiCommandCollection cubaseMidiCommands;
 
         private Action<MidiChannelCollection>? OnTrackCollection { get; set; } = null;
+
+        private Action<bool>? OnCommandComplete { get; set; } = null;
 
         public Action? OnReadyReceived { get; set; } = null;
 
@@ -54,6 +58,7 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 {MidiCommand.TrackUpdate.ToString(), this.TracksReceived },
                 {MidiCommand.TrackComplete.ToString(), this.TracksComplete },
                 {MidiCommand.CommandValueChanged.ToString(), this.CommandValueChanged },
+                {MidiCommand.CommandComplete.ToString(), this.CommandComplete  }
              
             };
             //midiThread = new Thread(ProcessMidiQueue)
@@ -109,6 +114,12 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             return action;
         }
 
+        public Action<MidiChannel> RegisterOnTrackChanged(Action<MidiChannel> action)
+        {
+            this.onTrackChangedHandlers.Add(action);
+            return action;
+        }
+
         public void UnRegisterOnTrackSelected(Action<MidiChannel> action)
         {
             this.onTrackSelectedHandlers.Remove(action);
@@ -152,16 +163,60 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
             this.midiDriver.SendMessage(MidiCommand.Tracks, "");
         }
 
+        public async Task<bool> SendSysExMessageAsync<T>(MidiCommand command, T request, int timeoutMs = 3000)
+        {
+            var tcs = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            this.OnCommandComplete = (result) =>
+            {
+                tcs.SetResult(true);
+            };
+
+            var timeoutTask = Task.Delay(timeoutMs);
+
+            this.SendSysExMessage(command, request);
+
+            // Wait for whichever finishes first
+            var completed = await Task.WhenAny(tcs.Task, timeoutTask);
+
+            if (completed == timeoutTask)
+            {
+                return false; // indicates timeout
+            }
+            return await tcs.Task; // success
+        }
+
         public void SendSysExMessage<T>(MidiCommand command, T request)
         {
             this.midiDriver.SendMessage(command, request);  
         }
 
-        public void SelectTracks(List<MidiChannel> tracks)
+        public async Task<bool> SelectTracks(List<MidiChannel> tracks, int timeoutMs = 5000)
         {
+            var tcs = new TaskCompletionSource<bool>(
+                 TaskCreationOptions.RunContinuationsAsynchronously);
+
+            this.OnCommandComplete = (result) =>
+            {
+                tcs.SetResult(true);
+            };
+
+            var timeoutTask = Task.Delay(timeoutMs);
+
             this.SendSysExMessage(MidiCommand.SelectTracks, tracks);
+
+            // Wait for whichever finishes first
+            var completed = await Task.WhenAny(tcs.Task, timeoutTask);
+
+            if (completed == timeoutTask)
+            {
+                return false; // indicates timeout
+            }
+            return await tcs.Task; // success
         }
-        
+            
+       
         public async Task<MidiChannelCollection?> GetTracksAsync(Action<string> errorHandler, int timeoutMs = 5000)
         {
             var tcs = new TaskCompletionSource<MidiChannelCollection?>(
@@ -250,6 +305,19 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
                 handler?.Invoke(channelCollection);
             }
 
+            foreach (var handler in this.onTrackChangedHandlers.ToList())
+            {
+                handler?.Invoke(channelData);
+            }
+
+        }
+
+        private void CommandComplete(string emptyString)
+        {
+            if (this.OnCommandComplete != null)
+            {
+                this.OnCommandComplete.Invoke(true);
+            }
         }
 
         private void CommandValueChanged(string commandValue)

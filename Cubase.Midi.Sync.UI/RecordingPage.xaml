@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cubase.Midi.Sync.UI.Controls"
+             x:Class="Cubase.Midi.Sync.UI.RecordingPage"
+             Title="RecordingPage">
+
+    <ScrollView Orientation="Vertical">
+        <VerticalStackLayout>
+
+            <controls:TrackSelectorView x:Name="trackSelector" Tracks="{Binding Tracks}" />
+
+            <VerticalStackLayout x:Name="CommandsContainer"
+                                 Margin="10"
+                                 Padding="5"/>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -73,6 +73,18 @@ namespace Cubase.Midi.Sync.Common.Midi
             collection.AddRange(midiChannels);
             return collection;
         }
+
+        public List<MidiChannel> GetTracksWith(IEnumerable<string> trackNames)
+        {
+            return this.Where(x =>
+                trackNames.Any(name =>
+                    !string.IsNullOrEmpty(x.Name) && x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))).ToList();
+        }
+
+        public bool HaveTrack(string trackName)
+        {
+            return this.Any(x => x.Name.Equals(trackName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     public class MidiChannel

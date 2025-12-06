@@ -1,4 +1,5 @@
-﻿using Cubase.Midi.Sync.UI.CubaseService.NutstoneClient;
+﻿using Cubase.Midi.Sync.UI.Controls;
+using Cubase.Midi.Sync.UI.CubaseService.NutstoneClient;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.NutstoneServices.NutstoneClient;
 using Cubase.Midi.Sync.UI.Settings;
@@ -88,6 +89,8 @@ namespace Cubase.Midi.Sync.UI
                             .AddSingleton(appSettings)
                             .AddTransient<BasePage>()
                             .AddTransient<MixerPage>()
+                            .AddTransient<RecordingPage>()
+                            .AddSingleton<TrackSelectorView>()
                             .AddTransient<CubaseOptions>()
                             .AddTransient<CubaseMainPage>();
 

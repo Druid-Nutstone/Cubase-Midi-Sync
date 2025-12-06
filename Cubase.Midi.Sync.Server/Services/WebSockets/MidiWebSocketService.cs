@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading.Channels;
 
 namespace Cubase.Midi.Sync.Server.Services.WebSockets
 {
@@ -117,6 +118,15 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                                     var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
                                     await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(allTracks.Serialise())), WebSocketMessageType.Text, true, ct);
                                 }
+                            }
+                        });
+
+                        this.midiService.RegisterOnTrackChanged(async (track) =>
+                        {
+                            if (ws.State == WebSocketState.Open)
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
+                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
                             }
                         });
 

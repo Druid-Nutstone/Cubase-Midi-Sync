@@ -20,6 +20,9 @@ namespace Cubase.Midi.Sync.Common.Midi
         PreviousTrack,
         MacroCommand,
         TrackSelectionChanged,
-        CommandValueChanged
+        CommandValueChanged,
+        EnableRecord,
+        DisableRecord,
+        CommandComplete
     }
 }

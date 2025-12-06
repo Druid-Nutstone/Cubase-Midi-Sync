@@ -12,6 +12,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
         GetTracks = 1,
         DisableRecord = 2,
         EnableRecord = 3,
+        ExecuteCommand = 4,
         Unknown = 99
     }
 }

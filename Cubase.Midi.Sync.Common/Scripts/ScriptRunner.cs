@@ -57,26 +57,22 @@ namespace Cubase.Midi.Sync.Common.Scripts
                     return ScriptResult.CreateError("Invalid if/else");
 
                 case ForEachNode foreachNode:
-                    var collection = await EvaluateExpressionAsync(foreachNode.Collection) as IEnumerable<object>;
-                    if (collection == null)
-                    {
+                    var rawCollection = await EvaluateExpressionAsync(foreachNode.Collection);
+
+                    if (rawCollection is ScriptResult sr)
+                        return sr;
+
+                    if (rawCollection is not System.Collections.IEnumerable enumerable)
                         return ScriptResult.CreateError("Cannot evaluate Foreach");
-                    }
 
-                    if (collection is ScriptResult)
+                    foreach (var item in enumerable)
                     {
-                        return (ScriptResult)collection;
-                    }
-
-                    foreach (var item in collection)
-                    {
-                        _variables[foreachNode.Variable] = item;
+                        _variables[foreachNode.Variable] = item; // now matches VariableNode.Name in AST
                         var result = await ExecuteBlockAsync(foreachNode.Body);
                         if (!result.IsSucces)
-                        {
                             return result;
-                        }
                     }
+
                     _variables.Remove(foreachNode.Variable);
                     return ScriptResult.Create();
 
@@ -135,6 +131,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
         {
             switch (expr)
             {
+
                 case StringNode s: return s.Value;
                 case VariableNode v:
                     if (_variables.TryGetValue(v.Name, out var val))
@@ -147,7 +144,6 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
                     // Call Cubase function via your API
                     return await _cubase.CallFunctionAsync(f.Name, args.ToArray());
-
                 default:
                     return ScriptResult.CreateError("Unknown Node Type");
             }

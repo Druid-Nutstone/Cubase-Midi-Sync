@@ -1,4 +1,5 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Mixer;
 using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Common.Window;
@@ -15,9 +16,13 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
     {
         private CubaseCommandsCollection? commands = null;
 
-        public CubaseMixerCollection? mixerCollection { get; set; } = null; 
+        public CubaseMixerCollection? mixerCollection { get; set; } = null;
+
+        public MidiChannelCollection? Tracks { get; set; } = null;
 
         private Func<string, Task>? errorHandler = null;
+
+        private readonly List<Func<MidiChannel, Task>> registeredTrackHandlers = new();
 
         private readonly List<Func<CubaseActiveWindowCollection, Task>> registeredWindowEventHandlers
             = new();
@@ -29,6 +34,14 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
         {
             switch (request.Command)
             {
+                case WebSocketCommand.TrackUpdated:
+                    var midiChannel = request.GetMessage<MidiChannel>();
+                    foreach (var trackHandler in this.registeredTrackHandlers)
+                        _ = Task.Run(() => trackHandler(midiChannel));  // fire & forget safely
+                    break;
+                case WebSocketCommand.Tracks:
+                    this.Tracks = request.GetMessage<MidiChannelCollection>();
+                    break;
                 case WebSocketCommand.ServerClosed:
                 case WebSocketCommand.CubaseReady:
                 case WebSocketCommand.CubaseNotReady: 
@@ -102,5 +115,14 @@ namespace Cubase.Midi.Sync.UI.CubaseService.WebSocket
                 this.registeredWindowEventHandlers.Add(windowHander);   
             }  
         }
+
+        public void RegisterdTrackHandler(Func<MidiChannel, Task> trackHandler)
+        {
+            if (!this.registeredTrackHandlers.Contains(trackHandler))
+            {
+                this.registeredTrackHandlers.Add(trackHandler);
+            }
+        }
+
     }
 }

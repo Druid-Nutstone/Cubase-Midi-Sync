@@ -27,8 +27,9 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
         public IEnumerable<string> SupportedKeys => ["Script"];
 
-        private Dictionary<Type, Func<Node, Task<(bool success, string? message)>>> nodeProcessors;
-        private Dictionary<string, Func<IEnumerable<string>, Task<(bool success, string? message)>>> conditionProcessors;
+        Dictionary<ScriptFunction, Func<object[], Task<object>>> functions;
+
+        Dictionary<ScriptFunction, Func<object[], Task<ScriptResult>>> commands;
 
         // In the constructor, fix the dictionary initialization to match the correct types
         public CubaseScriptService(IMidiService midiService,
@@ -40,18 +41,23 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             this.cacheService = cacheService;
             this.serviceProvider = serviceProvider;
             this.logger = logger;
-            this.InitialiseDictionaries();
+            this.functions = new Dictionary<ScriptFunction, Func<object[], Task<object>>>
+            {
+                {ScriptFunction.GetTracks,  this.GetTracks }
+            };
+
+            this.commands = new Dictionary<ScriptFunction, Func<object[], Task<ScriptResult>>>()
+            {
+                {ScriptFunction.DisableRecord, this.DisableRecord },
+                {ScriptFunction.EnableRecord, this.EnableRecord },
+                {ScriptFunction.SelectTrack, this.SelectTrack },
+                {ScriptFunction.ExecuteCommand, this.ExecuteCommand }
+            };
         }
 
-        // used for testing 
-        //public CubaseScriptService()
-        //{
-        //    this.InitialiseDictionaries();
-        //}
 
         public CubaseActionResponse ProcessAction(ActionEvent request)
         {
-
             return CubaseActionResponse.CreateError("Non async is NOT supported");
         }
 
@@ -77,224 +83,109 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
             return scriptResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(scriptResult.Message);
 
-            /*
-            if (node != null)
-            {
-                foreach (var statement in node.Statements)
-                {
-                    var result = await this.nodeProcessors[statement.GetType()]
-                                     .Invoke(statement);
-                    if (!result.success)
-                    {
-                        actionResponse = CubaseActionResponse.CreateError($"Script failed on statment {result.message}");
-                        break;
-                    }
-                }
-            }
-            return actionResponse;
-            */
-        }
+       }
 
-        private void InitialiseDictionaries()
-        {
-            this.nodeProcessors = new Dictionary<Type, Func<Node, Task<(bool success, string? message)>>>()
-            {
-                { typeof(IfNode), this.ProcessIF },
-                { typeof(CommandNode), this.ProcessCommand }
-            };
-            // <string, Func<IEnumerable<string>
-            this.conditionProcessors = new Dictionary<string, Func<IEnumerable<string>, Task<(bool success, string? message)>>>()
-            {
-                { ScriptFunction.SelectTrack.ToString().ToLower(), this.ProcessSelectTrack }
-            };
-        }
-
-        private async Task<(bool success, string? message)> ProcessCommand(Node node)
-        {
-            var commandNode = (CommandNode)node;
-            return (true, null);
-        }
-
-        private async Task<(bool success, string? message)> ProcessIF(Node node)
-        {
-            var ifNode = (IfNode)node;
-            (bool success, string? message) conditionResult = (true, null);
-            /*
-            switch (ifNode.Condition)
-            {
-                case CommandConditionNode ccn:
-                    if (this.conditionProcessors.ContainsKey(ccn.Command.ToLower()))
-                    {
-                        this.logger.LogInformation($"Processing if node with {ccn.Command}");
-                        conditionResult = await this.conditionProcessors[ccn.Command.ToLower()].Invoke(ccn.Args);
-                        if (!conditionResult.success)
-                        {
-                            return conditionResult;
-                        }
-                    }
-                    else
-                    {
-                        this.logger.LogInformation($"could not find condition {ccn.Command}");
-                        conditionResult = (false, $"The condition {ccn.Command} is not recognised");
-                        return conditionResult;
-                    }
-                    break;
-            }
-            */
-            if (conditionResult.success)
-            {
-                if (ifNode.Then != null)
-                {
-                    foreach (var thenNode in ifNode.Then)
-                    {
-                        if (this.nodeProcessors.ContainsKey(thenNode.GetType()))
-                        {
-                            var resultThen = await this.nodeProcessors[thenNode.GetType()].Invoke(thenNode);
-                            if (!resultThen.success)
-                            {
-                                return resultThen;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (ifNode.Else != null)
-                {
-                    foreach (var elseNode in ifNode.Else)
-                    {
-                        if (this.nodeProcessors.ContainsKey(elseNode.GetType()))
-                        {
-                            var resultElse = await this.nodeProcessors[elseNode.GetType()].Invoke(elseNode);
-                            if (!resultElse.success)
-                            {
-                                return resultElse;
-                            }
-                        }
-                    }
-                }
-            }
-            return (true, null);
-        }
-
-        private async Task<(bool success, string? message)> ProcessSelectTrack(IEnumerable<string> args)
-        {
-           
-            this.logger.LogInformation($"processing SelectTrack {string.Join(';',args)}");
-            //if (args.Count() > 1)
-            //{
-            //    return (false, "SelectTrack on accepts one argument (the track name)");
-            //}
-
-            // make sure the track name exists 
-            var tracksToSelect = new List<MidiChannel>();
-
-            var result = await this.GetMidiTracks(); 
-            if (!result.success)
-            {
-                return result;  
-            }
-            
-            foreach (var track in args)
-            {
-                var targetTrack = midiTracks?.GetChannelByName(track);
-                if (targetTrack == null)
-                {
-                    return (false, $"The track name {track} does not exist in the current cubase project");
-
-                }
-                if (targetTrack.Selected.HasValue && !targetTrack.Selected.Value)
-                {
-                    tracksToSelect.Add(targetTrack);
-                }
-            } 
-
-            var preCommands = await ExecuteCommands(["Show All Tracks", "Expand Folders"]);
-            if (!preCommands.success)
-            {
-                return preCommands;
-            }
-
-            this.midiService.SelectTracks(tracksToSelect);
-
-            // asert alltracks are selected 
-            result = await this.GetMidiTracks();
-            if (!result.success)
-            {
-                return result;  
-            }
-            foreach (var mtrack in tracksToSelect)
-            {
-                if (!midiTracks.GetChannelByName(mtrack.Name).Selected.Value)
-                {
-                    return (false, $"Track {mtrack.Name} has NOT been selected");
-                }
-            }
-            return (true, null);
-
-            async Task<(bool success, string? message)> ExecuteCommands(IEnumerable<string> commands)
-            {
-                foreach (var cmd in commands)
-                {
-                    this.logger.LogInformation($"Executing {cmd}");
-                    var result = await this.RunCubaseMidiAndKeyCommand(cmd);
-                    if (!result.success)
-                    {
-                        return result;
-                    }
-                }
-                return (true, null);
-            }
-        }
-
-        private async Task<(bool success, string? message)> RunCubaseMidiAndKeyCommand(string name)
-        {
-            var command = this.cacheService.MidiAndKeys.GetCommandByName(name);
-
-            if (command == null)
-            {
-                return (false, $"Could not find command {name}");
-            }
-
-            var commandResult = await this.ProcessMidiAndKeyCommand(command);
-
-            return (commandResult.Success, commandResult.Message);
-        }
-         
-        private async Task<CubaseActionResponse> ProcessMidiAndKeyCommand(MidiAndKey midiAndKey)
-        {
-            var actionEvent = ActionEvent.CreateFromMidiAndKey(midiAndKey);
-            var processor = this.serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(actionEvent.CommandType.ToString()));
-            if (processor == null)
-            {
-                return new CubaseActionResponse
-                {
-                    Success = false,
-                    Message = $"No service found for area {actionEvent.CommandType.ToString()}"
-                };
-            }
-            return await processor.ProcessActionAsync(actionEvent);
-        }
-
-        private async Task<(bool success, string? message)> GetMidiTracks()
-        {
-            (bool success, string? message) result = (true, null);
-            midiTracks = await this.midiService.GetTracksAsync((error) => 
-            {
-                result = (false, error); 
-            });
-            return result;
-        }
 
         public async Task<ScriptResult> ExecuteCommandAsync(string command, params object[] args)
         {
-            throw new NotImplementedException();
+            var scriptFunction = command.ToScriptFunction();
+            if (scriptFunction == ScriptFunction.Unknown)
+            {
+                return ScriptResult.CreateError($"{command} is not a valid command");
+            }
+            return await this.commands[scriptFunction](args);
         }
 
         public async Task<object> CallFunctionAsync(string function, params object[] args)
         {
-            throw new NotImplementedException();
+            var scriptFunction = function.ToScriptFunction();
+            if (scriptFunction == ScriptFunction.Unknown)
+            {
+                return ScriptResult.CreateError($"{function} is not a valid function");
+            }
+            return await this.functions[scriptFunction](args);
         }
+
+        #region functions
+        private async Task<object> GetTracks(object[] args)
+        {
+            return this.GetChannels(args);
+        }
+        #endregion
+
+        #region commands 
+        private async Task<ScriptResult> ExecuteCommand(object[] args)
+        {
+            var allCommands = new MidiAndKeysCollection(); 
+            foreach (object arg in args)
+            {
+                var midiOrKeyCommand = allCommands.GetCommandByName(arg.ToString()); 
+                if (midiOrKeyCommand != null)
+                {
+                    var processor = this.serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(midiOrKeyCommand.KeyType.ToString()));
+                    if (processor == null)
+                    {
+                        return ScriptResult.CreateError($"No processor found for command {midiOrKeyCommand.Name} {midiOrKeyCommand.KeyType.ToString()}");
+
+                    }
+                    var result = await processor.ProcessActionAsync(ActionEvent.CreateFromMidiAndKey(midiOrKeyCommand));
+                }
+                else
+                {
+                    return ScriptResult.CreateError($"Cannot find midi or key command {arg.ToString()}");
+                }
+            }
+            return ScriptResult.Create();
+        } 
+        
+        private async Task<ScriptResult> SelectTrack(object[] args)
+        {
+            List<MidiChannel>? channels = null;
+            if (args.IsStringArray())
+            {
+                channels = GetChannels(args);
+            }
+            else
+            {
+                channels = args.ToMidiChannelArray();
+            }
+            foreach (var channel in channels)
+            {
+                if (!this.midiService.MidiChannels.HaveTrack(channel.Name))
+                {
+                    return ScriptResult.CreateError($"The track {channel.Name} does not exist");
+                }
+            }
+            var result = await this.midiService.SelectTracks(channels);
+            return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not selected tracks  - timeout");
+        }
+        
+        private async Task<ScriptResult> DisableRecord(object[] args)
+        {
+            var channels = args.ToMidiChannelArray();
+            var result = await this.midiService.SendSysExMessageAsync(MidiCommand.DisableRecord, channels, 5000);
+            return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not execute DisableRecord - timeout");
+        }
+        private async Task<ScriptResult> EnableRecord(object[] args)
+        {
+            var channels = args.ToMidiChannelArray();
+            var result = await this.midiService.SendSysExMessageAsync(MidiCommand.EnableRecord, channels, 5000);
+            return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not execute enable Record - timeout");
+        }
+        #endregion
+
+        #region internal command helpers
+        private List<MidiChannel> GetChannels(object[] args)
+        {
+            if (args.Length == 0)
+            {
+                return this.midiService.MidiChannels.ToList();
+            }
+            else
+            {
+                return this.midiService.MidiChannels.GetTracksWith(args.ToStringArray());
+            }
+        }
+        #endregion
     }
 }

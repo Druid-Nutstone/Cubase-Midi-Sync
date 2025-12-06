@@ -14,7 +14,9 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.ScriptParsers
         Dictionary<ScriptFunction, Func<object[], Task<object>>> functions;
 
         Dictionary<ScriptFunction, Func<object[], Task<ScriptResult>>> commands;
-        
+
+        private MidiChannelCollection channels;
+
         public TestCubaseApi()
         {
             this.functions = new Dictionary<ScriptFunction, Func<object[], Task<object>>>
@@ -27,6 +29,7 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.ScriptParsers
                 {ScriptFunction.DisableRecord, this.DisableRecord },
                 {ScriptFunction.EnableRecord, this.EnableRecord }
             };
+            this.channels = this.BuildTestChannels();
         }
 
         public Task<object> CallFunctionAsync(string function, params object[] args)
@@ -51,14 +54,13 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.ScriptParsers
 
 
         #region functions
-        private async Task<object> GetTracks(object[] args) 
+        private async Task<object> GetTracks(object[] args)
         {
-            if (args.Count() > 0)
+            if (args.Length == 0)
             {
-
+                return this.channels;
             }
-            
-            return Task.CompletedTask;
+            return this.channels.GetTracksWith(args.ToStringArray());
         }
         #endregion
 
@@ -74,6 +76,15 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.ScriptParsers
         #endregion
 
         #region helper functions
-        private MidiChannelCollection GetTracks
+        private MidiChannelCollection BuildTestChannels()
+        {
+            return MidiChannelCollection.FromArray(new List<MidiChannel>()
+            {
+                { new MidiChannel() { Name = "Telecaster" } },
+                { new MidiChannel() { Name = "Vocal  1"}}
+            });
+        }
+        
+        #endregion
     }
 }

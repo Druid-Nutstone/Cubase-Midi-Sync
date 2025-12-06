@@ -25,16 +25,20 @@ public partial class CubaseMainPage : ContentPage
 
     private MixerPage mixerPage;
 
+    private RecordingPage recordingPage;
+
     public CubaseMainPage(AppSettings appSettings, 
                           ICubaseHttpClient client, 
                           IMidiWebSocketClient webSocketClient, 
                           BasePage basePage,
                           IMidiWebSocketResponse midiWebSocketResponse,
-                          MixerPage mixerPage)
+                          MixerPage mixerPage,
+                          RecordingPage recordingPage)
     {
         InitializeComponent();
         this.mixerPage = mixerPage;
         this.basePage = basePage;
+        this.recordingPage = recordingPage;
         this.appSettings = appSettings;
         this.midiWebSocketResponse = midiWebSocketResponse;
         this.webSocketClient = webSocketClient;
@@ -136,6 +140,7 @@ public partial class CubaseMainPage : ContentPage
             collections = null;
             await this.webSocketClient.SendMidiCommand(WebSocketMessage.Create(WebSocketCommand.Commands));
             collections = await this.midiWebSocketResponse.GetCommands();
+            
             var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
                 try
@@ -149,6 +154,19 @@ public partial class CubaseMainPage : ContentPage
                 }
             }, this.appSettings);
             CollectionsLayout.Children.Add(mixerButton.Button);
+
+            var recordingButton = RaisedButtonFactory.Create("Record", System.Drawing.Color.Red.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
+            {
+                try
+                {
+                    await Navigation.PushAsync(this.recordingPage);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error CubaseMainPage LoadCommands - Initialise Recording", ex.Message, "OK");
+                }
+            }, this.appSettings);
+            CollectionsLayout.Children.Add(recordingButton.Button);
 
             if (collections == null || collections.Count == 0) return;
 
@@ -174,6 +192,7 @@ public partial class CubaseMainPage : ContentPage
                 }
             }
             CollectionsLayout.Children.RemoveAt(0); // remove loading button
+            ScrollView.InvalidateMeasure();
         }
         catch (Exception ex)
         {

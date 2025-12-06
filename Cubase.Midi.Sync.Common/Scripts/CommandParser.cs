@@ -172,19 +172,6 @@ namespace Cubase.Midi.Sync.Common.Scripts
         }
 
         // ----------------- COMMAND -------------------------
-        /*
-        private Node ParseCommand(Action<ScriptParseException> errorHandler)
-        {
-            var line = ConsumeLine();
-            if (line.Count == 0) return null;
-
-            return new CommandNode
-            {
-                Command = line[0],
-                // Args = ParseExpressionTokens(line.Skip(1).ToList(), errorHandler).ToFunctionArgList()
-            };
-        }
-        */
         private Node ParseCommand(Action<ScriptParseException> errorHandler)
         {
             var line = ConsumeLine();
@@ -281,6 +268,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
         }
 
         // ----------------- FOREACH -------------------------
+        /*
         private Node ParseForEach(Action<ScriptParseException> errorHandler)
         {
             var line = ConsumeLine();
@@ -307,19 +295,54 @@ namespace Cubase.Midi.Sync.Common.Scripts
                 Body = body
             };
         }
+        */
+        private Node ParseForEach(Action<ScriptParseException> errorHandler)
+        {
+            var line = ConsumeLine();
+
+            if (line.Count < 5 || line[1] != "(" || !line.Contains("in") || line[^1] != ")")
+                throw new ScriptParseException("Invalid foreach syntax", _lineIndex, string.Join(" ", line));
+
+            int inIndex = line.IndexOf("in");
+
+            // Strip $ prefix here so variable names match AST VariableNode
+            string varName = line[2].TrimStart('$');
+
+            var exprTokens = line.Skip(inIndex + 1).Take(line.Count - inIndex - 2).ToList();
+            var collectionExpr = ParseExpressionTokens(exprTokens, errorHandler);
+
+            var body = ParseStatements(errorHandler);
+
+            if (!PeekToken(0).Equals("endforeach", StringComparison.OrdinalIgnoreCase))
+                throw new ScriptParseException("Expected 'endforeach'", _lineIndex, "");
+
+            ConsumeLine(); // skip endforeach
+
+            return new ForEachNode
+            {
+                Variable = varName,
+                Collection = collectionExpr,
+                Body = body
+            };
+        }
 
         // ----------------- EXPRESSIONS ----------------------
         private ExpressionNode ParseExpressionTokens(List<string> tokens, Action<ScriptParseException> errorHandler)
         {
-            if (tokens.Count == 0) return null;
+            if (tokens == null || tokens.Count == 0) return null;
 
+            // function style: name ( ... )
             if (tokens.Count > 1 && tokens[1] == "(")
                 return ParseFunctionCall(tokens, errorHandler);
 
+            // multi-token without parentheses — treat as function-ish where first token is name and rest are simple args
             if (tokens.Count > 1)
             {
                 string funcName = tokens[0];
-                var args = tokens.Skip(1).Select(ParseSingleToken).ToList();
+                var args = tokens.Skip(1)
+                                 .Select(ParseSingleToken)
+                                 .Where(n => n != null)
+                                 .ToList();
                 return new FunctionCallNode
                 {
                     Name = funcName,
@@ -327,6 +350,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
                 };
             }
 
+            // single token
             return ParseSingleToken(tokens[0]);
         }
 
@@ -334,7 +358,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
         {
             string funcName = tokens[0];
             var args = new List<ExpressionNode>();
-            int i = 2;
+            int i = 2; // start after name and '('
 
             while (i < tokens.Count && tokens[i] != ")")
             {
@@ -342,6 +366,7 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
                 if (token == ",") { i++; continue; }
 
+                // nested function call starting at this token (token is name and next is '(')
                 if (i + 1 < tokens.Count && tokens[i + 1] == "(")
                 {
                     var nestedTokens = CollectTokensForNestedFunction(tokens, i);
@@ -350,12 +375,17 @@ namespace Cubase.Midi.Sync.Common.Scripts
                     continue;
                 }
 
-                args.Add(ParseSingleToken(token));
+                var single = ParseSingleToken(token);
+                if (single != null)
+                    args.Add(single);
                 i++;
             }
 
             if (i >= tokens.Count || tokens[i] != ")")
                 throw new ScriptParseException("Expected closing ')'", _lineIndex, string.Join(" ", tokens));
+
+            // consume the closing ')'
+            i++;
 
             return new FunctionCallNode
             {
@@ -380,21 +410,32 @@ namespace Cubase.Midi.Sync.Common.Scripts
 
         private ExpressionNode ParseSingleToken(string token)
         {
-            if (string.IsNullOrWhiteSpace(token)) return null;
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
 
+            token = token.Trim();
+
+            // ignore punctuation tokens generated by TokenizeLine
+            if (token == "(" || token == ")" || token == ",")
+                return null;
+
+            // quoted strings (token will include quotes)
             if ((token.StartsWith('"') && token.EndsWith('"')) ||
                 (token.StartsWith('\'') && token.EndsWith('\'')))
             {
                 return new StringNode { Value = token.Substring(1, token.Length - 2) };
             }
 
+            // variables with $ prefix
             if (token.StartsWith("$"))
             {
                 return new VariableNode { Name = token.Substring(1) };
             }
 
-            return new StringNode { Value = token };
+            // unquoted identifiers → treat as variable/identifier (not a literal string)
+            return new VariableNode { Name = token };
         }
+
 
         // ----------------- CONDITIONS ----------------------
         private ConditionNode ParseConditionTokens(List<string> tokens)
@@ -476,12 +517,16 @@ namespace Cubase.Midi.Sync.Common.Scripts
                 {
                     if (!inQuotes)
                     {
+                        // start quoted string - include opening quote
                         inQuotes = true;
                         quoteChar = c;
+                        buffer.Add(c);
                         continue;
                     }
                     else if (c == quoteChar)
                     {
+                        // include closing quote then flush
+                        buffer.Add(c);
                         inQuotes = false;
                         tokens.Add(new string(buffer.ToArray()));
                         buffer.Clear();

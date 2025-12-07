@@ -60,6 +60,9 @@ namespace Cubase.Midi.Sync.Server.Services.Cubase
         {
             switch (request.Command)
             {
+                case WebSocketCommand.SysEx:
+                    
+                    return WebSocketMessage.Create(WebSocketCommand.Success);
                 case WebSocketCommand.TrackState:
                     return WebSocketMessage.Create(WebSocketCommand.TrackState, TrackState.CreateFromChannels(await this.GetTracks()));
                 case WebSocketCommand.SelectTracks:

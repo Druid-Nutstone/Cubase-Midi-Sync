@@ -1,6 +1,0 @@
-@Cubase.Midi.Sync.Server_HostAddress = http://localhost:5290
-
-GET {{Cubase.Midi.Sync.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

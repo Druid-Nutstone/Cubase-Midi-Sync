@@ -121,17 +121,19 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             var currentMidiCommand = this.commandCollection.GetCommandByCommand(midiCommand);
             if (currentMidiCommand != null)
             {
-                bool isReady = false;
-                this.midiService.onCommandDataHandler = (commandValue) =>
-                {
-                    if (commandValue.Name == currentMidiCommand.Name)
-                    {
-                        isReady = true;
-                    }
-                };
+                // CAN't ASSUME Every midi command will case a command ok  
+                //bool isReady = false;
+                //this.midiService.onCommandDataHandler = (commandValue) =>
+                //{
+                //    if (commandValue.Name == currentMidiCommand.Name)
+                //    {
+                //        isReady = true;
+                //    }
+                //};
                 var result = await this.midiService.SendMidiMessageAsync(currentMidiCommand);
-                bool ok = await WaitUntilReadyAsync(() => isReady);
-                return ok ? result : false;
+                //bool ok = await WaitUntilReadyAsync(() => isReady);
+                //return ok ? result : false;
+                return result;
             }
             else
             {

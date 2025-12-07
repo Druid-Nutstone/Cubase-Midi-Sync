@@ -1,6 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Keys;
 using Cubase.Midi.Sync.Common.Scripts;
+using Cubase.Midi.Sync.Common.SysEx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,11 @@ namespace Cubase.Midi.Sync.Common.Midi
             {
                 this.Add(MidiAndKey.AddScript(s.Name, s.FileName));
             });
+            var sysExCommands = Enum.GetNames<SysExCommand>();
+            foreach (var sysExCommand in sysExCommands)
+            {
+                this.Add(MidiAndKey.AddSysEx(Enum.Parse<SysExCommand>(sysExCommand)));
+            }
 
         }
 

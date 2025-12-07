@@ -22,14 +22,14 @@
                    Wrap="Wrap"
                    JustifyContent="Start"
                    AlignItems="Start"
-                  Margin="10" />
+                  Margin="2" />
                 <FlexLayout 
                   x:Name="TrackButtons"
                    Direction="Row"
                    Wrap="Wrap"
                    JustifyContent="Start"
                    AlignItems="Start"
-                  Margin="10" />                    
+                  Margin="1" />                    
         </VerticalStackLayout>
         </ScrollView>
 

@@ -24,6 +24,7 @@ namespace Cubase.Midi.Sync.Common
         MidiMacro,
         KeyMacro,
         Preferences,
-        Script
+        Script,
+        SysEx
     }
 }

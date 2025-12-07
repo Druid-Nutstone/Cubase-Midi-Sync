@@ -1,8 +1,17 @@
-﻿using Cubase.Midi.Sync.Common.Midi;
+﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Extensions;
+using Cubase.Midi.Sync.Common.Midi;
+using Cubase.Midi.Sync.Common.Requests;
+using Cubase.Midi.Sync.Common.SysEx;
+using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.UI.CubaseService.WebSocket;
 using Cubase.Midi.Sync.UI.Models;
+using Cubase.Midi.Sync.UI.Settings;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics.Text;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Cubase.Midi.Sync.UI.Controls;
 
@@ -12,7 +21,8 @@ public partial class TrackSelectorView : ContentView
     private bool Expanded = true;
 
     private IMidiWebSocketResponse midiWebSocketResponse;
-
+    private IMidiWebSocketClient midiWebSocketClient;
+    private AppSettings appSettings;
 
     private readonly object _mergeLock = new();
     private readonly Dictionary<int, TrackModel> _pending = new();
@@ -29,16 +39,23 @@ public partial class TrackSelectorView : ContentView
 
     private void MaxMinButton_Clicked(object? sender, EventArgs e)
     {
+        SetExpandedState();
+    }
+
+    private void SetExpandedState()
+    {
         if (Expanded)
         {
             MaxMinButton.Text = "Select Tracks - Open";
             TrackLayout.IsVisible = false;
+            TrackButtons.IsVisible = false;
             Expanded = false;
         }
         else
         {
             MaxMinButton.Text = "Select Tracks - Close";
             TrackLayout.IsVisible = true;
+            TrackButtons.IsVisible= true;   
             Expanded = true;
         }
     }
@@ -56,14 +73,78 @@ public partial class TrackSelectorView : ContentView
         set => SetValue(TracksProperty, value);
     }
 
-    public async Task Initialise(IMidiWebSocketResponse midiWebSocketResponse)
+    public async Task Initialise(IMidiWebSocketResponse midiWebSocketResponse, IMidiWebSocketClient midiWebSocketClient, AppSettings appSettings)
     {
+        SetExpandedState();
+        this.midiWebSocketClient = midiWebSocketClient;
         this.midiWebSocketResponse = midiWebSocketResponse; 
         this.Tracks = new ObservableCollection<TrackModel>();
         midiWebSocketResponse.RegisterdTrackHandler(this.TracksUpdatedHandler);
         await this.UpdateTracks();
+        this.appSettings = appSettings;
+        this.BuildButtonUi();
     }
 
+    private void BuildButtonUi()
+    {
+        TrackButtons.Children.Clear();
+
+        var recordEnablebtn = new Button
+        {
+            Text = "Record Enable",
+            BackgroundColor = Colors.Red,
+            TextColor = Colors.White,
+            CornerRadius = 4,
+            Padding = new Thickness(6),
+            Margin = new Thickness(6),
+            FontSize = 13,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill,
+            LineBreakMode = LineBreakMode.WordWrap,
+        };
+
+        recordEnablebtn.Clicked += async (s, e) =>
+        {
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction,
+                                                 CubaseActionRequest
+                                                    .Create(
+                                                        ActionEvent.Create()
+                                                                   .WithAction(this.GetSelectedTracksAsString())
+                                                                   .WithSubCommand(SysExCommand.DisableAndEnable.ToString())
+                                                                   .WithCommandType(CubaseAreaTypes.SysEx)));
+            var response = await this.midiWebSocketClient.SendMidiCommand(socketMessage);
+        };
+
+        var recordDisablebtn = new Button
+        {
+            Text = "Record Disable",
+            BackgroundColor = Colors.LightGray,
+            TextColor = Colors.Black,
+            CornerRadius = 4,
+            Padding = new Thickness(6),
+            Margin = new Thickness(6),
+            FontSize = 13,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill,
+            LineBreakMode = LineBreakMode.WordWrap,
+        };
+
+        recordDisablebtn.Clicked += async (s, e) =>
+        {
+            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction,
+                                                 CubaseActionRequest
+                                                    .Create(
+                                                        ActionEvent.Create()
+                                                                   .WithSubCommand(SysExCommand.DisableRecord.ToString())
+                                                                   .WithCommandType(CubaseAreaTypes.SysEx)));
+            var response = await this.midiWebSocketClient.SendMidiCommand(socketMessage);
+        };
+
+        TrackButtons.Children.Add(recordEnablebtn);
+        TrackButtons.Children.Add(recordDisablebtn);
+    }
+    
+    
     private void BuildUI()
     {
         TrackLayout.Children.Clear();
@@ -87,9 +168,9 @@ public partial class TrackSelectorView : ContentView
         // --- Container (2 rows: button + indicators) ---
         var container = new Grid
         {
-            WidthRequest = 120,
-            HeightRequest = 120,
-            Padding = 4,
+            WidthRequest = 80,
+            HeightRequest = 80,
+            Padding = 2,
             RowDefinitions =
         {
             new RowDefinition { Height = GridLength.Star },
@@ -302,8 +383,11 @@ public partial class TrackSelectorView : ContentView
         control.BuildUI();
     }
 
+    public string GetSelectedTracksAsString() =>
+        string.Join(';', this.GetSelectedTracksAsList());
 
-
+    public IEnumerable<string> GetSelectedTracksAsList() =>
+        Tracks?.Where(t => t.IsSelected).Select(x => x.Name) ?? Enumerable.Empty<string>();
 
     public IEnumerable<TrackModel> GetSelectedTracks() =>
         Tracks?.Where(t => t.IsSelected) ?? Enumerable.Empty<TrackModel>();

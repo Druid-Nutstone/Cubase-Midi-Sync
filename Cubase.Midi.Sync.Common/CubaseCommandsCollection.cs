@@ -443,7 +443,42 @@ namespace Cubase.Midi.Sync.Common
     {
         public CubaseAreaTypes CommandType { get; set; }
 
+        public string SubCommand { get; set; }
+
         public string Action { get; set; }
+
+        public ActionEvent Clone()
+        {
+            return new ActionEvent()
+            {
+                CommandType = CommandType,
+                SubCommand = SubCommand,
+                Action = Action,
+            };
+        }
+        
+        public ActionEvent WithSubCommand(string subCommand)
+        {
+            SubCommand = subCommand;
+            return this;
+        }
+
+        public ActionEvent WithCommandType(CubaseAreaTypes cubaseAreaTypes)
+        {
+            this.CommandType = cubaseAreaTypes;
+            return this;
+        }
+
+        public ActionEvent WithAction(string action)
+        {
+            this.Action = action;   
+            return this;
+        }
+
+        public static ActionEvent Create()
+        {
+            return new ActionEvent();   
+        }
 
         public static ActionEvent Create(CubaseAreaTypes commandType, string Action)
         {
@@ -452,7 +487,8 @@ namespace Cubase.Midi.Sync.Common
 
         public static ActionEvent CreateFromMidiAndKey(MidiAndKey midiAndKey)
         {
-            return ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action);
+            return ActionEvent.Create(midiAndKey.KeyType, midiAndKey.Action)
+                              .WithSubCommand(midiAndKey.Name); 
         }
     }
 
@@ -490,6 +526,7 @@ namespace Cubase.Midi.Sync.Common
         /// </summary>
         Macro,
         MacroToggle,
-        Script
+        Script,
+        SysEx
     }
 }

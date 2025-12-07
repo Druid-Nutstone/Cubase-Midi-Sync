@@ -2,6 +2,7 @@
 using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.Responses;
 using Cubase.Midi.Sync.Common.Scripts;
+using Cubase.Midi.Sync.Common.SysEx;
 using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi;
@@ -25,7 +26,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
         private MidiChannelCollection? midiTracks;
 
-        public IEnumerable<string> SupportedKeys => ["Script"];
+        public IEnumerable<string> SupportedKeys => ["Script", "SysEx"];
 
         Dictionary<ScriptFunction, Func<object[], Task<object>>> functions;
 
@@ -63,6 +64,68 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
         public async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
         {
+            switch (request.CommandType)
+            {
+                case CubaseAreaTypes.Script:
+                    return await RunScript(request);
+                case CubaseAreaTypes.SysEx:
+                    return await RunSysEx(request);
+                default:
+                    return CubaseActionResponse.CreateError($"Cannot process {request.CommandType.ToString()}");
+            } 
+       }
+
+        public async Task<CubaseActionResponse> RunSysEx(ActionEvent request)
+        {
+            // command is in subcommand 
+            if (Enum.TryParse<SysExCommand>(request.SubCommand, out var sysExCommand))
+            {
+                switch (sysExCommand)
+                {
+                    case SysExCommand.DisableAndEnable:
+                        var deResult = await DisableRecord([]);
+                        if (!deResult.IsSucces)
+                        {
+                            return CubaseActionResponse.CreateError(deResult.Message);
+                        }
+                        var enableTracksresult = this.EnsureTracksArePresent(request.Action, out var tracks);
+                        if (!enableTracksresult.Success)
+                        {
+                            return enableTracksresult;
+                        }
+                        var eResult = await this.EnableRecord(tracks.ToArray());
+                        return eResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(eResult.Message);
+                    case SysExCommand.DisableRecord:
+                        this.EnsureTracksArePresent(request.Action, out var disableTracks);
+                        var disableRecordResult = await DisableRecord(disableTracks.ToArray());
+                        return disableRecordResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(disableRecordResult.Message);
+                    case SysExCommand.EnableRecord:
+                        var enabledTracks = this.EnsureTracksArePresent(request.Action, out var enableTracks);
+                        if (!enabledTracks.Success)
+                        {
+                            return enabledTracks;
+                        }
+                        var enableRecordResult = await EnableRecord(enableTracks.ToArray());
+                        return enableRecordResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(enableRecordResult.Message);
+                }
+            }
+
+            return CubaseActionResponse.CreateError($"Unknown SysEx command {request.SubCommand} {request.Action}"); 
+        }
+
+        private CubaseActionResponse EnsureTracksArePresent(string trackString,out List<MidiChannel> tracks)
+        {
+            if (trackString.Contains(';'))
+            {
+                tracks = this.midiService.MidiChannels.GetTracksWith(trackString.Split(';'));
+                return tracks.Count > 0 ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Notracks have been specified");
+            }
+            tracks = new List<MidiChannel>();
+            return CubaseActionResponse.CreateError("Notracks have been specified");
+        } 
+
+        public async Task<CubaseActionResponse> RunScript(ActionEvent request)
+        {
             CubaseActionResponse actionResponse = CubaseActionResponse.CreateSuccess();
             this.logger.LogInformation($"Processing script {request.Action}");
 
@@ -83,8 +146,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
             return scriptResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(scriptResult.Message);
 
-       }
-
+        }
 
         public async Task<ScriptResult> ExecuteCommandAsync(string command, params object[] args)
         {

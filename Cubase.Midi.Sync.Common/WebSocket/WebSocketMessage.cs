@@ -92,6 +92,7 @@ namespace Cubase.Midi.Sync.Common.WebSocket
         TracksComplete = 11,
         SelectTracks = 12,
         TrackState = 13,
-        TrackUpdated = 14
+        TrackUpdated = 14,
+        SysEx = 15
     }
 }

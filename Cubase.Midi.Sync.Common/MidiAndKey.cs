@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cubase.Midi.Sync.Common.SysEx;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,17 @@ namespace Cubase.Midi.Sync.Common
                 Category = CubaseAreaTypes.Script.ToString() 
                
             }; 
+        }
+
+        public static MidiAndKey AddSysEx(SysExCommand command)
+        {
+            return new MidiAndKey()
+            {
+                Name = command.ToString(),
+                Action = command.ToString(),
+                KeyType = CubaseAreaTypes.SysEx,
+                Category = CubaseAreaTypes.SysEx.ToString()
+            };
         }
 
         public static MidiAndKey AddMidi(string name, string action, string category)

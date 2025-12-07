@@ -1,5 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common;
 using Cubase.Midi.Sync.Common.Colours;
+using Cubase.Midi.Sync.Common.Extensions;
 using Cubase.Midi.Sync.Common.InternalCommands;
 using Cubase.Midi.Sync.Common.Requests;
 using Cubase.Midi.Sync.Common.Responses;
@@ -63,6 +64,7 @@ public partial class CubaseAction : ContentPage
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         Title = commands.Name;
         this.webSocketResponse.RegisterForErrors(this.OnError);
+        Task.Run(async () => await trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings));
         LoadPreCommands();
         LoadCommand();
     }
@@ -315,6 +317,13 @@ public partial class CubaseAction : ContentPage
         string errMsg = null;
         await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
         var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
+        if (command.ButtonType == CubaseButtonType.SysEx)
+        {
+            cubaseSocketRequest.Action
+                               .Clone()
+                               .WithSubCommand(command.Action.Action)
+                               .WithAction(trackSelector.GetSelectedTracksAsString());
+        }
         var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
         var response = await this.webSocketClient.SendMidiCommand(socketMessage);
         if (response.Command != WebSocketCommand.Success)
@@ -330,10 +339,18 @@ public partial class CubaseAction : ContentPage
     {
         try
         {
-            var actionGroup = command.ActionGroup;
+            var actionGroup = command.ActionGroup?.Clone();
             if (command.ButtonType == CubaseButtonType.MacroToggle)
             {
-                actionGroup = command.IsToggled ? command.ActionGroup : command.ActionGroupToggleOff;
+                actionGroup = command.IsToggled ? command.ActionGroup?.Clone() : command.ActionGroupToggleOff?.Clone();
+                foreach (var act in actionGroup)
+                {
+                    if (act.CommandType == CubaseAreaTypes.SysEx)
+                    {
+                            act.WithSubCommand(act.Action)
+                               .WithAction(trackSelector.GetSelectedTracksAsString());
+                    }
+                }
             }
             await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
             var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, actionGroup);

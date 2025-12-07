@@ -25,20 +25,16 @@ public partial class CubaseMainPage : ContentPage
 
     private MixerPage mixerPage;
 
-    private RecordingPage recordingPage;
-
     public CubaseMainPage(AppSettings appSettings, 
                           ICubaseHttpClient client, 
                           IMidiWebSocketClient webSocketClient, 
                           BasePage basePage,
                           IMidiWebSocketResponse midiWebSocketResponse,
-                          MixerPage mixerPage,
-                          RecordingPage recordingPage)
+                          MixerPage mixerPage)
     {
         InitializeComponent();
         this.mixerPage = mixerPage;
         this.basePage = basePage;
-        this.recordingPage = recordingPage;
         this.appSettings = appSettings;
         this.midiWebSocketResponse = midiWebSocketResponse;
         this.webSocketClient = webSocketClient;
@@ -46,11 +42,6 @@ public partial class CubaseMainPage : ContentPage
         this.client = client;
         CollectionsLayout.Clear();
         midiWebSocketResponse.RegisterForSystemMessages(this.ProcessSystemError);
-        //this.serverAvailable = this.client.CanConnectToServer();
-        //if (!this.serverAvailable)
-        //{
-        //    DisplayAlert("Error CubaseMainPage CTOR", $"Cannot connect to server {this.client.GetBaseConnection()}", "OK");
-        //}
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         var label = new Label
         {
@@ -154,19 +145,6 @@ public partial class CubaseMainPage : ContentPage
                 }
             }, this.appSettings);
             CollectionsLayout.Children.Add(mixerButton.Button);
-
-            var recordingButton = RaisedButtonFactory.Create("Record", System.Drawing.Color.Red.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
-            {
-                try
-                {
-                    await Navigation.PushAsync(this.recordingPage);
-                }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error CubaseMainPage LoadCommands - Initialise Recording", ex.Message, "OK");
-                }
-            }, this.appSettings);
-            CollectionsLayout.Children.Add(recordingButton.Button);
 
             if (collections == null || collections.Count == 0) return;
 

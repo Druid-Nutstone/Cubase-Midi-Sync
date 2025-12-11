@@ -68,6 +68,8 @@ public partial class CubaseMainPage : ContentPage
                 await LoadCommands();
                 loaded = true;
                 SetSpinner(false);
+                var socketMessage = WebSocketMessage.Create(WebSocketCommand.Tracks);
+                var response = await this.webSocketClient.SendMidiCommand(socketMessage);
             }
             else
             {

@@ -72,8 +72,8 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                     return await RunSysEx(request);
                 default:
                     return CubaseActionResponse.CreateError($"Cannot process {request.CommandType.ToString()}");
-            } 
-       }
+            }
+        }
 
         public async Task<CubaseActionResponse> RunSysEx(ActionEvent request)
         {
@@ -82,6 +82,21 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             {
                 switch (sysExCommand)
                 {
+                    case SysExCommand.EnableMute:
+                    case SysExCommand.DisableMute:
+                        this.EnsureTracksArePresent(request.Action, out var muteTracks);
+                        var muteResult = await this.midiService.SendSysExMessageAsync(sysExCommand.ToMidiCommand(), muteTracks, 5000);
+                        return muteResult ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Error enable/disable Mute");
+                    case SysExCommand.EnableSolo:
+                    case SysExCommand.DisableSolo:
+                        this.EnsureTracksArePresent(request.Action, out var soloTracks);
+                        var soloResult = await this.midiService.SendSysExMessageAsync(sysExCommand.ToMidiCommand(), soloTracks, 5000);
+                        return soloResult ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Error enable/disable Solo");
+                    case SysExCommand.EnableListen:
+                    case SysExCommand.DisableListen:
+                        this.EnsureTracksArePresent(request.Action, out var listenTracks);
+                        var listenResult = await this.midiService.SendSysExMessageAsync(sysExCommand.ToMidiCommand(), listenTracks, 5000);
+                        return listenResult ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Error enable/disable Listen");
                     case SysExCommand.DisableAndEnable:
                         var deResult = await DisableRecord([]);
                         if (!deResult.IsSucces)
@@ -107,22 +122,30 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                         }
                         var enableRecordResult = await EnableRecord(enableTracks.ToArray());
                         return enableRecordResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(enableRecordResult.Message);
+                    case SysExCommand.SelectTracks:
+                        var selectedTracksRequest = this.EnsureTracksArePresent(request.Action, out var selectedTracks);
+                        if (!selectedTracksRequest.Success)
+                        {
+                            return selectedTracksRequest;
+                        }
+                        var selectedTracksResult = await this.SelectTracks(selectedTracks.ToArray());
+                        return selectedTracksResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(selectedTracksResult.Message);
                 }
             }
 
-            return CubaseActionResponse.CreateError($"Unknown SysEx command {request.SubCommand} {request.Action}"); 
+            return CubaseActionResponse.CreateError($"Unknown SysEx command {request.SubCommand} {request.Action}");
         }
 
-        private CubaseActionResponse EnsureTracksArePresent(string trackString,out List<MidiChannel> tracks)
+        private CubaseActionResponse EnsureTracksArePresent(string trackString, out List<MidiChannel> tracks)
         {
-            if (trackString.Contains(';'))
+            if (trackString.Contains(';') || !string.IsNullOrEmpty(trackString))
             {
-                tracks = this.midiService.MidiChannels.GetTracksWith(trackString.Split(';'));
+                tracks = this.midiService.MidiChannels.GetTracksWith(trackString.Split(';', StringSplitOptions.RemoveEmptyEntries));
                 return tracks.Count > 0 ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError("Notracks have been specified");
             }
             tracks = new List<MidiChannel>();
             return CubaseActionResponse.CreateError("Notracks have been specified");
-        } 
+        }
 
         public async Task<CubaseActionResponse> RunScript(ActionEvent request)
         {
@@ -178,10 +201,10 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
         #region commands 
         private async Task<ScriptResult> ExecuteCommand(object[] args)
         {
-            var allCommands = new MidiAndKeysCollection(); 
+            var allCommands = new MidiAndKeysCollection();
             foreach (object arg in args)
             {
-                var midiOrKeyCommand = allCommands.GetCommandByName(arg.ToString()); 
+                var midiOrKeyCommand = allCommands.GetCommandByName(arg.ToString());
                 if (midiOrKeyCommand != null)
                 {
                     var processor = this.serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(midiOrKeyCommand.KeyType.ToString()));
@@ -198,8 +221,8 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                 }
             }
             return ScriptResult.Create();
-        } 
-        
+        }
+
         private async Task<ScriptResult> SelectTrack(object[] args)
         {
             List<MidiChannel>? channels = null;
@@ -221,7 +244,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             var result = await this.midiService.SelectTracks(channels);
             return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not selected tracks  - timeout");
         }
-        
+
         private async Task<ScriptResult> DisableRecord(object[] args)
         {
             var channels = args.ToMidiChannelArray();
@@ -234,6 +257,57 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             var result = await this.midiService.SendSysExMessageAsync(MidiCommand.EnableRecord, channels, 5000);
             return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not execute enable Record - timeout");
         }
+
+        private async Task<ScriptResult> SelectTracks(object[] args)
+        {
+            var channels = args.ToMidiChannelArray();
+            // unfold tracks
+            var unfoldTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Expand_Tracks.ToMidiString().ToSingleArray());
+            if (!unfoldTracksResult.IsSucces)
+            {
+                return unfoldTracksResult;
+            }
+            // show all tracks 
+            var showAllTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Show_All_Tracks.ToMidiString().ToSingleArray());
+            if (!showAllTracksResult.IsSucces)
+            {
+                return showAllTracksResult;
+            }
+            // deselect all track
+            var deselectTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.DeSelectAll, "", 5000);
+            if (!deselectTracksResult)
+            {
+                return ScriptResult.CreateError("Could not deselect tracks. Might have timed out");
+            }
+            if (channels.Count > 1)
+            {
+                // call js to alter required tracks to sel-{trackname}
+                var selTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.SelectTracks, channels, 5000);
+                if (!selTracksResult)
+                {
+                    return ScriptResult.CreateError("Could not rename tracks. Might have timed out");
+                }
+                // call ple to actually select the tracks - 'cos we cant do it programatically 
+                var selectTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Select_Tracks.ToMidiString().ToSingleArray());
+                if (!selectTracksResult.IsSucces)
+                {
+                    return selectTracksResult;
+                }
+                
+                await this.midiService.SendSysExMessageAsync(MidiCommand.Tracks, "", 3000);
+            }
+            // just select a single track
+            else
+            {
+                var selTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.SelectTracks, channels, 5000);
+                if (!selTracksResult)
+                {
+                    return ScriptResult.CreateError("Could not rename tracks. Might have timed out");
+                }
+            }
+            return ScriptResult.Create();
+        }
+
         #endregion
 
         #region internal command helpers

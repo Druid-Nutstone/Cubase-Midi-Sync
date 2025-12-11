@@ -57,7 +57,11 @@ namespace Cubase.Midi.Sync.Common.Midi
                 if (midiChannel.Selected.HasValue)
                 {
                     channel.Selected = midiChannel.Selected;
-                }   
+                } 
+                if (!string.IsNullOrEmpty(midiChannel.TrackType))
+                {
+                    channel.TrackType = midiChannel.TrackType;
+                }
             }
             else
             {
@@ -81,6 +85,11 @@ namespace Cubase.Midi.Sync.Common.Midi
                     !string.IsNullOrEmpty(x.Name) && x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))).ToList();
         }
 
+        public List<MidiChannel> GetTracksOfType(MidiChannelType channelType)
+        {
+            return this.Where(x => x.TrackTypeEnum == channelType).ToList();
+        }
+
         public bool HaveTrack(string trackName)
         {
             return this.Any(x => x.Name.Equals(trackName, StringComparison.OrdinalIgnoreCase));
@@ -102,5 +111,27 @@ namespace Cubase.Midi.Sync.Common.Midi
         public bool? Solo { get; set; } = null;
 
         public bool? Selected { get; set; } = null;
+
+        public string? TrackType { get; set; } = null;  
+    
+        public MidiChannelType TrackTypeEnum 
+        { 
+            get 
+            {
+                return Enum.Parse<MidiChannelType>(this.TrackType ?? MidiChannelType.Unknown.ToString());
+            }
+        }
+
+    }
+
+    public enum MidiChannelType
+    {
+        Synth,
+        GroupChannel,
+        Audio,
+        OutputChannel,
+        DrumChannel,
+        MidiChannel,
+        Unknown
     }
 }

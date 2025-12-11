@@ -64,7 +64,7 @@ public partial class CubaseAction : ContentPage
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         Title = commands.Name;
         this.webSocketResponse.RegisterForErrors(this.OnError);
-        Task.Run(async () => await trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings));
+        Task.Run(async () => await trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings, this.OnTracksExpanded));
         LoadPreCommands();
         LoadCommand();
     }
@@ -80,6 +80,19 @@ public partial class CubaseAction : ContentPage
         });
     }
     
+    private void OnTracksExpanded(bool expanded)
+    {
+        foreach (var child in CommandsContainer.Children)
+        {
+            if (child is VisualElement ve)
+            {
+                ve.IsVisible = !expanded;
+                //if (child != maximizedLayout && child != maximizedBanner)
+                //    ve.IsVisible = false;
+            }
+        }
+    }
+
     private void LoadPreCommands()
     {
         this.commands.PreCommands.ForEach(pcmd =>

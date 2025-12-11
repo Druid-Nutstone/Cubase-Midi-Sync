@@ -13,6 +13,7 @@ namespace Cubase.Midi.Sync.Common.Midi
         Message,
         Ready,
         SelectTracks,
+        UnSelectTracks,
         Tracks,
         TrackUpdate,
         TrackComplete,
@@ -23,6 +24,13 @@ namespace Cubase.Midi.Sync.Common.Midi
         CommandValueChanged,
         EnableRecord,
         DisableRecord,
-        CommandComplete
+        CommandComplete,
+        DeSelectAll,
+        EnableMute,
+        DisableMute,
+        EnableSolo,
+        DisableSolo,
+        EnableListen,
+        DisableListen
     }
 }

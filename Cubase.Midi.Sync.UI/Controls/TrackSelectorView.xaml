@@ -16,13 +16,41 @@
                     FontSize="14"
                     Text="Select Tracks - Close">
                 </Button>
-                <FlexLayout 
+            <HorizontalStackLayout x:Name="FilterCollection" Spacing="20" Padding="6">
+                <Label Text="Filter:" TextColor="White" VerticalTextAlignment="Center" />
+
+                <Grid>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer />
+                    </Grid.GestureRecognizers>
+                    <CheckBox x:Name="AudioFilter" CheckedChanged="OnFilterChanged" />
+                    <Label Text="Audio" TextColor="White" VerticalOptions="Center" Margin="28,0,0,0"/>
+                </Grid>
+
+                <Grid>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer />
+                    </Grid.GestureRecognizers>
+                    <CheckBox x:Name="MidiFilter" CheckedChanged="OnFilterChanged" />
+                    <Label Text="MIDI" TextColor="White" VerticalOptions="Center" Margin="28,0,0,0"/>
+                </Grid>
+
+                <Grid>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer />
+                    </Grid.GestureRecognizers>
+                    <CheckBox x:Name="GroupFilter" CheckedChanged="OnFilterChanged" />
+                    <Label Text="Groups" TextColor="White" VerticalOptions="Center" Margin="28,0,0,0"/>
+                </Grid>
+            </HorizontalStackLayout>
+
+            <FlexLayout 
                    x:Name="TrackLayout"
                    Direction="Row"
                    Wrap="Wrap"
                    JustifyContent="Start"
                    AlignItems="Start"
-                  Margin="2" />
+                   Margin="1" />
                 <FlexLayout 
                   x:Name="TrackButtons"
                    Direction="Row"

@@ -111,22 +111,36 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                         {
                             if (ws.State == WebSocketState.Open)
                             {
-                                var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
-                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
-                                if (this.midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
+                                try
                                 {
-                                    var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
-                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(allTracks.Serialise())), WebSocketMessageType.Text, true, ct);
+                                    var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
+                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                    if (this.midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
+                                    {
+                                        var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
+                                        await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(allTracks.Serialise())), WebSocketMessageType.Text, true, ct);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Error sending channel update: {message}", ex.Message);
                                 }
                             }
                         });
 
                         this.midiService.RegisterOnTrackChanged(async (track) =>
                         {
-                            if (ws.State == WebSocketState.Open)
+                            try
                             {
-                                var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
-                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                if (ws.State == WebSocketState.Open)
+                                {
+                                    var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
+                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending track update: {message}", ex.Message);
                             }
                         });
 
@@ -176,7 +190,14 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                         _logger.LogInformation("WebSocket connection closed.");
                         if (ws != null && ws.State != WebSocketState.Closed)
                         {
-                            await ws.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception", CancellationToken.None);
+                            try
+                            {
+                                await ws.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception", CancellationToken.None);
+                            }
+                            catch (WebSocketException ex)
+                            {
+                                this._logger.LogError($"Error closing - might not be an error {ex.Message}");
+                            }
                         }
                     }
                 });

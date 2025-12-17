@@ -174,9 +174,13 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 case CubaseMixerCommand.CloseMixers:
                     this.mixersEnabled = false;
                     var mixerWindows = this.cubaseWindowMonitor.GetMixerWindows();
+                    this.logger.LogInformation($"Closing {mixerWindows.Count} mixer windows. {string.Join(';', mixerWindows.Select(x => x.Name))}");
                     foreach (var mixer in mixerWindows)
                     {
-                        mixer.Close();
+                        if (!mixer.Close())
+                        {
+                            this.logger.LogWarning($"Failed to close mixer window {mixer.Name}");
+                        }
                     }
                     var mainCubaseWindowToRestore = this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow();
                     mainCubaseWindowToRestore?.Restore()

@@ -12,17 +12,10 @@ using Cubase.Midi.Sync.UI.Settings;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;
+using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.UI;
 
-// To fix CS0263, ensure all partial declarations of 'CubaseAction' specify the same base class.
-// If you have another file (e.g., CubaseAction.xaml) with a partial class declaration like:
-// public partial class CubaseAction : ContentPage
-// Change it to:
-// public partial class CubaseAction : BasePage
-//
-// No code changes are needed in this file if the base class is correct here.
-// Please update the other partial class declaration(s) to match this base class: BasePage.
 public partial class CubaseAction : ContentPage
 {
     private readonly CubaseCommandCollection commands;
@@ -65,20 +58,44 @@ public partial class CubaseAction : ContentPage
         Title = commands.Name;
         this.webSocketResponse.RegisterForErrors(this.OnError);
 
-        LoadPreCommands();
+        // start async initialization without blocking ctor
+        _ = InitializeAsync();
+
         LoadCommand();
-        Task.Run(() => trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings, this.OnTracksExpanded));
     }
 
-    protected override void OnDisappearing()
+    private async Task InitializeAsync()
+    {
+        try
+        {
+            await LoadPreCommandsAsync().ConfigureAwait(false);
+            var initTask = trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings, this.OnTracksExpanded);
+            if (initTask != null)
+                await initTask.ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await MainThread.InvokeOnMainThreadAsync(() => DisplayAlert("Initialization error", ex.Message, "OK")).ConfigureAwait(false);
+        }
+    }
+
+    protected override async void OnDisappearing()
     {
         base.OnDisappearing();
-        this.commands.PostCommands.ForEach(pcmd => 
+
+        try
         {
-            var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
-            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-            this.webSocketClient.SendMidiCommand(socketMessage).Wait();
-        });
+            foreach (var pcmd in this.commands.PostCommands)
+            {
+                var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
+                var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+                await this.webSocketClient.SendMidiCommand(socketMessage).ConfigureAwait(false);
+            }
+        }
+        catch
+        {
+            // swallow to avoid exceptions on disappear
+        }
     }
     
     private void OnTracksExpanded(bool expanded)
@@ -88,21 +105,26 @@ public partial class CubaseAction : ContentPage
             if (child is VisualElement ve)
             {
                 ve.IsVisible = !expanded;
-                //if (child != maximizedLayout && child != maximizedBanner)
-                //    ve.IsVisible = false;
             }
         }
-        this.Scroller.ScrollToAsync(0, 0, animated: true);
+        _ = this.Scroller.ScrollToAsync(0, 0, animated: true);
     }
 
-    private void LoadPreCommands()
+    private async Task LoadPreCommandsAsync()
     {
-        this.commands.PreCommands.ForEach(pcmd =>
+        foreach (var pcmd in this.commands.PreCommands)
         {
-            var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
-            var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-            this.webSocketClient.SendMidiCommand(socketMessage).Wait();
-        });
+            try
+            {
+                var cubaseSocketRequest = CubaseActionRequest.Create(pcmd.Action);
+                var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
+                await this.webSocketClient.SendMidiCommand(socketMessage).ConfigureAwait(false);
+            }
+            catch
+            {
+                // ignore individual failures
+            }
+        }
     }
 
     private async Task OnError(string message)
@@ -193,7 +215,7 @@ public partial class CubaseAction : ContentPage
             Margin = new Thickness(0),
             FontAttributes = FontAttributes.Bold,
             WidthRequest = 50,
-            HeightRequest = 40, // match banner height
+            HeightRequest = 40,
             BackgroundColor = Colors.Transparent,
             TextColor = Colors.Black,
             BorderWidth = 0,
@@ -306,17 +328,15 @@ public partial class CubaseAction : ContentPage
                     command.IsToggled = !command.IsToggled;
                     SetButtonState(btn, command);
 
-                    await Task.Run(async () =>
-                    {
-                        if (command.IsMacro)
-                            await SetMacroButton(btn, command);
-                        else
-                            await SetMomentaryOrToggleButton(btn, command);
-                    });
+                    // call async work directly
+                    if (command.IsMacro)
+                        await SetMacroButton(btn, command).ConfigureAwait(false);
+                    else
+                        await SetMomentaryOrToggleButton(btn, command).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK");
+                    await MainThread.InvokeOnMainThreadAsync(() => DisplayAlert("Error CubaseAction.cs LoadCommand", ex.Message, "OK")).ConfigureAwait(false);
                 }
             }, this.appSettings,
             toggleMode: true
@@ -330,7 +350,7 @@ public partial class CubaseAction : ContentPage
     private async Task SetMomentaryOrToggleButton(Button button, CubaseCommand command)
     {
         string errMsg = null;
-        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
+        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed")).ConfigureAwait(false);
         var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command);
         if (command.ButtonType == CubaseButtonType.SysEx)
         {
@@ -340,13 +360,13 @@ public partial class CubaseAction : ContentPage
                                .WithAction(trackSelector.GetSelectedTracksAsString());
         }
         var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-        var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+        var response = await this.webSocketClient.SendMidiCommand(socketMessage).ConfigureAwait(false);
         if (response.Command != WebSocketCommand.Success)
         {
-            await DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK");
+            await MainThread.InvokeOnMainThreadAsync(() => DisplayAlert("Error SetMomentaryOrToggleButton", errMsg ?? "Is cubase up?", "OK")).ConfigureAwait(false);
             command.IsToggled = !command.IsToggled;
         }
-        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Normal"));
+        await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Normal")).ConfigureAwait(false);
         SetButtonState(button, command);
     }
 
@@ -367,10 +387,10 @@ public partial class CubaseAction : ContentPage
                     }
                 }
             }
-            await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed"));
+            await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Pressed")).ConfigureAwait(false);
             var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, actionGroup);
             var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-            var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            var response = await this.webSocketClient.SendMidiCommand(socketMessage).ConfigureAwait(false);
             if (response.Command == WebSocketCommand.Success)
             {
                 var duplicateCommands = this.commandsCollection
@@ -384,18 +404,18 @@ public partial class CubaseAction : ContentPage
             }
             else
             {
-                await DisplayAlert("Error Executing Command", response.Message, "OK");
+                await MainThread.InvokeOnMainThreadAsync(() => DisplayAlert("Error Executing Command", response.Message, "OK")).ConfigureAwait(false);
                 command.IsToggled = !command.IsToggled;
                 SetButtonState(button, command);
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error CubaseAction SetMacroButton", ex.Message, "OK");
+            await MainThread.InvokeOnMainThreadAsync(() => DisplayAlert("Error CubaseAction SetMacroButton", ex.Message, "OK")).ConfigureAwait(false);
         }
         finally
         {
-            await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Normal"));
+            await MainThread.InvokeOnMainThreadAsync(() => VisualStateManager.GoToState(button, "Normal")).ConfigureAwait(false);
             SetButtonState(button, command);
         }
     }

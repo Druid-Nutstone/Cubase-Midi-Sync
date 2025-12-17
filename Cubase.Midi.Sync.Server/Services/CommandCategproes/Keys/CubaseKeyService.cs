@@ -26,18 +26,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys
             this.logger = logger;
         }
 
-        public CubaseActionResponse ProcessAction(ActionEvent request)
-        {
-            if (!this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())
-                return CubaseActionResponse.CreateError("Cubase is not up or focused");
-
-            var result = SendKey(request.Action, (err) =>
-            {
-                this.logger.LogInformation($"Error running {request.Action} {err}");
-            });
-            return result ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError($"Cannot process {request.Action}");
-        }
-
         public Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
         {
             if (!this.cubaseWindowMonitor.HaveAtLeastOneCubaseWindowFocused())

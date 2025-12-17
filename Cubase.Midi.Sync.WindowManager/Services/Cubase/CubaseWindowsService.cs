@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
@@ -44,17 +45,16 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Cubase
         }
 
 
-        public Task WaitForCubaseWindows()
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            var runTask = Task.Run(async () => 
+            return Task.Run(async () => 
             {
-                while (!this.Cancel)
+                while (!cancellationToken.IsCancellationRequested && !this.Cancel)
                 {
                     this.SetWindowPositions();
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
                 }
-            });
-            return runTask;
+            }, cancellationToken);
         }
 
         public void SetWindowPositions()

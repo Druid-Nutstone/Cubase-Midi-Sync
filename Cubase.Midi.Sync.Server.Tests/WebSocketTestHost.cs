@@ -18,46 +18,54 @@ public class WebSocketTestHost : IAsyncDisposable
     public ClientWebSocket WebSocket { get; private set; }
     public Uri WebSocketUri { get; private set; }
 
+    private CancellationTokenSource _receiveCts;
+    private Task _receiveTask;
+
     public WebSocketTestHost(int port = 8014, string path = "/ws/midi")
     {
 
         WebSocketUri = new Uri($"ws://localhost:{port}{path}");
     }
 
-    public async Task StartAsync(Func<WebSocketMessage, Task> msgHandler)
+    public async Task StartAsync(Func<WebSocketMessage, Task> msgHandler, CancellationToken cancellationToken = default)
     {
         var app = Program.BuildHost(); // returns IHost
-        await app.StartAsync();
+        await app.StartAsync(cancellationToken);
 
-        await Task.Delay(2000);
+        await Task.Delay(2000, cancellationToken);
         // Connect WebSocket
         WebSocket = new ClientWebSocket();
-        await WebSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
-        await WaitForResponse(msgHandler);
+        await WebSocket.ConnectAsync(WebSocketUri, cancellationToken);
+
+        // Start background receiver task with its own CTS so it can be stopped independently
+        _receiveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _receiveTask = ReceiveLoopAsync(msgHandler, _receiveCts.Token);
     }
 
-    public async Task WaitForResponse(Func<WebSocketMessage, Task> msgHandler)
+    private async Task ReceiveLoopAsync(Func<WebSocketMessage, Task> msgHandler, CancellationToken cancellationToken)
     {
-        Task.Run(async () =>
+        try
         {
             var buffer = new byte[8192];
 
-            while (WebSocket.State == WebSocketState.Open)
+            while (WebSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
             {
                 using var ms = new MemoryStream();
                 WebSocketReceiveResult result;
 
                 do
                 {
-                    result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
                     ms.Write(buffer, 0, result.Count);
-                } while (!result.EndOfMessage);
+                } while (!result.EndOfMessage && !cancellationToken.IsCancellationRequested);
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                    break;
                 }
-                else if (result.MessageType == WebSocketMessageType.Text)
+
+                if (result.MessageType == WebSocketMessageType.Text)
                 {
                     ms.Seek(0, SeekOrigin.Begin);
                     using var reader = new StreamReader(ms, Encoding.UTF8);
@@ -67,20 +75,40 @@ public class WebSocketTestHost : IAsyncDisposable
                     await msgHandler(wsMessage);
                 }
             }
-        });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // normal cancellation — ignore
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"WebSocket receive loop error: {ex.Message}");
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (WebSocket != null)
+        try
         {
-            if (WebSocket.State == WebSocketState.Open)
-                await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test finished", CancellationToken.None);
+            if (_receiveCts != null)
+            {
+                _receiveCts.Cancel();
+                if (_receiveTask != null)
+                    await _receiveTask.ConfigureAwait(false);
+                _receiveCts.Dispose();
+            }
 
-            WebSocket.Dispose();
+            if (WebSocket != null)
+            {
+                if (WebSocket.State == WebSocketState.Open)
+                    await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test finished", CancellationToken.None);
+
+                WebSocket.Dispose();
+            }
+
+            _factory?.Dispose();
         }
-
-        _factory.Dispose();
+        catch { }
     }
 
     public async Task SendAsync(string message)

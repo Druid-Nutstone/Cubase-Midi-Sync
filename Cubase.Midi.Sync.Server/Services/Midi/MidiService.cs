@@ -127,26 +127,12 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public bool SendMidiMessage(CubaseMidiCommand cubaseMidiCommand)
         {
+            // preserve synchronous facade by delegating to the async implementation
             try
             {
-                if (cubaseMidiCommand.Channel > -1)
-                {
-                    this.logger.LogInformation($"Sending Midi Name:{cubaseMidiCommand.Name} Command:{cubaseMidiCommand.Command} Channel:{cubaseMidiCommand.Channel} Note:{cubaseMidiCommand.Note} ");
-                    this.midiDriver.SendNoteOn(cubaseMidiCommand.Channel, cubaseMidiCommand.Note, cubaseMidiCommand.Velocity);
-                    return true;
-                }
-                else
-                {
-                    var keyService = serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(CubaseServiceConstants.KeyService));
-                    if (keyService != null)
-                    {
-                        var keyResult = keyService.ProcessAction(ActionEvent.Create(CubaseAreaTypes.Keys, cubaseMidiCommand.Command));
-                        return keyResult.Success;
-                    }
-                    return false;
-                }
+                return SendMidiMessageAsync(cubaseMidiCommand).GetAwaiter().GetResult();
             }
-            catch (Exception ex) 
+            catch
             {
                 return false;
             }
@@ -154,7 +140,34 @@ namespace Cubase.Midi.Sync.Server.Services.Midi
 
         public Task<bool> SendMidiMessageAsync(CubaseMidiCommand midiCommand)
         {
-            return Task.FromResult(this.SendMidiMessage(midiCommand));
+            return SendMidiMessageAsync_Impl(midiCommand);
+        }
+
+        private async Task<bool> SendMidiMessageAsync_Impl(CubaseMidiCommand midiCommand)
+        {
+            try
+            {
+                if (midiCommand.Channel > -1)
+                {
+                    this.logger.LogInformation($"Sending Midi Name:{midiCommand.Name} Command:{midiCommand.Command} Channel:{midiCommand.Channel} Note:{midiCommand.Note} ");
+                    this.midiDriver.SendNoteOn(midiCommand.Channel, midiCommand.Note, midiCommand.Velocity);
+                    return true;
+                }
+
+                var keyService = serviceProvider.GetServices<ICategoryService>().FirstOrDefault(x => x.SupportedKeys.Contains(CubaseServiceConstants.KeyService));
+                if (keyService != null)
+                {
+                    var result = await keyService.ProcessActionAsync(ActionEvent.Create(CubaseAreaTypes.Keys, midiCommand.Command)).ConfigureAwait(false);
+                    return result.Success;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error sending MIDI message");
+                return false;
+            }
         }
 
 

@@ -357,12 +357,12 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             return list;
         }
 
-        public static void CloseWindow(IntPtr hWnd)
+        public static bool CloseWindow(IntPtr hWnd)
         {
             if (hWnd == IntPtr.Zero)
-                return;
+                return true;
             const int WM_CLOSE = 0x0010;
-            PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            return PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
         }
 
         public static Rect GetVisibleBounds(IntPtr hwnd)

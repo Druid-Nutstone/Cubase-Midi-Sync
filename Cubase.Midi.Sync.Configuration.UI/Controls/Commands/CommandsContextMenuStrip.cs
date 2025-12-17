@@ -168,10 +168,16 @@ namespace Cubase.Midi.Sync.Configuration.UI.Controls.Commands
                 var command = cubaseCommandItem.Command;
                 var cubaseSocketRequest = CubaseActionRequest.CreateFromCommand(command, command.ActionGroup);
                 var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction, cubaseSocketRequest);
-                Task.Run(async () =>
+
+                // Fire-and-forget — start the send and observe exceptions so they don't go unobserved
+                var sendTask = CubaseWebSocketClient.Instance.SendCommand(socketMessage);
+                sendTask.ContinueWith(t =>
                 {
-                    await CubaseWebSocketClient.Instance.SendCommand(socketMessage);
-                });
+                    if (t.IsFaulted)
+                    {
+                        System.Diagnostics.Debug.WriteLine(t.Exception?.Flatten().Message);
+                    }
+                }, TaskScheduler.Default);
             }
         }
     }

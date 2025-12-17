@@ -64,11 +64,11 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this;
         }
 
-        public WindowPosition Close()
+        public bool Close()
         {
-             WindowManagerService.CloseWindow(this.Hwnd);
-            return this;
+            return WindowManagerService.CloseWindow(this.Hwnd);
         }
+
         public WindowPosition Minimise()
         {
             WindowManagerService.MinimiseWindow(this.Hwnd);

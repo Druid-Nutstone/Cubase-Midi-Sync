@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
@@ -169,7 +170,7 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
         }
 
         [TestMethod]
-        public void Can_Manage_Cubase_windows()
+        public async Task Can_Manage_Cubase_windows()
         {
             var cubaseWindowCollection = WindowPositionCollection.Create("cubase Windows")
                                               .WithWindowPosition(WindowPosition.Create("Cubase Version").WithWindowType(WindowType.Primary))
@@ -177,8 +178,9 @@ namespace Cubase.Midi.Sync.Server.Tests.Tests.Windows
                                               .WithWindowPosition(WindowPosition.Create("Channel Settings").WithWindowType(WindowType.Transiant));
             var cubaseWinService = new CubaseWindowsService();
             // cubaseWinService.Initialise(cubaseWindowCollection);
-            var tsk = cubaseWinService.WaitForCubaseWindows();
-            tsk.Wait();
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(2));
+            await cubaseWinService.StartAsync(cts.Token);
         }
     }
 }

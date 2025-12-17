@@ -38,25 +38,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
             
         } 
         
-        public CubaseActionResponse ProcessAction(ActionEvent request)
-        {
-            try
-            {
-                CubaseActionResponse response = CubaseActionResponse.CreateSuccess();
-
-                var result = this.ExecuteMidiCommand(request.Action);
-                if (!result)
-                {
-                     response = CubaseActionResponse.CreateError($"Could not execute Midi command {request.Action}");
-                }; 
-                return response;
-            }
-            catch (Exception ex)
-            {
-                return CubaseActionResponse.CreateError($"Exception sending key: {ex.Message}");
-            }
-        }
-
         public async Task<CubaseActionResponse> ProcessActionAsync(ActionEvent request)
         {
             try
@@ -87,10 +68,12 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi
                     isReady = true;
                 };
                 this.midiService.SendSysExMessage(MidiCommand.Ready, "{}");
-                // bool ok = await WaitUntilReadyAsync(() => isReady);
-                while (!isReady)
+
+                // Wait for readiness using the async waiter (uses Task.Delay internally) to avoid busy spinning
+                var ok = WaitUntilReadyAsync(() => isReady).GetAwaiter().GetResult();
+                if (!ok)
                 {
-                    Thread.Sleep(50); // Wait for ready signal
+                    return false; // timeout or not ready
                 }
 
                 return this.midiService.SendMidiMessage(currentMidiCommand);

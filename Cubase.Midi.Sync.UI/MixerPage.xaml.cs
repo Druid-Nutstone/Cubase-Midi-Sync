@@ -345,7 +345,8 @@ namespace Cubase.Midi.Sync.UI
                 {
                     await DisplayAlert("ERROR from getmixer", $"The mixer collection has {this.mixerCollection.Count.ToString()} records in it", "OK");
                 }
-                Task.Run(() => trackSelector.Initialise(this.midiWebSocketResponse, this.webSocketClient, this.appSettings, this.OnTrackSelectionChanged, true));
+                // start track selector initialise in background (fire-and-forget) and capture exceptions
+                _ = InitialiseTrackSelectorInBackground(isMixer: true);
                 await UpdateMixConsoles();
             }
             catch (Exception ex)
@@ -423,6 +424,18 @@ namespace Cubase.Midi.Sync.UI
                         dupItem.IsToggled = command.IsToggled;
                     }
                 }
+            }
+        }
+
+        private async Task InitialiseTrackSelectorInBackground(bool isMixer)
+        {
+            try
+            {
+                await trackSelector.Initialise(this.midiWebSocketResponse, this.webSocketClient, this.appSettings, this.OnTrackSelectionChanged, isMixer).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TrackSelector.Initialise failed: {ex}");
             }
         }
     }

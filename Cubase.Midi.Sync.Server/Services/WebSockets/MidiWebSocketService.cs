@@ -61,15 +61,23 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
             this.cubaseWindowMonitor = cubaseWindowMonitor; 
         }
 
-        public void BroadcastMessage(WebSocketMessage message)
+        public async Task BroadcastMessageAsync(WebSocketMessage message)
         {
             var messageBytes = Encoding.UTF8.GetBytes(message.Serialise());
             var messageSegment = new ArraySegment<byte>(messageBytes);
-            foreach (var ws in _sockets.ToList())
+            var sockets = _sockets.ToList();
+            foreach (var ws in sockets)
             {
                 if (ws.State == WebSocketState.Open)
                 {
-                    ws.SendAsync(messageSegment, WebSocketMessageType.Text, true, CancellationToken.None).Wait();
+                    try
+                    {
+                        await ws.SendAsync(messageSegment, WebSocketMessageType.Text, true, CancellationToken.None).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error broadcasting to websocket");
+                    }
                 }
                 else
                 {

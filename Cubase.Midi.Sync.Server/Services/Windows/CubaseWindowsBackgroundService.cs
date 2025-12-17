@@ -1,5 +1,4 @@
-﻿
-using Cubase.Midi.Sync.Common.WebSocket;
+﻿using Cubase.Midi.Sync.Common.WebSocket;
 using Cubase.Midi.Sync.Server.Constants;
 using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.WebSockets;
@@ -75,7 +74,7 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                     if (cubaseIsRunning)
                     {
                         this.logger.LogError("Cubase is not running");
-                        this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady));
+                        _ = this.webSocketServer.BroadcastMessageAsync(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady)).ConfigureAwait(false);
                         cubaseIsRunning = false;
                     }
                 }
@@ -102,7 +101,7 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                 if (cubaseWindowCollection.GetPrimaryWindow() == null)
                 {
                     this.logger.LogWarning("No primary Cubase window found.");
-                    this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady));
+                    _ = this.webSocketServer.BroadcastMessageAsync(WebSocketMessage.Create(WebSocketCommand.CubaseNotReady)).ConfigureAwait(false);
                     statusChange = false;
                 }
                 else
@@ -110,7 +109,7 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
                     if (!statusChange)
                     {
                         this.logger.LogInformation("Cubase is running and primary window found.");
-                        this.webSocketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.CubaseReady));
+                        _ = this.webSocketServer.BroadcastMessageAsync(WebSocketMessage.Create(WebSocketCommand.CubaseReady)).ConfigureAwait(false);
                         statusChange = true;
                     }
                 }

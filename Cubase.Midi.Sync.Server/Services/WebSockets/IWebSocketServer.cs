@@ -1,4 +1,6 @@
 ﻿using Cubase.Midi.Sync.Common.WebSocket;
+using Microsoft.AspNetCore.Builder;
+using System.Threading.Tasks;
 
 namespace Cubase.Midi.Sync.Server.Services.WebSockets
 {
@@ -6,6 +8,6 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
     {
         void Configure(IApplicationBuilder app);
 
-        void BroadcastMessage(WebSocketMessage message);
+        Task BroadcastMessageAsync(WebSocketMessage message);
     }
 }

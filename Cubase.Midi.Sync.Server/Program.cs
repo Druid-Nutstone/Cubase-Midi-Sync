@@ -33,20 +33,27 @@ var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
     midi.Dispose();
-    SendClosingMessage(wsServer);
+    _ = SendClosingMessageAsync(wsServer);
 });
 
 AppDomain.CurrentDomain.ProcessExit += (_, __) =>
 {
     midi.Dispose();
-    SendClosingMessage(wsServer);
+    _ = SendClosingMessageAsync(wsServer);
 };
 
 app.Run();
 
-static void SendClosingMessage(IWebSocketServer socketServer)
+static async Task SendClosingMessageAsync(IWebSocketServer socketServer)
 {
-    socketServer.BroadcastMessage(WebSocketMessage.Create(WebSocketCommand.ServerClosed, "Server is shutting down"));
+    try
+    {
+        await socketServer.BroadcastMessageAsync(WebSocketMessage.Create(WebSocketCommand.ServerClosed, "Server is shutting down")).ConfigureAwait(false);
+    }
+    catch
+    {
+        // best-effort on shutdown
+    }
 }
 
 

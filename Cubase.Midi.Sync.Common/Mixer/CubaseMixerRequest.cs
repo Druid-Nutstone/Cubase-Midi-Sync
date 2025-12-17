@@ -74,6 +74,7 @@ namespace Cubase.Midi.Sync.Common.Mixer
         ProjectWindow = 5,
         RestoreMixers = 6,
         Orientation = 7,
+        SyncMixer = 8,
         Error = 99,
     }
 

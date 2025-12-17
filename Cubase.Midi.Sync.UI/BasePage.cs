@@ -1,3 +1,4 @@
+using Cubase.Midi.Sync.Common;
 using System.Runtime.InteropServices.Marshalling;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ public class BasePage
 
     private IServiceProvider serviceProvider;
 
+    private CubaseCommandsCollection commands;
+
     public BasePage(MixerPage mixerPage, 
                     CubaseOptions cubaseOptions,
                     IServiceProvider serviceProvider)
@@ -21,6 +24,11 @@ public class BasePage
         this.optionsPage = cubaseOptions;
         this.serviceProvider = serviceProvider;
     }
+
+    public void AddCommands(CubaseCommandsCollection commands)
+    {
+        this.commands = commands;
+    }   
 
     public void AddToolbars(ContentPage contentPage)
     {
@@ -69,7 +77,7 @@ public class BasePage
     protected async virtual void OnMixerClicked()
     {
         await this.contentPage.Navigation.PushAsync(this.mixerPage);
-        await this.mixerPage.Initialise(); 
+        await this.mixerPage.Initialise(this.commands); 
     }
 
     protected async virtual void OnOptionsClicked()

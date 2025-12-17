@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cubase.Midi.Sync.UI.Controls"             
              x:Class="Cubase.Midi.Sync.UI.MixerPage"
              Title="MixerPage">
     <Grid RowDefinitions="Auto,*" Padding="10" RowSpacing="10">
 
-        <ScrollView Orientation="Vertical" Grid.Row="1" Grid.RowSpan="2">
+        <ScrollView x:Name="Scroller" Orientation="Vertical" Grid.Row="1" Grid.RowSpan="2">
             <VerticalStackLayout Spacing="10">
+                <controls:TrackSelectorView x:Name="trackSelector" Tracks="{Binding Tracks}" />
                 <!-- Top flexible toolbar -->
-                <Border BackgroundColor="LightGray"
+                <Border BackgroundColor="LightGray" x:Name="Border1"
                        Padding="10">
                     <Label Text="Mixer Consoles"
                            FontSize="20"
@@ -20,7 +22,7 @@
                     Wrap="Wrap"
                     JustifyContent="Start"
                     AlignItems="Start" />                
-                <Border BackgroundColor="LightGray"
+                <Border BackgroundColor="LightGray" x:Name="Border2"
                        Padding="10">
                     <Label Text="Standard Show/Hide Mixer Views"
                            FontSize="20"
@@ -46,7 +48,7 @@
                     JustifyContent="Start"
                     AlignItems="Start"
                     AlignContent="Start" />                
-                <Border BackgroundColor="LightGray"
+                <Border BackgroundColor="LightGray" x:Name="Border3"
                        Padding="10">
                     <Label Text="Link To Pages"
                            FontSize="20"

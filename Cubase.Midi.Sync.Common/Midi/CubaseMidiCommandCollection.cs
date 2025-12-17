@@ -68,6 +68,9 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Expand Folders", 1, 23, "Project", "Folding: Unfold Tracks", 127));
             this.Add(CubaseMidiCommand.Create("Navigate Top", 1, 24, "Navigate", "Top", 127));
             this.Add(CubaseMidiCommand.Create("Select Tracks", 1, 25, "Process Project Logical Editor", "SelectTracksByPrefix", 127));
+            this.Add(CubaseMidiCommand.Create("Sync Mixer", 1, 26, "Channel & Track Visibility", "Sync Visibility of Project and MixConsole: On/Off", 127));
+            this.Add(CubaseMidiCommand.Create("Select Mixer Tracks", 1, 27, "Process Project Logical Editor", "SelectMixerTracksByPrefix", 127));
+            this.Add(CubaseMidiCommand.Create("DeSelect Tracks", 1, 28, "Process Project Logical Editor", "DeSelect Tracks", 127));
         }
 
 
@@ -157,6 +160,9 @@ namespace Cubase.Midi.Sync.Common.Midi
         Reload_Scripts,
         Expand_Folders,
         Navigate_Top,
-        Select_Tracks
+        Select_Tracks,
+        Sync_Mixer,
+        Select_Mixer_Tracks,
+        DeSelect_Tracks
     }
 }

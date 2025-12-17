@@ -178,6 +178,11 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     {
                         mixer.Close();
                     }
+                    var mainCubaseWindowToRestore = this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow();
+                    mainCubaseWindowToRestore?.Restore()
+                                                .Maximise()
+                                                .Focus();
+                    await this.SendMidiCommand(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Show_All_Tracks));
                     return CubaseMixerResponse.Create(CubaseMixerCommand.CloseMixers);
                 case CubaseMixerCommand.ProjectWindow:
                     this.mixersEnabled = false;
@@ -191,10 +196,14 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                                        .ToList()
                                        .ForEach(w => w.Minimise());
 
-                        mainCubaseWindow.Maximise()
+                        mainCubaseWindow.Restore()
+                                        .Maximise()  
                                         .Focus();
                     }
                     return CubaseMixerResponse.Create(CubaseMixerCommand.ProjectWindow);
+                case CubaseMixerCommand.SyncMixer:
+                    await this.SendMidiCommand(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Sync_Mixer));
+                    return CubaseMixerResponse.Create(CubaseMixerCommand.SyncMixer);
                 default:
                     return CubaseMixerResponse.CreateError("Unknown Mixer command.");
             }
@@ -351,7 +360,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private async Task SendMidiCommand(CubaseMidiCommand cmd)
         {
-            this.midiService.SendMidiMessage(cmd);
+            await Task.Run(() => this.midiService.SendMidiMessage(cmd));
             // await Task.Delay(20); // Small delay to ensure Cubase processes the command
         }
     }

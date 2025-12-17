@@ -19,8 +19,11 @@ namespace Cubase.Midi.Sync.UI.Controls;
 
 public partial class TrackSelectorView : ContentView
 {
+    private bool IsMixer = false;
 
     private bool Expanded = true;
+
+    private string currentMixer;
 
     private IMidiWebSocketResponse midiWebSocketResponse;
     private IMidiWebSocketClient midiWebSocketClient;
@@ -41,7 +44,12 @@ public partial class TrackSelectorView : ContentView
         MaxMinButton.Clicked += MaxMinButton_Clicked;
     }
 
- 
+    public void SetCurrentMixer(string currentMixerConsole)
+    {
+        currentMixer = currentMixerConsole;
+    }
+
+
     public string GetSelectedTracksAsString() =>
        string.Join(';', this.GetSelectedTracksAsList());
 
@@ -64,16 +72,20 @@ public partial class TrackSelectorView : ContentView
         set => SetValue(TracksProperty, value);
     }
 
-    public async Task Initialise(IMidiWebSocketResponse midiWebSocketResponse, IMidiWebSocketClient midiWebSocketClient, AppSettings appSettings, Action<bool>? onExpanded)
+    public async Task Initialise(IMidiWebSocketResponse midiWebSocketResponse, IMidiWebSocketClient midiWebSocketClient, AppSettings appSettings, Action<bool>? onExpanded, bool isMixer = false)
     {
         SetExpandedState();
         this.OnExpanded = onExpanded;
         this.midiWebSocketClient = midiWebSocketClient;
         this.midiWebSocketResponse = midiWebSocketResponse; 
         this.Tracks = new ObservableCollection<TrackModel>();
-        midiWebSocketResponse.RegisterdTrackHandler(this.TracksUpdatedHandler);
+        if (!isMixer)
+        {
+            midiWebSocketResponse.RegisterdTrackHandler(this.TracksUpdatedHandler);
+        }
         await this.UpdateTracks();
         this.appSettings = appSettings;
+        this.IsMixer = isMixer;
         this.BuildButtonUi();
     }
 
@@ -220,16 +232,22 @@ public partial class TrackSelectorView : ContentView
 
 
 
-        var selectTracksbtn = MakeTrackButton(Color.FromArgb("3B3C3F"), Color.FromArgb("D7D7D8"), "Select Tracks", async (s, e) => 
-        { 
+        var selectTracksbtn = MakeTrackButton(Color.FromArgb("3B3C3F"), Color.FromArgb("D7D7D8"), (this.IsMixer ? "Select MIXER Tracks" : "Select Tracks"), async (s, e) => 
+        {
             var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction,
                                                  CubaseActionRequest
                                                     .Create(
                                                         ActionEvent.Create()
                                                                    .WithAction(this.GetSelectedTracksAsString())
-                                                                   .WithSubCommand(SysExCommand.SelectTracks.ToString())
+                                                                   .WithTargetCubaseWindow(this.currentMixer)
+                                                                   .WithSubCommand(this.IsMixer ? SysExCommand.SelectMixerTracks.ToString() : SysExCommand.SelectTracks.ToString())
                                                                    .WithCommandType(CubaseAreaTypes.SysEx)));
             var response = await this.midiWebSocketClient.SendMidiCommand(socketMessage);
+            if (this.IsMixer)
+            {
+                this.ResetTrackSelections();
+                this.SetExpandedState();
+            }
         });
 
         var mutebtn = MakeToggleTrackButton(Colors.Yellow,
@@ -339,9 +357,9 @@ public partial class TrackSelectorView : ContentView
             this.SetExpandedState();
         });
 
-        TrackButtons.Children.Add(selectRecordEnablebtn);
+        if (!this.IsMixer) TrackButtons.Children.Add(selectRecordEnablebtn);
         TrackButtons.Children.Add(selectTracksbtn);
-        TrackButtons.Children.Add(recordEnablebtn);
+        if (!this.IsMixer) TrackButtons.Children.Add(recordEnablebtn);
         TrackButtons.Children.Add(mutebtn);
         TrackButtons.Children.Add(solobtn);
         TrackButtons.Children.Add(listenbtn);
@@ -632,7 +650,10 @@ public partial class TrackSelectorView : ContentView
         }
         else
         {
-            Task.Run(async () => await this.GetTracks());
+            if (!this.IsMixer)
+            {
+                Task.Run(async () => await this.GetTracks());
+            }
             MaxMinButton.Text = "Select Tracks - Close";
             TrackLayout.IsVisible = true;
             TrackButtons.IsVisible = true;
@@ -694,6 +715,24 @@ public partial class TrackSelectorView : ContentView
                 ui.btn.IsVisible = show;
             });
         }
+    }
+
+    private void OnAudioTapped(object sender, TappedEventArgs e)
+    {
+        AudioFilter.IsChecked = !AudioFilter.IsChecked;
+        ApplyFilters(); 
+    }
+
+    private void OnMidiTapped(object sender, TappedEventArgs e)
+    {
+        MidiFilter.IsChecked = !MidiFilter.IsChecked;
+        ApplyFilters();
+    }
+
+    private void OnGroupsTapped(object sender, TappedEventArgs e)
+    {
+        GroupFilter.IsChecked = !GroupFilter.IsChecked;
+        ApplyFilters();
     }
 
 }

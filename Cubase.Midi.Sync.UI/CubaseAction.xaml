@@ -5,7 +5,7 @@
              x:Class="Cubase.Midi.Sync.UI.CubaseAction"
              Title="{Binding Name}">
 
-    <ScrollView Orientation="Vertical">
+    <ScrollView Orientation="Vertical" x:Name="Scroller">
         <VerticalStackLayout>
             <controls:TrackSelectorView x:Name="trackSelector" Tracks="{Binding Tracks}" />
             <VerticalStackLayout x:Name="CommandsContainer"

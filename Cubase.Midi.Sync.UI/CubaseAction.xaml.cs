@@ -64,9 +64,10 @@ public partial class CubaseAction : ContentPage
         BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
         Title = commands.Name;
         this.webSocketResponse.RegisterForErrors(this.OnError);
-        Task.Run(async () => await trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings, this.OnTracksExpanded));
+
         LoadPreCommands();
         LoadCommand();
+        Task.Run(() => trackSelector.Initialise(this.webSocketResponse, this.webSocketClient, this.appSettings, this.OnTracksExpanded));
     }
 
     protected override void OnDisappearing()
@@ -91,6 +92,7 @@ public partial class CubaseAction : ContentPage
                 //    ve.IsVisible = false;
             }
         }
+        this.Scroller.ScrollToAsync(0, 0, animated: true);
     }
 
     private void LoadPreCommands()

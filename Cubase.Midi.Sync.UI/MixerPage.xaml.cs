@@ -43,8 +43,8 @@ namespace Cubase.Midi.Sync.UI
         private List<CubaseCommandCollection> commandCollection;
 
         private CubaseUIMixerCollection uiMixerCollection = new CubaseUIMixerCollection();
-
-        private string currentMixerConsole;
+        
+        private string? currentMixerConsole = "";
 
         public MixerPage(ICubaseHttpClient cubaseHttpClient, 
                          IMidiWebSocketClient webSocketClient, 
@@ -61,6 +61,7 @@ namespace Cubase.Midi.Sync.UI
             this.webSocketResponse.RegisterForSystemMessages(this.OnSystemError);
             this.midiWebSocketResponse = midiWebSocketResponse;
             this.midiWebSocketResponse.RegisterCubaseWindowHandler(this.OnCubaseWindowChanges);
+            this.midiWebSocketResponse.RegisterForErrors(this.OnSocketError);
             BackgroundColor = ColourConstants.WindowBackground.ToMauiColor();
 
         }
@@ -68,6 +69,14 @@ namespace Cubase.Midi.Sync.UI
         private async Task OnCubaseWindowChanges(CubaseActiveWindowCollection cubaseActiveWindows)
         {
             this.cubaseActiveWindows = cubaseActiveWindows;
+            if (this.cubaseActiveWindows.HaveAnyMixers())
+            {
+                if (string.IsNullOrEmpty(this.currentMixerConsole))
+                {
+                    this.currentMixerConsole = this.cubaseActiveWindows.GetAllMixers().First().Name; ;
+                    trackSelector.SetCurrentMixer(this.currentMixerConsole);
+                } 
+            }
             await this.UpdateMixConsoles();
         }
         
@@ -84,14 +93,14 @@ namespace Cubase.Midi.Sync.UI
             }
         }
 
+        private async Task OnSocketError(string errorMessage)
+        {
+            await DisplayAlert("WebSocket Error", errorMessage, "OK");
+        }
+
         private async Task UpdateMixConsoles()
         {
             uiMixerCollection.Populate(this.cubaseActiveWindows);
-            if (this.cubaseActiveWindows.GetAllMixers().Count > 0)
-            {
-                currentMixerConsole = uiMixerCollection.FirstOrDefault(x => x.GetZOrder() == CubaseWindowZOrder.Focused)?.WindowTitle ?? string.Empty;
-            }
-
             foreach (var mixerButton in MixerConsoles.Children.OfType<Button>())
             {
                 var buttonText = mixerButton.Text;
@@ -127,6 +136,7 @@ namespace Cubase.Midi.Sync.UI
                                 case CubaseWindowZOrder.Focused:
                                 case CubaseWindowZOrder.Active:
                                     await this.SendMidiCommand(CubaseMixerCommand.FocusMixer, mixer.WindowTitle);
+                                    this.trackSelector.SetCurrentMixer(mixer.WindowTitle);
                                     break;
                                 case CubaseWindowZOrder.Unknown:
                                     await SendMidiCommand(CubaseMixerCommand.OpenMixer, mixer.Indentifier);
@@ -141,18 +151,32 @@ namespace Cubase.Midi.Sync.UI
                 }, this.appSettings, true);
                 MixerConsoles.Children.Add(button.Button);
             }
+            
+            var showAllButton = RaisedButtonFactory.Create("Show All", System.Drawing.Color.ForestGreen.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
+            {
+                var socketMessage = WebSocketMessage.Create(WebSocketCommand.ExecuteCubaseAction,
+                                                     CubaseActionRequest
+                                                        .Create(
+                                                            ActionEvent.Create(CubaseAreaTypes.Midi, "ShowAll")));
+
+                var response = await this.webSocketClient.SendMidiCommand(socketMessage);
+            }, this.appSettings);
+            MixerConsoles.Children.Add(showAllButton.Button);
+
             var closeButton = RaisedButtonFactory.Create("Close", System.Drawing.Color.Firebrick.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) => 
             {
                 await this.SendMidiCommand(CubaseMixerCommand.CloseMixers);
                 await this.Navigation.PopToRootAsync();
             }, this.appSettings);
             MixerConsoles.Children.Add(closeButton.Button);
+            
             var projectButton = RaisedButtonFactory.Create("Project", System.Drawing.Color.DarkBlue.ToSerializableColour(), System.Drawing.Color.White.ToSerializableColour(), async (s, e) =>
             {
                 await this.SendMidiCommand(CubaseMixerCommand.ProjectWindow);
                 await Navigation.PopToRootAsync();
             }, this.appSettings);
             MixerConsoles.Children.Add(projectButton.Button);
+            
             var orientationButton = RaisedButtonFactory.Create("Vertical", System.Drawing.Color.DarkOrange.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
                 var but = (Button)s;
@@ -162,6 +186,7 @@ namespace Cubase.Midi.Sync.UI
                 await SendOrientation(orientation);
             }, this.appSettings);
             MixerConsoles.Children.Add(orientationButton.Button);
+
 
         }
 
@@ -298,7 +323,6 @@ namespace Cubase.Midi.Sync.UI
         {
             this.basePage = this.serviceProvider.GetService<BasePage>();
             this.basePage.AddToolbars(this);
-
             try
             {
                 this.commandCollection = mainCommands;
@@ -321,11 +345,25 @@ namespace Cubase.Midi.Sync.UI
                 {
                     await DisplayAlert("ERROR from getmixer", $"The mixer collection has {this.mixerCollection.Count.ToString()} records in it", "OK");
                 }
+                Task.Run(() => trackSelector.Initialise(this.midiWebSocketResponse, this.webSocketClient, this.appSettings, this.OnTrackSelectionChanged, true));
+                await UpdateMixConsoles();
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error MixerPage GetMixer", $"Error getting mixer {ex.Message}", "OK");
             }
+        }
+
+        private void OnTrackSelectionChanged(bool isExpanded)
+        {
+            this.Border1.IsVisible = !isExpanded;
+            this.Border2.IsVisible = !isExpanded;
+            this.Border3.IsVisible = !isExpanded;
+            this.CustomCommands.IsVisible = !isExpanded;    
+            this.MixerConsoles.IsVisible = !isExpanded; 
+            this.StaticButtons.IsVisible = !isExpanded; 
+            this.Pages.IsVisible = !isExpanded;
+            this.Scroller.ScrollToAsync(0, 0, animated: true);
         }
 
         private void SetButtonState(Button button, CubaseCommand command)

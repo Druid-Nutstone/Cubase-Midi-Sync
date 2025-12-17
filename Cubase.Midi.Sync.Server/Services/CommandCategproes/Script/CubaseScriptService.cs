@@ -7,6 +7,7 @@ using Cubase.Midi.Sync.Server.Services.Cache;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Keys;
 using Cubase.Midi.Sync.Server.Services.CommandCategproes.Midi;
 using Cubase.Midi.Sync.Server.Services.Midi;
+using Cubase.Midi.Sync.Server.Services.Windows;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Runtime.CompilerServices;
@@ -26,6 +27,8 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
 
         private MidiChannelCollection? midiTracks;
 
+        private ICubaseWindowMonitor cubaseWindowMonitor;
+
         public IEnumerable<string> SupportedKeys => ["Script", "SysEx"];
 
         Dictionary<ScriptFunction, Func<object[], Task<object>>> functions;
@@ -36,10 +39,12 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
         public CubaseScriptService(IMidiService midiService,
                                    IServiceProvider serviceProvider,
                                    ILogger<CubaseScriptService> logger,
+                                   ICubaseWindowMonitor cubaseWindowMonitor,
                                    ICacheService cacheService)
         {
             this.midiService = midiService;
             this.cacheService = cacheService;
+            this.cubaseWindowMonitor = cubaseWindowMonitor; 
             this.serviceProvider = serviceProvider;
             this.logger = logger;
             this.functions = new Dictionary<ScriptFunction, Func<object[], Task<object>>>
@@ -122,6 +127,10 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                         }
                         var enableRecordResult = await EnableRecord(enableTracks.ToArray());
                         return enableRecordResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(enableRecordResult.Message);
+                    case SysExCommand.SelectMixerTracks:
+                        var mixerTracksRequest = this.EnsureTracksArePresent(request.Action, out var mixerTracks);
+                        var mixerTracksResult = await this.SelectMixerTracks(mixerTracks.ToArray(), request.TargetCubaseWindow);
+                        return mixerTracksResult.IsSucces ? CubaseActionResponse.CreateSuccess() : CubaseActionResponse.CreateError(mixerTracksResult.Message);
                     case SysExCommand.SelectTracks:
                         var selectedTracksRequest = this.EnsureTracksArePresent(request.Action, out var selectedTracks);
                         if (!selectedTracksRequest.Success)
@@ -194,7 +203,7 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
         #region functions
         private async Task<object> GetTracks(object[] args)
         {
-            return this.GetChannels(args);
+            return await Task.Run(() => this.GetChannels(args));
         }
         #endregion
 
@@ -256,6 +265,73 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             var channels = args.ToMidiChannelArray();
             var result = await this.midiService.SendSysExMessageAsync(MidiCommand.EnableRecord, channels, 5000);
             return result ? ScriptResult.Create() : ScriptResult.CreateError("Could not execute enable Record - timeout");
+        }
+
+        private async Task<ScriptResult> SelectMixerTracks(object[] args, string mixerWindow)
+        {
+            // deselect all tracks
+            var deselectTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.DeSelectAll, "", 5000);
+            if (!deselectTracksResult)
+            {
+                return ScriptResult.CreateError("Could not deselect tracks. Might have timed out");
+            }
+            if (this.cubaseWindowMonitor.WindowExists(mixerWindow))
+            {
+                if (string.IsNullOrEmpty(mixerWindow))
+                {
+                    return ScriptResult.CreateError("No mixer window specified");
+                };
+                this.cubaseWindowMonitor.FocusCubase((txt) => 
+                { 
+                   this.logger.LogError(txt);   
+                });
+            }
+            else
+            {
+                return ScriptResult.CreateError($"The mixer window {mixerWindow} does not have focus");  
+            }
+            var channels = args.ToMidiChannelArray();
+            this.logger.LogInformation($"Selecting mixer tracks in window {mixerWindow}: Tracks {String.Join(';',channels.Select(x => x.Name).ToArray())}");  
+            if (channels.Count > 1)
+            {
+                var delay = 180;
+                
+                // first show all on the current mixer track 
+                await this.ExecuteCommand(KnownCubaseMidiCommands.Show_All_Tracks.ToMidiString().ToSingleArray());
+                await Task.Delay(delay); // let cubase catch up
+                // call js to alter required tracks to sel-{trackname}
+                var selTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.SelectTracks, channels, 5000);
+                if (!selTracksResult)
+                {
+                    return ScriptResult.CreateError("Could not rename tracks. Might have timed out");
+                }
+                await Task.Delay(delay);
+                // call ple to actually select the tracks - 'cos we cant do it programatically 
+                var selectTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Select_Mixer_Tracks.ToMidiString().ToSingleArray());
+                if (!selectTracksResult.IsSucces)
+                {
+                    return selectTracksResult;
+                }
+                await Task.Delay(delay);
+                this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow().Minimise();
+                //switch back to mixer window 
+                this.logger.LogInformation($"Switching focus to mixer window {mixerWindow}");
+                this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(mixerWindow).Focus();
+                await Task.Delay(delay+20); 
+                await this.ExecuteCommand(KnownCubaseMidiCommands.Show_Selected_Tracks.ToMidiString().ToSingleArray());
+                await Task.Delay(delay+20); // let cubase catch up
+                await this.ExecuteCommand(KnownCubaseMidiCommands.DeSelect_Tracks.ToMidiString().ToSingleArray());
+            }
+            // just select a single track
+            else
+            {
+                var selTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.SelectTracks, channels, 5000);
+                if (!selTracksResult)
+                {
+                    return ScriptResult.CreateError("Could not rename tracks. Might have timed out");
+                }
+            }
+            return ScriptResult.Create();
         }
 
         private async Task<ScriptResult> SelectTracks(object[] args)

@@ -133,7 +133,7 @@ public partial class CubaseMainPage : ContentPage
             collections = null;
             await this.webSocketClient.SendMidiCommand(WebSocketMessage.Create(WebSocketCommand.Commands));
             collections = await this.midiWebSocketResponse.GetCommands();
-            
+            this.basePage.AddCommands(collections); 
             var mixerButton = RaisedButtonFactory.Create("Mixer", System.Drawing.Color.DarkGoldenrod.ToSerializableColour(), System.Drawing.Color.Black.ToSerializableColour(), async (s, e) =>
             {
                 try

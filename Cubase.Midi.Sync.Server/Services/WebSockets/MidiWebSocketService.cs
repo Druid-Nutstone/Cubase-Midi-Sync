@@ -140,16 +140,23 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Error sending track update: {message}", ex.Message);
+                                _logger.LogError(ex, $"Error sending track update: {ex.Message}", ex.Message);
                             }
                         });
 
                         this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
                         {
-                            if (ws.State == WebSocketState.Open)
+                            try
                             {
-                                var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
-                                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                if (ws.State == WebSocketState.Open)
+                                {
+                                    var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
+                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, $"Error sending window update: {ex.Message}", ex.Message);
                             }
                         });
 

@@ -17,6 +17,7 @@ namespace Cubase.Midi.Sync.Common.SysEx
          EnableSolo = 6,
          DisableSolo = 7,
          EnableListen = 8,
-         DisableListen = 9
+         DisableListen = 9,
+         SelectMixerTracks = 10
     }
 }

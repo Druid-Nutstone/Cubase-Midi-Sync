@@ -447,6 +447,8 @@ namespace Cubase.Midi.Sync.Common
 
         public string Action { get; set; }
 
+        public string TargetCubaseWindow { get; set; }
+
         public ActionEvent Clone()
         {
             return new ActionEvent()
@@ -472,6 +474,12 @@ namespace Cubase.Midi.Sync.Common
         public ActionEvent WithAction(string action)
         {
             this.Action = action;   
+            return this;
+        }
+
+        public ActionEvent WithTargetCubaseWindow(string targetCubaseWindow)
+        {
+            this.TargetCubaseWindow = targetCubaseWindow;
             return this;
         }
 

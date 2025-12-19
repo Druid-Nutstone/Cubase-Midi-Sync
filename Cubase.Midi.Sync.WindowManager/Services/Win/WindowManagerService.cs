@@ -116,6 +116,7 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
         private const uint SWP_NOZORDER = 0x0004;
         private const uint SWP_NOACTIVATE = 0x0010;
         private const int SW_RESTORE = 9;
+        private const int SW_HIDE = 0;
         private const uint MONITOR_DEFAULTTONEAREST = 2;
 
         private const int border = 7;
@@ -257,11 +258,25 @@ namespace Cubase.Midi.Sync.WindowManager.Services.Win
             ShowWindow(hWnd, (int)WindowState.Maximized);
         }
 
+        public static void HideWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            ShowWindow(hWnd, (int)WindowState.Hide);
+        }
+
         public static void MinimiseWindow(IntPtr hWnd)
         {
             if (hWnd == IntPtr.Zero)
                 return;
             ShowWindow(hWnd, (int)WindowState.Minimized);
+        }
+
+        public static void ShowWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+                return;
+            ShowWindow(hWnd, (int)WindowState.Show);
         }
 
         public static void RestoreWindow(IntPtr hWnd)

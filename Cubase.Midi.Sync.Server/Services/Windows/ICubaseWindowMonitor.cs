@@ -8,6 +8,8 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
 
         void RegisterForWindowEvents(Action<CubaseActiveWindowCollection> windowEventHandler);
 
+        void UnRegisterForWindowEvents(Action<CubaseActiveWindowCollection> windowEventHandler);
+
         void CubaseWindowEvent(WindowPositionCollection cubaseWindows);
         
         WindowPositionCollection CubaseWindows { get; set; }

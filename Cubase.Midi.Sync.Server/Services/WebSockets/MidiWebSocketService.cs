@@ -1,5 +1,7 @@
 ﻿using Cubase.Midi.Sync.Common;
+using Cubase.Midi.Sync.Common.Midi;
 using Cubase.Midi.Sync.Common.WebSocket;
+using Cubase.Midi.Sync.Common.Window;
 using Cubase.Midi.Sync.Server.Services.Cubase;
 using Cubase.Midi.Sync.Server.Services.Windows;
 using global::Cubase.Midi.Sync.Server.Services.Midi;
@@ -48,6 +50,8 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
         private List<WebSocket> _sockets = new List<WebSocket>();
 
+        private readonly SemaphoreSlim _wsSendLock = new(1, 1);
+
         public WebSocketServer(ILogger<WebSocketServer> logger, 
                                IServiceProvider services, 
                                ICubaseService cubaseService,
@@ -86,7 +90,186 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
             }
         }
 
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseWebSockets();
+
+            app.Map("/ws/midi", builder =>
+            {
+                builder.Run(async context =>
+                {
+                    WebSocket ws = null;
+                    var ct = context.RequestAborted;
+
+                    // Event handlers (real types from your project)
+                    Action<MidiChannelCollection> channelHandler = null;
+                    Action<MidiChannel> trackHandler = null;
+                    Action<CubaseActiveWindowCollection> windowHandler = null;
+
+                    try
+                    {
+                        if (!context.WebSockets.IsWebSocketRequest)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                            return;
+                        }
+
+                        ws = await context.WebSockets.AcceptWebSocketAsync();
+                        _sockets.Add(ws);
+                        _logger.LogInformation("WebSocket connected from {ip}", context.Connection.RemoteIpAddress);
+
+                        var buffer = new byte[1024 * 10];
+
+                        // ======= CHANNEL HANDLER =======
+                        channelHandler = async (channels) =>
+                        {
+                            if (ws.State != WebSocketState.Open) return;
+
+                            await _wsSendLock.WaitAsync();
+                            try
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
+                                await ws.SendAsync(
+                                    Encoding.UTF8.GetBytes(message.Serialise()),
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    CancellationToken.None);
+
+                                if (midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
+                                {
+                                    var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
+                                    await ws.SendAsync(
+                                        Encoding.UTF8.GetBytes(allTracks.Serialise()),
+                                        WebSocketMessageType.Text,
+                                        true,
+                                        CancellationToken.None);
+                                }
+                            }
+                            catch (WebSocketException) { /* client disconnected */ }
+                            catch (Exception ex) { _logger.LogError(ex, "Error sending channel update"); }
+                            finally { _wsSendLock.Release(); }
+                        };
+                        midiService.RegisterOnChannelChanged(channelHandler);
+
+                        // ======= TRACK HANDLER =======
+                        trackHandler = async (track) =>
+                        {
+                            if (ws.State != WebSocketState.Open) return;
+
+                            await _wsSendLock.WaitAsync();
+                            try
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
+                                await ws.SendAsync(
+                                    Encoding.UTF8.GetBytes(message.Serialise()),
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    CancellationToken.None);
+                            }
+                            catch (WebSocketException) { /* client disconnected */ }
+                            catch (Exception ex) { _logger.LogError(ex, "Error sending track update"); }
+                            finally { _wsSendLock.Release(); }
+                        };
+                        midiService.RegisterOnTrackChanged(trackHandler);
+
+                        // ======= WINDOW HANDLER =======
+                        windowHandler = async (windows) =>
+                        {
+                            if (ws.State != WebSocketState.Open) return;
+
+                            await _wsSendLock.WaitAsync();
+                            try
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.Windows, windows);
+                                await ws.SendAsync(
+                                    Encoding.UTF8.GetBytes(message.Serialise()),
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    CancellationToken.None);
+                            }
+                            catch (WebSocketException) { /* client disconnected */ }
+                            catch (Exception ex) { _logger.LogError(ex, "Error sending window update"); }
+                            finally { _wsSendLock.Release(); }
+                        };
+                        cubaseWindowMonitor.RegisterForWindowEvents(windowHandler);
+
+                        // ======= RECEIVE LOOP =======
+                        while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
+                        {
+                            WebSocketReceiveResult result;
+                            try
+                            {
+                                result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
+                            }
+                            catch (OperationCanceledException) { break; }
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", ct);
+                                _logger.LogInformation("WebSocket closed by client.");
+                                break;
+                            }
+
+                            var messageAsString = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                            var sourceMessage = WebSocketMessage.Deserialise(messageAsString);
+
+                            _logger.LogInformation($"Received WS MIDI command: {sourceMessage.Command}");
+
+                            var responseMessage = await cubaseService.ExecuteWebSocketAsync(sourceMessage);
+
+                            await _wsSendLock.WaitAsync();
+                            try
+                            {
+                                if (ws.State == WebSocketState.Open)
+                                {
+                                    await ws.SendAsync(
+                                        Encoding.UTF8.GetBytes(responseMessage.Serialise()),
+                                        WebSocketMessageType.Text,
+                                        true,
+                                        CancellationToken.None);
+                                }
+                            }
+                            finally { _wsSendLock.Release(); }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "WebSocket error: {message}", ex.Message);
+                    }
+                    finally
+                    {
+                        _logger.LogInformation("WebSocket connection closed.");
+
+                        if (ws != null)
+                        {
+                            if (ws.State != WebSocketState.Closed)
+                            {
+                                try
+                                {
+                                    await ws.CloseAsync(WebSocketCloseStatus.InternalServerError, "Closing", CancellationToken.None);
+                                }
+                                catch (WebSocketException ex)
+                                {
+                                    _logger.LogWarning("Error closing websocket: {msg}", ex.Message);
+                                }
+                            }
+
+                            _sockets.Remove(ws);
+
+                            // Unregister handlers to avoid ghost sends
+                            if (channelHandler != null) midiService.UnRegisterOnChannelChanged(channelHandler);
+                            if (trackHandler != null) midiService.UnRegisterOnTrackSelected(trackHandler);
+                            if (windowHandler != null) cubaseWindowMonitor.UnRegisterForWindowEvents(windowHandler);
+                        }
+                    }
+                });
+            });
+        }
+
+
+
         // Call this from Program.cs: wsServer.Configure(app);
+        /*
         public void Configure(IApplicationBuilder app)
         {
             app.UseWebSockets();
@@ -117,40 +300,73 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
 
                         this.midiService.RegisterOnChannelChanged(async (channels) =>
                         {
-                            if (ws.State == WebSocketState.Open)
-                            {
-                                try
-                                {
-                                    var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
-                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
-                                    if (this.midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
-                                    {
-                                        var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
-                                        await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(allTracks.Serialise())), WebSocketMessageType.Text, true, ct);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Error sending channel update: {message}", ex.Message);
-                                }
-                            }
-                        });
+                            if (ws.State != WebSocketState.Open)
+                                return;
 
-                        this.midiService.RegisterOnTrackChanged(async (track) =>
-                        {
+                            await _wsSendLock.WaitAsync();
                             try
                             {
-                                if (ws.State == WebSocketState.Open)
+                                var message = WebSocketMessage.Create(WebSocketCommand.Tracks, channels);
+                                await ws.SendAsync(
+                                    Encoding.UTF8.GetBytes(message.Serialise()),
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    CancellationToken.None); // 👈 important
+
+                                if (this.midiService.MidiChannels.Count == CubaseServerSettings.MaxNumberOfChannels)
                                 {
-                                    var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
-                                    await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.Serialise())), WebSocketMessageType.Text, true, ct);
+                                    var allTracks = WebSocketMessage.Create(WebSocketCommand.TracksComplete, channels);
+                                    await ws.SendAsync(
+                                        Encoding.UTF8.GetBytes(allTracks.Serialise()),
+                                        WebSocketMessageType.Text,
+                                        true,
+                                        CancellationToken.None);
                                 }
+                            }
+                            catch (WebSocketException)
+                            {
+                                // client disconnected – normal
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, $"Error sending track update: {ex.Message}", ex.Message);
+                                _logger.LogError(ex, "Error sending channel update");
+                            }
+                            finally
+                            {
+                                _wsSendLock.Release();
                             }
                         });
+
+
+                        this.midiService.RegisterOnTrackChanged(async (track) =>
+                        {
+                            if (ws.State != WebSocketState.Open)
+                                return;
+
+                            await _wsSendLock.WaitAsync();
+                            try
+                            {
+                                var message = WebSocketMessage.Create(WebSocketCommand.TrackUpdated, track);
+                                await ws.SendAsync(
+                                    Encoding.UTF8.GetBytes(message.Serialise()),
+                                    WebSocketMessageType.Text,
+                                    true,
+                                    CancellationToken.None);
+                            }
+                            catch (WebSocketException)
+                            {
+                                // normal disconnect
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending track update");
+                            }
+                            finally
+                            {
+                                _wsSendLock.Release();
+                            }
+                        });
+
 
                         this.cubaseWindowMonitor.RegisterForWindowEvents(async (windows) =>
                         {
@@ -213,10 +429,16 @@ namespace Cubase.Midi.Sync.Server.Services.WebSockets
                             {
                                 this._logger.LogError($"Error closing - might not be an error {ex.Message}");
                             }
+                            finally
+                            {
+                              // todo unregister 
+                            }
                         }
                     }
                 });
             });
-        }
+        
+        } */
     }
+
 }

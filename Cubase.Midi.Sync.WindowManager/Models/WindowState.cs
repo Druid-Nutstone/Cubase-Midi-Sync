@@ -12,6 +12,7 @@ namespace Cubase.Midi.Sync.WindowManager.Models
         Normal = 1,
         Minimized = 2,
         Maximized = 3,
+        Show = 5, 
         Restore = 9,
         Unknown = 99 
     }

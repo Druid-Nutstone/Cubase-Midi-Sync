@@ -281,10 +281,6 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                 {
                     return ScriptResult.CreateError("No mixer window specified");
                 };
-                this.cubaseWindowMonitor.FocusCubase((txt) => 
-                { 
-                   this.logger.LogError(txt);   
-                });
             }
             else
             {
@@ -294,11 +290,14 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
             this.logger.LogInformation($"Selecting mixer tracks in window {mixerWindow}: Tracks {String.Join(';',channels.Select(x => x.Name).ToArray())}");  
             if (channels.Count > 1)
             {
-                var delay = 180;
+                var delay = 160;
                 
                 // first show all on the current mixer track 
                 await this.ExecuteCommand(KnownCubaseMidiCommands.Show_All_Tracks.ToMidiString().ToSingleArray());
                 await Task.Delay(delay); // let cubase catch up
+                //this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow().Focus();
+                //await Task.Delay(delay); // let cubase catch up
+
                 // call js to alter required tracks to sel-{trackname}
                 var selTracksResult = await this.midiService.SendSysExMessageAsync(MidiCommand.SelectTracks, channels, 5000);
                 if (!selTracksResult)
@@ -313,13 +312,20 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                     return selectTracksResult;
                 }
                 await Task.Delay(delay);
-                this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow().Minimise();
+                var renameTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Rename_Mixer_Tracks.ToMidiString().ToSingleArray());
+                if (!renameTracksResult.IsSucces)
+                {
+                    return renameTracksResult;
+                }
+                await Task.Delay(delay);
+
                 //switch back to mixer window 
                 this.logger.LogInformation($"Switching focus to mixer window {mixerWindow}");
-                this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(mixerWindow).Focus();
-                await Task.Delay(delay+20); 
+                this.cubaseWindowMonitor.CubaseWindows.GetWindowByName(mixerWindow)
+                                                      .Focus();
+                await Task.Delay(delay+10); 
                 await this.ExecuteCommand(KnownCubaseMidiCommands.Show_Selected_Tracks.ToMidiString().ToSingleArray());
-                await Task.Delay(delay+20); // let cubase catch up
+                await Task.Delay(delay+10); // let cubase catch up
                 await this.ExecuteCommand(KnownCubaseMidiCommands.DeSelect_Tracks.ToMidiString().ToSingleArray());
             }
             // just select a single track
@@ -369,7 +375,13 @@ namespace Cubase.Midi.Sync.Server.Services.CommandCategproes.Script
                 {
                     return selectTracksResult;
                 }
-                
+                await Task.Delay(120);
+                var renameTracksResult = await this.ExecuteCommand(KnownCubaseMidiCommands.Rename_Mixer_Tracks.ToMidiString().ToSingleArray());
+                if (!renameTracksResult.IsSucces)
+                {
+                    return renameTracksResult;
+                }
+
                 await this.midiService.SendSysExMessageAsync(MidiCommand.Tracks, "", 3000);
             }
             // just select a single track

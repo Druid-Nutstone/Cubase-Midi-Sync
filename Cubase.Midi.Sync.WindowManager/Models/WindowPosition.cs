@@ -75,6 +75,18 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             return this;
         }
 
+        public WindowPosition Show()
+        {
+            WindowManagerService.ShowWindow(this.Hwnd);
+            return this;
+        }
+
+        public WindowPosition Hide()
+        {
+            WindowManagerService.HideWindow(this.Hwnd);
+            return this;
+        }
+
         public WindowPosition Restore()
         {
             WindowManagerService.RestoreWindow(this.Hwnd);
@@ -123,6 +135,33 @@ namespace Cubase.Midi.Sync.WindowManager.Models
             }
             return null;
         }
+
+        public WindowPosition MoveOffScreen()
+        {
+            this.OriginalPosition = WindowManagerService.GetWindowPosition(this.Hwnd);  
+            var rect = new Rect() { 
+                Left = -32000, 
+                Top = this.OriginalPosition.Value.Top, 
+                Right = -32000 + this.OriginalPosition.Value.Width, 
+                Bottom = this.OriginalPosition.Value.Bottom 
+            };
+
+            var moveoffScreen = WindowManagerService.SetPosition(this.Hwnd, rect);
+            if (!moveoffScreen)
+            {
+                throw new Exception("Failed to move window off screen");
+            }
+            return this;
+        }
+
+        public WindowPosition MoveOnScreen()
+        {
+            if (this.OriginalPosition != null)
+            {
+                WindowManagerService.SetPosition(this.Hwnd, this.OriginalPosition.Value);
+            }
+            return this;
+        }   
 
         private bool MoveTo(Rect? rect = null)
         {

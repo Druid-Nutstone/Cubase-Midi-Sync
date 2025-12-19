@@ -83,6 +83,11 @@ namespace Cubase.Midi.Sync.Server.Services.Windows
             this.registeredWindowEventHandlers.Add(windowEventHandler); 
         }
 
+        public void UnRegisterForWindowEvents(Action<CubaseActiveWindowCollection> windowEventHandler)
+        {
+            this.registeredWindowEventHandlers.Remove(windowEventHandler);
+        }
+
         private CubaseActiveWindowCollection CreateFromCubaseWindows()
         {
             var cubaseWindowCollection = new CubaseActiveWindowCollection();

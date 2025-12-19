@@ -71,6 +71,8 @@ namespace Cubase.Midi.Sync.Common.Midi
             this.Add(CubaseMidiCommand.Create("Sync Mixer", 1, 26, "Channel & Track Visibility", "Sync Visibility of Project and MixConsole: On/Off", 127));
             this.Add(CubaseMidiCommand.Create("Select Mixer Tracks", 1, 27, "Process Project Logical Editor", "SelectMixerTracksByPrefix", 127));
             this.Add(CubaseMidiCommand.Create("DeSelect Tracks", 1, 28, "Process Project Logical Editor", "DeSelect Tracks", 127));
+            // name: "Rename Mixer Tracks", channel: 1, note: 29, category: "Process Project Logical Editor", command: "ResetSelectTracksByPrefix",        
+            this.Add(CubaseMidiCommand.Create("Rename Mixer Tracks", 1, 29, "Process Project Logical Editor", "ResetSelectTracksByPrefix", 127));
         }
 
 
@@ -163,6 +165,7 @@ namespace Cubase.Midi.Sync.Common.Midi
         Select_Tracks,
         Sync_Mixer,
         Select_Mixer_Tracks,
-        DeSelect_Tracks
+        DeSelect_Tracks,
+        Rename_Mixer_Tracks
     }
 }

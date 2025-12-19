@@ -165,6 +165,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerStaticCommand);
                 case CubaseMixerCommand.OpenMixer:
                     await this.AddOrFocusMixer(cubaseMixerRequest.TargetMixer ?? string.Empty);
+                    await this.SendMidiCommand(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Show_Tracks_With_Data));
                     return CubaseMixerResponse.Create(CubaseMixerCommand.MixerCollection, await GetMixer());
                 case CubaseMixerCommand.RestoreMixers:
                     BuildMixerLayout();
@@ -184,8 +185,8 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                     }
                     var mainCubaseWindowToRestore = this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow();
                     mainCubaseWindowToRestore?.Restore()
-                                                .Maximise()
-                                                .Focus();
+                                              .Maximise()
+                                              .Focus();
                     await this.SendMidiCommand(this.cubaseMidiCommands.GetMidiCommandByName(KnownCubaseMidiCommands.Show_All_Tracks));
                     return CubaseMixerResponse.Create(CubaseMixerCommand.CloseMixers);
                 case CubaseMixerCommand.ProjectWindow:
@@ -200,7 +201,7 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                                        .ToList()
                                        .ForEach(w => w.Minimise());
 
-                        mainCubaseWindow.Restore()
+                        mainCubaseWindow?.Restore()
                                         .Maximise()  
                                         .Focus();
                     }
@@ -215,6 +216,8 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private async Task AddOrFocusMixer(string mixerName)
         {
+            this.cubaseWindowMonitor.CubaseWindows.GetPrimaryWindow()
+                                                  .MoveOffScreen();
             if (this.cubaseWindowMonitor.MixerExists(mixerName))
             {
                 this.FocusWindow(mixerName);
@@ -262,54 +265,90 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
 
         private void BuildMixerLayout()
         {
+            // ---- GUARDS (critical) --------------------------------------------
+
+            // No mixer windows detected yet – valid transient state
+            if (this.cubaseWindowMonitor.MixerConsoles.Count == 0)
+            {
+                this.logger.LogDebug("BuildMixerLayout skipped: no mixer consoles detected");
+                return;
+            }
+
+            // No screens detected – extremely rare but possible during display changes
+            var screens = WindowManagerService.GetAllMonitors();
+            if (screens == null || !screens.Any())
+            {
+                this.logger.LogWarning("BuildMixerLayout skipped: no monitors detected");
+                return;
+            }
+
             int border = 7;
             int minMixerHeight = 487;
 
+            // -------------------------------------------------------------------
 
-            // todo - if there are multiple screens , need some way of knowing which 
-            // screen the mixers should be on 
-            var screens = WindowManagerService.GetAllMonitors();
-            // this.NumberOfScreens = screens.Count();
-            var primaryScreen = screens.Select(x => x.WorkRect)
+            // todo - if there are multiple screens , need some way of knowing which
+            // screen the mixers should be on
+            var primaryScreen = screens
+                .Select(x => x.WorkRect)
                 .OrderByDescending(r => (long)r.Width * r.Height)
-                .FirstOrDefault();
+                .First();
 
-            MixerLayoutMode mixerLayoutMode = primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count < minMixerHeight ? MixerLayoutMode.ByWidth : MixerLayoutMode.ByHeight;
+            // Screen sanity check
+            if (primaryScreen.Width <= 0 || primaryScreen.Height <= 0)
+            {
+                this.logger.LogWarning("BuildMixerLayout skipped: invalid primary screen dimensions");
+                return;
+            }
+
+            int mixerCount = this.cubaseWindowMonitor.MixerConsoles.Count;
+
+            // Decide layout mode safely
+            MixerLayoutMode mixerLayoutMode =
+                (primaryScreen.Height / mixerCount) < minMixerHeight
+                    ? MixerLayoutMode.ByWidth
+                    : MixerLayoutMode.ByHeight;
 
             if (this.currentOrientation != MixerOrientation.Auto)
             {
-                // primaryScreen.Bottom = primaryScreen.Top + (minMixerHeight * this.cubaseWindowMonitor.MixerConsoles.Count) + border;
-                mixerLayoutMode = this.currentOrientation == MixerOrientation.Vertical ? MixerLayoutMode.ByWidth : MixerLayoutMode.ByHeight;    
+                mixerLayoutMode =
+                    this.currentOrientation == MixerOrientation.Vertical
+                        ? MixerLayoutMode.ByWidth
+                        : MixerLayoutMode.ByHeight;
             }
 
-            // var taskBarSize = WindowManagerService.GetTaskBarSize();
-
-            primaryScreen.Left = primaryScreen.Left - border;
-            primaryScreen.Right = primaryScreen.Right + (border * 2);
-            // primaryScreen.Bottom = primaryScreen.Bottom - border;
+            // Expand screen slightly to allow for borders
+            primaryScreen.Left -= border;
+            primaryScreen.Right += border * 2;
 
             var currentTop = primaryScreen.Top;
             var currentLeft = primaryScreen.Left;
 
-            var heightPerWindow = mixerLayoutMode == MixerLayoutMode.ByHeight
-                ? primaryScreen.Height / this.cubaseWindowMonitor.MixerConsoles.Count
+            int heightPerWindow = mixerLayoutMode == MixerLayoutMode.ByHeight
+                ? primaryScreen.Height / mixerCount
                 : primaryScreen.Height + border;
 
-            var widthPerWindow = mixerLayoutMode == MixerLayoutMode.ByWidth
-                ? primaryScreen.Width / this.cubaseWindowMonitor.MixerConsoles.Count
+            int widthPerWindow = mixerLayoutMode == MixerLayoutMode.ByWidth
+                ? primaryScreen.Width / mixerCount
                 : primaryScreen.Width;
 
             var mixerWindows = this.cubaseWindowMonitor.GetMixerWindows();
+            if (mixerWindows == null || mixerWindows.Count == 0)
+            {
+                this.logger.LogDebug("BuildMixerLayout skipped: no mixer windows returned");
+                return;
+            }
 
-            mixerWindows.ForEach((mixer) =>
+            // -------------------------------------------------------------------
+
+            mixerWindows.ForEach(mixer =>
             {
                 if (mixer.State == WindowManager.Models.WindowState.Minimized)
                 {
                     mixer.Restore();
                 }
 
-                // assume height is ok 
-                var targetRect = new Rect()
+                var targetRect = new Rect
                 {
                     Left = primaryScreen.Left,
                     Top = currentTop,
@@ -326,15 +365,12 @@ namespace Cubase.Midi.Sync.Server.Services.Mixer
                 }
 
                 mixer.RestoreResize(targetRect).Refresh();
+
                 currentTop += heightPerWindow;
                 currentLeft += (widthPerWindow - border);
             });
-            //if (mixerWindows.Count == 1)
-            //{
-            //    mixerWindows[0].Maximise()
-            //                   .Focus();
-            //}
         }
+
 
         private WindowPosition FocusWindow(string windowName)
         {
